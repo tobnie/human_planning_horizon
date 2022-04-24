@@ -1,7 +1,9 @@
 import os
+import random
 
 import pygame
 
+import colors
 import config
 import event_handler
 from world.player import Player
@@ -11,13 +13,6 @@ from world.world import World
 Variables
 '''
 
-fps = 40  # frame rate
-
-BLUE = (25, 25, 200)
-BLACK = (23, 23, 23)
-WHITE = (254, 254, 254)
-ALPHA = (0, 255, 0)
-
 
 class Game:
 
@@ -26,19 +21,14 @@ class Game:
         Sets up the game by initializing PyGame.
         """
         self.clock = pygame.time.Clock()
+        self.game_clock = 0
         self.running = True
 
-        # get monitor size information
-        os.environ['SDL_VIDEO_CENTERED'] = '1'  # You have to call this before pygame.init()
+        # set screen information
         pygame.init()
-        info = pygame.display.Info()
-        screen_width, screen_height = info.current_w, info.current_h
-
-        self.screen = pygame.display.set_mode([screen_width, screen_height])
-        self.world = World(screen_width, screen_height)
-
-
-        self.screen.fill(BLACK)
+        self.screen = pygame.display.set_mode((config.MONITOR_WIDTH_PX, config.MONITOR_HEIGHT_PX), pygame.FULLSCREEN)
+        self.world = World(config.MONITOR_WIDTH_PX, config.MONITOR_HEIGHT_PX)
+        self.screen.fill(colors.BLACK)
 
     def run(self):
         """
@@ -48,10 +38,21 @@ class Game:
         while self.running:
             # event handling
             event_handler.handle_events(self)
-            self.world.player.update()
+            self.world.update()
+
+            # spawning street
+            # TODO outsource to spawn_handler or similar?
+            if self.game_clock % 100 == 0:  # TODO spawns every 10000th tick now
+                for lane in self.world.get_directed_lanes():
+                    if random.choice([True, False]):
+                        lane.spawn_entity()
 
             # draw objects
-            self.screen.fill(BLACK)
-            self.world.player_list.draw(self.screen)
-            pygame.display.flip()
-            self.clock.tick(fps)
+            self.render()
+
+            # tick game
+            self.clock.tick(config.FPS)
+            self.game_clock += 1
+
+    def render(self):
+        self.world.draw(self.screen)
