@@ -1,15 +1,17 @@
+import os
+
 import pygame
 
 import config
 import event_handler
 from world.player import Player
+from world.world import World
 
 '''
 Variables
 '''
 
 fps = 40  # frame rate
-screen = pygame.display.set_mode([config.MONITOR_WIDTH_PX, config.MONITOR_HEIGHT_PX])
 
 BLUE = (25, 25, 200)
 BLACK = (23, 23, 23)
@@ -26,12 +28,17 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
 
+        # get monitor size information
+        os.environ['SDL_VIDEO_CENTERED'] = '1'  # You have to call this before pygame.init()
         pygame.init()
-        screen.fill(BLACK)
+        info = pygame.display.Info()
+        screen_width, screen_height = info.current_w, info.current_h
 
-        self.player = Player()  # spawn player
-        self.player_list = pygame.sprite.Group()
-        self.player_list.add(self.player)
+        self.screen = pygame.display.set_mode([screen_width, screen_height])
+        self.world = World(screen_width, screen_height)
+
+
+        self.screen.fill(BLACK)
 
     def run(self):
         """
@@ -39,12 +46,12 @@ class Game:
         """
 
         while self.running:
+            # event handling
             event_handler.handle_events(self)
-            self.player.update()
+            self.world.player.update()
 
-            self.player_list.draw(screen)
+            # draw objects
+            self.screen.fill(BLACK)
+            self.world.player_list.draw(self.screen)
             pygame.display.flip()
             self.clock.tick(fps)
-
-    def print_player_information(self):
-        print(f"Player Position (x, y) =  ({self.player.rect.x}, {self.player.rect.y})")

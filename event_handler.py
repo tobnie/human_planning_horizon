@@ -2,8 +2,6 @@ import sys
 
 import pygame
 
-from world.player import Player
-
 
 def handle_events(game):
     """Requests all recent events and handles them by returning the action the player has taken.
@@ -18,19 +16,19 @@ def handle_events(game):
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                game.player.delta_y = -1
+                game.world.player.delta_y = -1
             if event.key == pygame.K_RIGHT:
-                game.player.delta_x = 1
+                game.world.player.delta_x = 1
             if event.key == pygame.K_DOWN:
-                game.player.delta_y = 1
+                game.world.player.delta_y = 1
             if event.key == pygame.K_LEFT:
-                game.player.delta_x = -1
+                game.world.player.delta_x = -1
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                game.player.delta_y = 0
+                game.world.player.delta_y = 0
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                game.player.delta_x = 0
+                game.world.player.delta_x = 0
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
