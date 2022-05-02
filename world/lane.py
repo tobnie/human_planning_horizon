@@ -30,7 +30,6 @@ class Lane(pygame.sprite.Sprite):
         self.row = row  # row number in the game (counting from the top)
         rect_height = config.MONITOR_HEIGHT_PX / config.N_LANES  # TODO ADJUST HEIGHT ?
         self.rect = pygame.Rect(0, self.row * rect_height, config.MONITOR_WIDTH_PX, rect_height)
-        self.fields = [Field(i, self.row) for i in range(config.N_FIELDS_PER_LANE)]
         self.color = color
 
     def draw_lane(self, screen):
