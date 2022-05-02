@@ -1,6 +1,9 @@
 # screen information
-MONITOR_WIDTH_PX = 1600
-MONITOR_HEIGHT_PX = 900    # TODO why is that?
+MONITOR_WIDTH_PX = 1920  #1600
+MONITOR_HEIGHT_PX = 1080    #900    # TODO why is that?
+
+# UI
+font_size = 24
 
 # world configuration
 N_FIELDS_PER_LANE = 21  # in previous thesis: 21
