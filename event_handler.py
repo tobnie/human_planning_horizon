@@ -2,6 +2,9 @@ import sys
 
 import pygame
 
+import config
+
+VEL = config.PLAYER_VELOCITY
 
 def handle_events(game):
     """Requests all recent events and handles them by returning the action the player has taken.
@@ -16,13 +19,13 @@ def handle_events(game):
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                game.world.player.input_delta_y = -1
+                game.world.player.input_delta_y = -VEL
             if event.key == pygame.K_RIGHT:
-                game.world.player.input_delta_x = 1
+                game.world.player.input_delta_x = VEL
             if event.key == pygame.K_DOWN:
-                game.world.player.input_delta_y = 1
+                game.world.player.input_delta_y = VEL
             if event.key == pygame.K_LEFT:
-                game.world.player.input_delta_x = -1
+                game.world.player.input_delta_x = -VEL
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP or event.key == pygame.K_DOWN:

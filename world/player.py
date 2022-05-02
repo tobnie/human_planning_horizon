@@ -10,14 +10,18 @@ class Player(DynamicObject):
     """
 
     def __init__(self, world, start_position=(0, 0)):
-        super().__init__(start_position[0], start_position[1], movement_bounds_x=(0, config.MONITOR_WIDTH_PX), movement_bounds_y=(0, config.MONITOR_HEIGHT_PX),
+        super().__init__(start_position[0], start_position[1], config.OBSTACLE_WIDTH // 2, config.MONITOR_HEIGHT_PX / config.N_LANES, movement_bounds_x=(0, config.MONITOR_WIDTH_PX), movement_bounds_y=(0, config.MONITOR_HEIGHT_PX),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
         self.world = world
-        self.input_delta_x = 0
-        self.input_delta_y = 0
 
-    def set_position(self, pos):
+        self.input_delta_x: float = 0
+        self.input_delta_y: float = 0
+
+    def set_position(self, pos: (float, float)):
         """Sets the current position of the player given as (x, y)-tuple."""
+
+        self.x = pos[0]
+        self.y = pos[1]
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
@@ -39,8 +43,8 @@ class Player(DynamicObject):
         delta_x_tot = self.delta_x + self.input_delta_x
         delta_y_tot = self.delta_y + self.input_delta_y
 
-        new_x = self.rect.x + config.STEP_SIZE * delta_x_tot
-        new_y = self.rect.y + config.STEP_SIZE * delta_y_tot
+        new_x = self.rect.x + delta_x_tot
+        new_y = self.rect.y + delta_y_tot
 
         # x position
         if new_x < self.movement_bounds_x[0]:

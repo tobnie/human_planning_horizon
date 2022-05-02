@@ -7,7 +7,6 @@ import pygame
 import colors
 import config
 import event_handler
-from world.player import Player
 from world.world import World
 
 '''
@@ -28,8 +27,8 @@ class Game:
         self.running = True
 
         # collision counter
-        self.n_vehicle_collisions = 0
-        self.n_water_collisions = 0
+        self.vehicle_collision = False
+        self.water_collision = False
 
         # set screen information
         pygame.init()
@@ -51,17 +50,16 @@ class Game:
 
             # event handling
             event_handler.handle_events(self)
-            self.world.update()
 
             # spawning street
             # TODO outsource to spawn_handler or similar?
-            if self.game_clock % 100 == 0:  # TODO spawns every 10000th tick now
+            if self.game_clock % 2 == 0:  # TODO spawns every 10000th tick now
                 for lane in self.world.directed_lanes:
-                    if random.choice([True, False]):
-                        lane.spawn_entity()
+                    lane.spawn_entity()
+                self.world.update()
 
-            # check collision
-            self.check_collision()
+                # check collision
+                self.check_collision()
 
             # draw objects
             self.render()
@@ -71,13 +69,8 @@ class Game:
             self.game_clock += 1
 
     def check_collision(self):
-        # collisions with vehicles
-        if self.world.check_vehicle_collision():
-            self.n_vehicle_collisions += 1
-
-        # collisions with water
-        if self.world.check_water_collision():
-            self.n_water_collisions += 1
+        self.vehicle_collision = True if self.world.check_vehicle_collision() else False
+        self.water_collision = True if self.world.check_water_collision() else False
 
     def render(self):
         self.world.draw(self.screen)
@@ -92,11 +85,11 @@ class Game:
 
         for i, debug_line in enumerate(debug_info):
             text_surface, rect = self.font.render(debug_line, self.font_color)
-            self.screen.blit(text_surface, (0, i*self.font_size))
+            self.screen.blit(text_surface, (0, i * self.font_size))
 
     def debug_information(self) -> string:
         debug_information = [f"Player Position = ({self.world.player.rect.x}, {self.world.player.rect.y})",
                              f"Player Delta = ({self.world.player.delta_x}, {self.world.player.delta_y})",
-                             f"Vehicle Hits = {self.n_vehicle_collisions}",
-                             f"Water Hits = {self.n_water_collisions}"]
+                             f"Vehicle Collision = {self.vehicle_collision}",
+                             f"Water Collision = {self.water_collision}"]
         return debug_information
