@@ -1,5 +1,6 @@
 import random
 
+import numpy as np
 import pygame
 from pygame.sprite import spritecollide
 
@@ -34,8 +35,8 @@ class World:
 
         # start position
         starting_lane: StartLane = self.starting_lanes.sprites()[0]
-        player_start_x = starting_lane.rect.width // 2 - self.player.rect.width // 2
-        player_start_y = starting_lane.rect.y
+        player_start_x = starting_lane.starting_position[0]
+        player_start_y = starting_lane.starting_position[1]
         self.player.set_position((player_start_x, player_start_y))
 
     def draw(self, screen) -> None:
@@ -47,13 +48,17 @@ class World:
         # draw player
         self.player_list.draw(screen)
 
+    def player_update(self):
+        """
+        Updates the player.
+        """
+        self.player.update()
+
     def update(self):
         """
-        Updates the current world state by updating the player and all objects in lanes.
+        Updates the current world state by updating all objects in lanes.
         """
         # check if player on lilypad
-
-        self.player.update()
         for lane in self.directed_lanes:
             lane.update()
 
@@ -62,7 +67,8 @@ class World:
         :return: True, if the player collides with a vehicle. False, otherwise
         """
         for street_lane in self.street_lanes:
-            if isinstance(street_lane, DirectedLane) and collision_handler.check_collision_group(self.player, street_lane.sprites):
+            if isinstance(street_lane, DirectedLane) and collision_handler.check_collision_group(self.player,
+                                                                                                 street_lane.non_player_sprites):
                 return True
 
         return False
@@ -74,7 +80,7 @@ class World:
         lilypads = []
         for water_lane in self.water_lanes:
             if isinstance(water_lane, WaterLane):
-                lilypads += spritecollide(self.player, water_lane.sprites, False, collided=pygame.sprite.collide_rect)
+                lilypads += spritecollide(self.player, water_lane.non_player_sprites, False, collided=pygame.sprite.collide_rect)
 
         return lilypads
 
@@ -94,7 +100,7 @@ class World:
         else:
             for water_lane in self.water_lanes:
                 if isinstance(water_lane, DirectedLane):
-                    if collision_handler.check_collision_group(self.player, water_lane.sprites):
+                    if collision_handler.check_collision_group(self.player, water_lane.non_player_sprites):
                         on_ground = True
                         break
         return not on_ground and on_water
@@ -108,14 +114,21 @@ class World:
         row = config.N_LANES - 1
 
         # starting lane
-        starting_lane = StartLane(row, 4)
+        if config.N_FIELDS_PER_LANE % 2 == 0:
+            starting_position_x = config.N_FIELDS_PER_LANE // 2 - 1
+        else:
+            starting_position_x = config.N_FIELDS_PER_LANE // 2
+        starting_position_y = config.N_LANES - 1
+
+        starting_lane = StartLane(row, starting_position=(starting_position_x, starting_position_y))
+        print(f"starting position = {starting_lane.starting_position}")
         self.starting_lanes.add(starting_lane)
         self.lanes.add(starting_lane)
         row -= 1
 
         # street lanes
         for i in range(config.N_STREET_LANES):
-            direction = random.choice([LaneDirection.LEFT, LaneDirection.RIGHT])
+            direction = LaneDirection.LEFT if i % 2 == 0 else LaneDirection.RIGHT
             street_lane = StreetLane(row, direction)
             self.street_lanes.add(street_lane)
             self.directed_lanes.add(street_lane)
@@ -130,7 +143,7 @@ class World:
 
         # water lanes
         for i in range(config.N_WATER_LANES):
-            direction = random.choice([LaneDirection.LEFT, LaneDirection.RIGHT])
+            direction = LaneDirection.LEFT if i % 2 == 0 else LaneDirection.RIGHT
             water_lane = WaterLane(row, direction)
             self.water_lanes.add(water_lane)
             self.directed_lanes.add(water_lane)

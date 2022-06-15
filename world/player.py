@@ -1,7 +1,7 @@
 import os
 
 import config
-from world.dynamic_object import DynamicObject
+from world.game_object import DynamicObject
 
 
 class Player(DynamicObject):
@@ -9,21 +9,11 @@ class Player(DynamicObject):
     Spawn a player
     """
 
-    def __init__(self, world, start_position=(0, 0)):
-        super().__init__(start_position[0], start_position[1], config.OBSTACLE_WIDTH // 2, config.MONITOR_HEIGHT_PX / config.N_LANES, movement_bounds_x=(0, config.MONITOR_WIDTH_PX), movement_bounds_y=(0, config.MONITOR_HEIGHT_PX),
+    def __init__(self, world, start_position=(0, config.N_FIELDS_PER_LANE // 2 + 1)):
+        super().__init__(start_position[0], start_position[1], config.FIELD_WIDTH, config.FIELD_HEIGHT,
+                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE), movement_bounds_y=(0, config.N_LANES),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
         self.world = world
-
-        self.input_delta_x: float = 0
-        self.input_delta_y: float = 0
-
-    def set_position(self, pos: (float, float)):
-        """Sets the current position of the player given as (x, y)-tuple."""
-
-        self.x = pos[0]
-        self.y = pos[1]
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
 
     def check_player_on_lilypad(self):
         """
@@ -31,36 +21,35 @@ class Player(DynamicObject):
         """
         player_lilypads = self.world.check_player_on_lilypad()
         if player_lilypads:
+            # TODO move with lilypad
             self.delta_x = player_lilypads[0].delta_x
-        else:
-            self.delta_x = 0
 
     def update(self) -> None:
         """Updates the object's position by adding the current deltas to the current position.
         The player is constrained by their movement boundaries."""
-        self.check_player_on_lilypad()
 
-        delta_x_tot = self.delta_x + self.input_delta_x
-        delta_y_tot = self.delta_y + self.input_delta_y
+        # self.check_player_on_lilypad() # TODO
 
-        new_x = self.rect.x + delta_x_tot
-        new_y = self.rect.y + delta_y_tot
+        new_x = self.x + self.delta_x
+        new_y = self.y + self.delta_y
 
         # x position
         if new_x < self.movement_bounds_x[0]:
-            self.rect.x = 0
-        elif new_x > self.movement_bounds_x[1] - self.rect.width:
-            self.rect.x = self.movement_bounds_x[1] - self.rect.width
+            new_x = self.movement_bounds_x[0]
+        elif new_x > self.movement_bounds_x[1]:
+            new_x = self.movement_bounds_x[1]
         else:
-            self.rect.x = new_x
+            new_x = new_x
 
         # y position
         if new_y < self.movement_bounds_y[0]:
-            self.rect.y = 0
-        elif new_y > self.movement_bounds_y[1] - self.rect.height:
-            self.rect.y = self.movement_bounds_y[1] - self.rect.height
+            new_y = self.movement_bounds_y[0]
+        elif new_y > self.movement_bounds_y[1]:
+            new_y = self.movement_bounds_y[1]
         else:
-            self.rect.y = new_y
+            new_y = new_y
+
+        self.set_position((new_x, new_y))
 
     def print_information(self) -> None:
         print(f"Player Position (x, y) =  ({self.rect.x}, {self.rect.y})")

@@ -1,8 +1,6 @@
-import os
-import random
-import string
-
 import pygame
+
+from display_debug_information import TextDisplayer
 
 import colors
 import config
@@ -23,23 +21,48 @@ class Game:
         # game clock
         self.clock = pygame.time.Clock()
         self.game_clock = 0
-        self.display_debug_information = False
+        self.display_debug_information_player = False
+        self.display_debug_information_objects = False
         self.running = True
+        self.pause = False
 
         # collision counter
         self.vehicle_collision = False
         self.water_collision = False
 
         # set screen information
-        pygame.init()
-        self.screen = pygame.display.set_mode((config.MONITOR_WIDTH_PX, config.MONITOR_HEIGHT_PX), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
 
-        self.font_color = colors.WHITE
-        self.font_size = config.font_size
-        self.font = pygame.freetype.SysFont(name="freesansbold", size=self.font_size)
-
-        self.world = World(config.MONITOR_WIDTH_PX, config.MONITOR_HEIGHT_PX)
+        self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES)
         self.screen.fill(colors.BLACK)
+
+        self.text_displayer = TextDisplayer(self)
+
+    def run_pause(self):
+        event_handler.handle_events(self)
+
+    def run_normal(self):
+        # event handling
+        if self.game_clock % 4 == 0:
+            event_handler.handle_events(self)
+            self.world.player_update()
+
+        # spawning street
+        # TODO outsource to spawn_handler or similar?
+        if self.game_clock % 20 == 0:  # TODO
+            for lane in self.world.directed_lanes:
+                lane.spawn_entity()
+            self.world.update()
+
+            # check collision
+            self.check_collision()
+
+        # draw objects
+        self.render()
+
+        # tick game
+        self.clock.tick(config.FPS)
+        self.game_clock += 1
 
     def run(self):
         """
@@ -48,25 +71,10 @@ class Game:
 
         while self.running:
 
-            # event handling
-            event_handler.handle_events(self)
-
-            # spawning street
-            # TODO outsource to spawn_handler or similar?
-            if self.game_clock % 2 == 0:  # TODO spawns every 10000th tick now
-                for lane in self.world.directed_lanes:
-                    lane.spawn_entity()
-                self.world.update()
-
-                # check collision
-                self.check_collision()
-
-            # draw objects
-            self.render()
-
-            # tick game
-            self.clock.tick(config.FPS)
-            self.game_clock += 1
+            if self.pause:
+                self.run_pause()
+            else:
+                self.run_normal()
 
     def check_collision(self):
         self.vehicle_collision = True if self.world.check_vehicle_collision() else False
@@ -75,21 +83,6 @@ class Game:
     def render(self):
         self.world.draw(self.screen)
 
-        if self.display_debug_information:
-            self.render_debug_information()
+        self.text_displayer.display_debug_information()
 
         pygame.display.flip()
-
-    def render_debug_information(self):
-        debug_info = self.debug_information()
-
-        for i, debug_line in enumerate(debug_info):
-            text_surface, rect = self.font.render(debug_line, self.font_color)
-            self.screen.blit(text_surface, (0, i * self.font_size))
-
-    def debug_information(self) -> string:
-        debug_information = [f"Player Position = ({self.world.player.rect.x}, {self.world.player.rect.y})",
-                             f"Player Delta = ({self.world.player.delta_x}, {self.world.player.delta_y})",
-                             f"Vehicle Collision = {self.vehicle_collision}",
-                             f"Water Collision = {self.water_collision}"]
-        return debug_information

@@ -1,7 +1,5 @@
 import pygame
 
-from world.lane import Lane
-
 
 def check_collision(sprite1: pygame.sprite.Sprite, sprite2: pygame.sprite.Sprite):
     """
