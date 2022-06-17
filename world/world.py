@@ -156,3 +156,42 @@ class World:
         self.lanes.add(finish_lane)
 
         assert row == 0, f"Error in lane generation, row={row}"
+
+    def __json__(self):
+        """Saves the given world as json at the given path."""
+        world_dict = {}
+
+        height = len(self.lanes)
+        width = len(self.lanes.sprites()[0].fields)
+        street_lanes = len(self.street_lanes)
+        middle_lanes = len(self.middle_lanes)
+        water_lanes = len(self.water_lanes)
+
+        starting_position = self.starting_lanes.sprites()[0].starting_position
+        target_position = self.finish_lanes.sprites()[0].target_position
+
+        # rewrite lanes into dictionary
+        lanes_list = []
+        for lane in self.lanes:
+            lane_dict = {}
+            lane_dict['row'] = lane.row
+            lane_dict['type'] = lane.__class__.__name__
+
+            if isinstance(lane, DirectedLane):
+                lane_dict['direction'] = lane.direction.value
+
+            # TODO spawn parameters
+
+            lanes_list.append(lane_dict)
+
+        # write parameters to dictionary
+        world_dict["height"] = height
+        world_dict["width"] = width
+        world_dict["street_lanes"] = street_lanes
+        world_dict["middle_lanes"] = middle_lanes
+        world_dict["water_lanes"] = water_lanes
+        world_dict["starting_position"] = starting_position
+        world_dict["target_position"] = target_position
+        world_dict["lanes"] = lanes_list
+
+        return world_dict
