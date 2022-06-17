@@ -28,8 +28,9 @@ class LaneDirection(Enum):
 
 class Lane(pygame.sprite.Sprite):
 
-    def __init__(self, row: int, color: (int, int, int) = colors.GREEN):
+    def __init__(self, world, row: int, color: (int, int, int) = colors.GREEN):
         super().__init__()
+        self.world = world
         self.row = row  # row number in the game (counting from the top)
         self.rect = pygame.Rect(0, self.row * config.FIELD_HEIGHT, config.DISPLAY_WIDTH_PX, config.FIELD_HEIGHT)
         self.color = color
@@ -47,22 +48,29 @@ class Lane(pygame.sprite.Sprite):
 
 class StartLane(Lane):
 
-    def __init__(self, row: int, starting_position: (int, int)):
-        super().__init__(row, colors.RED)
+    def __init__(self, world, row: int, starting_position: (int, int)):
+        super().__init__(world, row, colors.RED)
         self.starting_position = starting_position
 
 
 class FinishLane(Lane):
 
-    def __init__(self, row: int, end_position: (int, int)):
-        super().__init__(row, colors.RED)
-        self.end_position = end_position
+    def __init__(self, world, row: int, target_position: (int, int)):
+        super().__init__(world, row, colors.RED)
+        self.target_position = target_position
 
+
+    def draw_lane(self, screen):
+        super().draw_lane(screen)
+        # draw target position
+        target_field = self.fields[self.target_position]
+        for i in range(4):
+            pygame.draw.rect(screen, colors.YELLOW, (target_field.rect.x - i, target_field.rect.y - i, target_field.rect.width, target_field.rect.height), 1)
 
 class DirectedLane(Lane, ABC):
 
-    def __init__(self, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN):
-        super().__init__(row, color)
+    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN):
+        super().__init__(world, row, color)
 
         # take given direction, otherwise choose randomly if left or right
         if not lane_direction:
@@ -102,7 +110,7 @@ class DirectedLane(Lane, ABC):
                 obst_delta_x = -1
                 spawn_x = len(self)
 
-            new_entity: DynamicObject = self.dynamic_object_constructor(spawn_x, self.row,
+            new_entity: DynamicObject = self.dynamic_object_constructor(self.world, spawn_x, self.row,
                                                                         self.next_obstacle_size, 1,
                                                                         delta_x=obst_delta_x)
 
@@ -131,13 +139,13 @@ class DirectedLane(Lane, ABC):
 
 class StreetLane(DirectedLane):
 
-    def __init__(self, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
-        super().__init__(row, lane_direction, colors.BLACK)
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
+        super().__init__(world, row, lane_direction, colors.BLACK)
         self.dynamic_object_constructor = Vehicle
 
 
 class WaterLane(DirectedLane):
 
-    def __init__(self, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
-        super().__init__(row, lane_direction, colors.BLUE)
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
+        super().__init__(world, row, lane_direction, colors.BLUE)
         self.dynamic_object_constructor = LilyPad

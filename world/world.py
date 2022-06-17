@@ -1,14 +1,10 @@
-import random
-
-import numpy as np
 import pygame
-from pygame.sprite import spritecollide
 
-import collision_handler
 import colors
 import config
 from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
 from world.player import Player
+import json_fix
 
 
 class World:
@@ -62,49 +58,6 @@ class World:
         for lane in self.directed_lanes:
             lane.update()
 
-    def check_vehicle_collision(self):
-        """
-        :return: True, if the player collides with a vehicle. False, otherwise
-        """
-        for street_lane in self.street_lanes:
-            if isinstance(street_lane, DirectedLane) and collision_handler.check_collision_group(self.player,
-                                                                                                 street_lane.non_player_sprites):
-                return True
-
-        return False
-
-    def check_player_on_lilypad(self):
-        """
-        :return: A list with all sprites on which the player currently stands. An empty list, if they stand on no sprite.
-        """
-        lilypads = []
-        for water_lane in self.water_lanes:
-            if isinstance(water_lane, WaterLane):
-                lilypads += spritecollide(self.player, water_lane.non_player_sprites, False, collided=pygame.sprite.collide_rect)
-
-        return lilypads
-
-    def check_water_collision(self):
-        """
-        :return: True, if the player does not collide with a lilypad and thus collides with the water.
-        """
-        # check collision with water
-        on_water = collision_handler.check_collision_group(self.player, self.water_lanes)
-
-        # check collision with lilypads (=water_lane.sprites) or other ground)
-        on_ground = False
-        if collision_handler.check_collision_group(self.player, self.middle_lanes):
-            on_ground = True
-        elif collision_handler.check_collision_group(self.player, self.finish_lanes):
-            on_ground = True
-        else:
-            for water_lane in self.water_lanes:
-                if isinstance(water_lane, DirectedLane):
-                    if collision_handler.check_collision_group(self.player, water_lane.non_player_sprites):
-                        on_ground = True
-                        break
-        return not on_ground and on_water
-
     def draw_lanes(self, screen) -> None:
         for lane in self.lanes.sprites():
             if isinstance(lane, Lane):
@@ -120,7 +73,7 @@ class World:
             starting_position_x = config.N_FIELDS_PER_LANE // 2
         starting_position_y = config.N_LANES - 1
 
-        starting_lane = StartLane(row, starting_position=(starting_position_x, starting_position_y))
+        starting_lane = StartLane(self, row, starting_position=(starting_position_x, starting_position_y))
         print(f"starting position = {starting_lane.starting_position}")
         self.starting_lanes.add(starting_lane)
         self.lanes.add(starting_lane)
@@ -129,14 +82,14 @@ class World:
         # street lanes
         for i in range(config.N_STREET_LANES):
             direction = LaneDirection.LEFT if i % 2 == 0 else LaneDirection.RIGHT
-            street_lane = StreetLane(row, direction)
+            street_lane = StreetLane(self, row, direction)
             self.street_lanes.add(street_lane)
             self.directed_lanes.add(street_lane)
             self.lanes.add(street_lane)
             row -= 1
 
         # interim lane
-        middle_lane = Lane(row)
+        middle_lane = Lane(self, row)
         self.middle_lanes.add(middle_lane)
         self.lanes.add(middle_lane)
         row -= 1
@@ -144,14 +97,18 @@ class World:
         # water lanes
         for i in range(config.N_WATER_LANES):
             direction = LaneDirection.LEFT if i % 2 == 0 else LaneDirection.RIGHT
-            water_lane = WaterLane(row, direction)
+            water_lane = WaterLane(self, row, direction)
             self.water_lanes.add(water_lane)
             self.directed_lanes.add(water_lane)
             self.lanes.add(water_lane)
             row -= 1
 
         # finish lane
-        finish_lane = FinishLane(row, 8)
+        if config.N_FIELDS_PER_LANE % 2 == 0:
+            target_position = config.N_FIELDS_PER_LANE // 2 - 1
+        else:
+            target_position = config.N_FIELDS_PER_LANE // 2
+        finish_lane = FinishLane(self, row, target_position)
         self.finish_lanes.add(finish_lane)
         self.lanes.add(finish_lane)
 

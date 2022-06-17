@@ -1,7 +1,9 @@
 import os
 
+import collision_handler
 import config
 from world.game_object import DynamicObject
+from world.lane import WaterLane, DirectedLane
 
 
 class Player(DynamicObject):
@@ -10,25 +12,55 @@ class Player(DynamicObject):
     """
 
     def __init__(self, world, start_position=(0, config.N_FIELDS_PER_LANE // 2 + 1)):
-        super().__init__(start_position[0], start_position[1], config.FIELD_WIDTH, config.FIELD_HEIGHT,
+        super().__init__(world, start_position[0], start_position[1], 1, 1,
                          movement_bounds_x=(0, config.N_FIELDS_PER_LANE), movement_bounds_y=(0, config.N_LANES),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
-        self.world = world
+        self.is_dead = False
 
     def check_player_on_lilypad(self):
+        """Returns True if the player is in a WaterLane on a Lilypad. Otherwise, False."""
+        for lane in self.world.lanes:
+            if isinstance(lane, WaterLane):
+                for sprite in lane.non_player_sprites:
+                    if self.rect.colliderect(sprite.rect):
+                        return True
+        return False
+
+    def check_vehicle_collision(self):
         """
-        Checks if the player currently stands on a lilypad and adjusts the delta_x accordingly.
+        :return: True, if the player collides with a vehicle. False, otherwise
         """
-        player_lilypads = self.world.check_player_on_lilypad()
-        if player_lilypads:
-            # TODO move with lilypad
-            self.delta_x = player_lilypads[0].delta_x
+        for street_lane in self.world.street_lanes:
+            if isinstance(street_lane, DirectedLane) and collision_handler.check_collision_group(self,
+                                                                                                 street_lane.non_player_sprites):
+                return True
+
+        return False
+
+    def check_water_collision(self):
+        """
+        :return: True, if the player does not collide with a lilypad and thus collides with the water. Otherwise False.
+        """
+        # check collision with water
+        water_rows = list(map(lambda lane: lane.row, self.world.water_lanes.sprites()))
+        on_water = self.y in water_rows
+
+        # return False if player is not on a water lane
+        if not on_water:
+            return False
+
+        # check collision with lilypad
+        return not self.check_player_on_lilypad()
+
+    def check_status(self):
+        """Sets the player to dead, if the player collides with a Vehicle sprite or not a
+        LilyPad sprite while being in a water lane"""
+        if self.check_vehicle_collision() or self.check_water_collision():
+            self.world.player.is_dead = True
 
     def update(self) -> None:
         """Updates the object's position by adding the current deltas to the current position.
         The player is constrained by their movement boundaries."""
-
-        # self.check_player_on_lilypad() # TODO
 
         new_x = self.x + self.delta_x
         new_y = self.y + self.delta_y

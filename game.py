@@ -26,6 +26,8 @@ class Game:
         self.running = True
         self.pause = False
 
+        self.game_won = False
+
         # collision counter
         self.vehicle_collision = False
         self.water_collision = False
@@ -49,13 +51,14 @@ class Game:
 
         # spawning street
         # TODO outsource to spawn_handler or similar?
-        if self.game_clock % 20 == 0:  # TODO
+        if self.game_clock % 50 == 0:  # TODO
             for lane in self.world.directed_lanes:
                 lane.spawn_entity()
             self.world.update()
 
-            # check collision
-            self.check_collision()
+        # check if player is dead and end game
+        if self.world.player.check_status():
+            pass  # TODO
 
         # draw objects
         self.render()
@@ -76,11 +79,16 @@ class Game:
             else:
                 self.run_normal()
 
-    def check_collision(self):
-        self.vehicle_collision = True if self.world.check_vehicle_collision() else False
-        self.water_collision = True if self.world.check_water_collision() else False
+    def check_game_won(self):
+        """
+        Checks if the game has been won.
+        """
+        # TODO extend to target positions
+        if self.world.player.y == 0:
+            self.game_won = True
 
     def render(self):
+        """Renders the whole game."""
         self.world.draw(self.screen)
 
         self.text_displayer.display_debug_information()

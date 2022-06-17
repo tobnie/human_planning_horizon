@@ -32,8 +32,9 @@ class TextDisplayer:
     def debug_information_player(self) -> string:
         debug_information = [f"Player Position = ({self.world.player.x}, {self.world.player.y})",
                              f"Player Delta = ({self.world.player.delta_x}, {self.world.player.delta_y})",
-                             f"Vehicle Collision = {self.game.vehicle_collision}",
-                             f"Water Collision = {self.game.water_collision}"]
+                             f"Vehicle Collision = {self.game.world.player.check_vehicle_collision()}",
+                             f"Water Collision = {self.game.world.player.check_water_collision()}",
+                             "DEAD" if self.world.player.is_dead else "ALIVE"]
         return debug_information
 
     def debug_information_objects(self) -> string:
