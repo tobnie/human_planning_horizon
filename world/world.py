@@ -1,3 +1,5 @@
+import json
+
 import pygame
 
 import colors
@@ -9,10 +11,10 @@ import json_fix
 
 class World:
 
-    def __init__(self, width, height):
+    def __init__(self, width: int = None, height: int = None, path: str = None) -> None:
         # game boundaries
-        self.width = width
-        self.height = height
+        self.width = width if width is not None else 1
+        self.height = height if height is not None else 1
 
         # lanes
         self.lanes = pygame.sprite.Group()
@@ -22,9 +24,15 @@ class World:
         self.middle_lanes = pygame.sprite.Group()
         self.water_lanes = pygame.sprite.Group()
         self.finish_lanes = pygame.sprite.Group()
-        self._generate_lanes()
 
-        # player
+        if path:
+            self.load_lanes_from_json(path)
+        else:
+            # TODO remove this as soon as we only load predefined worlds
+            # create lanes
+            self._generate_lanes()
+
+        # create player
         self.player = Player(self)  # spawn player
         self.player_list = pygame.sprite.Group()
         self.player_list.add(self.player)
@@ -113,6 +121,47 @@ class World:
         self.lanes.add(finish_lane)
 
         assert row == 0, f"Error in lane generation, row={row}"
+
+    def load_lanes_from_json(self, path: str) -> None:
+        # load json at given path
+        with open(path, 'r', encoding='utf-8') as f:
+            world_dict = json.load(f)
+
+        # create world
+        # game boundaries
+        self.width = world_dict['width']
+        self.height = world_dict['height']
+        starting_position = world_dict['starting_position']
+
+        # parse lanes
+        for lane_info in world_dict['lanes']:
+            # start lane
+            if lane_info['type'] == 'StartLane':
+                starting_lane = StartLane(self, self.height - 1, starting_position=(starting_position[0], starting_position[1]))
+                self.starting_lanes.add(starting_lane)
+                self.lanes.add(starting_lane)
+            # street lane
+            elif lane_info['type'] == 'StreetLane':
+                street_lane = StreetLane(self, lane_info['row'], LaneDirection(lane_info['direction']))
+                self.street_lanes.add(street_lane)
+                self.lanes.add(street_lane)
+            # finish lane
+            elif lane_info['type'] == 'FinishLane':
+                finish_lane = FinishLane(self, lane_info['row'], world_dict["target_position"])
+                self.finish_lanes.add(finish_lane)
+                self.lanes.add(finish_lane)
+            # water lane
+            elif lane_info['type'] == 'WaterLane':
+                water_lane = WaterLane(self, lane_info['row'], LaneDirection(lane_info['direction']))
+                self.water_lanes.add(water_lane)
+                self.lanes.add(water_lane)
+            # interim lane
+            elif lane_info['type'] == 'Lane':
+                middle_lane = Lane(self, lane_info['row'])
+                self.middle_lanes.add(middle_lane)
+                self.lanes.add(middle_lane)
+            else:
+                raise Exception("Unknown lane type: {}".format(lane_info['type']))
 
     def __json__(self):
         """Saves the given world as json at the given path."""
