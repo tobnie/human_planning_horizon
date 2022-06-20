@@ -11,7 +11,7 @@ import json_fix
 
 class World:
 
-    def __init__(self, width: int = None, height: int = None, path: str = None) -> None:
+    def __init__(self, width: int = None, height: int = None, world_name: str = None) -> None:
         # game boundaries
         self.width = width if width is not None else 1
         self.height = height if height is not None else 1
@@ -25,10 +25,10 @@ class World:
         self.water_lanes = pygame.sprite.Group()
         self.finish_lanes = pygame.sprite.Group()
 
-        if path:
-            self.load_lanes_from_json(path)
+        if world_name:
+            self.load_lanes_from_json(world_name)
         else:
-            # TODO remove this as soon as we only load predefined worlds
+            # TODO remove this as soon as we only load predefined worlds?
             # create lanes
             self._generate_lanes()
 
@@ -62,7 +62,6 @@ class World:
         """
         Updates the current world state by updating all objects in lanes.
         """
-        # check if player on lilypad
         for lane in self.directed_lanes:
             lane.update()
 
@@ -122,9 +121,9 @@ class World:
 
         assert row == 0, f"Error in lane generation, row={row}"
 
-    def load_lanes_from_json(self, path: str) -> None:
+    def load_lanes_from_json(self, world_name: str) -> None:
         # load json at given path
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(config.LEVELS_DIR + world_name + '.json', 'r', encoding='utf-8') as f:
             world_dict = json.load(f)
 
         # create world
@@ -164,7 +163,7 @@ class World:
                 raise Exception("Unknown lane type: {}".format(lane_info['type']))
 
     def __json__(self):
-        """Saves the given world as json at the given path."""
+        """Returns a json (dict) representation of the world."""
         world_dict = {}
 
         height = len(self.lanes)
@@ -183,10 +182,13 @@ class World:
             lane_dict['row'] = lane.row
             lane_dict['type'] = lane.__class__.__name__
 
+            # spawn parameters
             if isinstance(lane, DirectedLane):
                 lane_dict['direction'] = lane.direction.value
-
-            # TODO spawn parameters
+                lane_dict['velocity'] = lane.velocity
+                lane_dict['obstacle_size'] = lane.obstacle_size
+                lane_dict['distance_between_obstacles'] = lane.distance_between_obstacles
+                lane_dict['obstacles_without_gap'] = lane.obstacles_without_gap
 
             lanes_list.append(lane_dict)
 

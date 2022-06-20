@@ -1,5 +1,7 @@
 import os
 
+import pygame
+
 import collision_handler
 import config
 from world.game_object import DynamicObject
@@ -13,7 +15,7 @@ class Player(DynamicObject):
 
     def __init__(self, world, start_position=(0, config.N_FIELDS_PER_LANE // 2 + 1)):
         super().__init__(world, start_position[0], start_position[1], 1, 1,
-                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE), movement_bounds_y=(0, config.N_LANES),
+                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE-1), movement_bounds_y=(0, config.N_LANES-1),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
         self.is_dead = False
 
@@ -62,10 +64,13 @@ class Player(DynamicObject):
         """Updates the object's position by adding the current deltas to the current position.
         The player is constrained by their movement boundaries."""
 
+        self.set_rotated_sprite_img()
+
         new_x = self.x + self.delta_x
         new_y = self.y + self.delta_y
 
         # x position
+        print(self.movement_bounds_y)
         if new_x < self.movement_bounds_x[0]:
             new_x = self.movement_bounds_x[0]
         elif new_x > self.movement_bounds_x[1]:

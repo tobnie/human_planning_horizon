@@ -59,17 +59,19 @@ class FinishLane(Lane):
         super().__init__(world, row, colors.RED)
         self.target_position = target_position
 
-
     def draw_lane(self, screen):
         super().draw_lane(screen)
         # draw target position
         target_field = self.fields[self.target_position]
         for i in range(4):
-            pygame.draw.rect(screen, colors.YELLOW, (target_field.rect.x - i, target_field.rect.y - i, target_field.rect.width, target_field.rect.height), 1)
+            pygame.draw.rect(screen, colors.YELLOW,
+                             (target_field.rect.x - i, target_field.rect.y - i, target_field.rect.width, target_field.rect.height), 1)
+
 
 class DirectedLane(Lane, ABC):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN):
+    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, lane_velocity: int = 1,
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
         super().__init__(world, row, color)
 
         # take given direction, otherwise choose randomly if left or right
@@ -80,54 +82,40 @@ class DirectedLane(Lane, ABC):
         self.non_player_sprites = pygame.sprite.Group()
         self.dynamic_object_constructor = None
 
-        # average spawn rate should be time for a movement covering the whole width of the current object times two
-        # time = width / velocity
-        self.spawn_counter = 0
-        self.next_spawn_event = 0
-        self.next_obstacle_size = 0
-        self.time_between_spawns = 0
-        self._reset_spawn_counter()
-
-    def _reset_spawn_counter(self):
-        # TODO for generated worlds
-        self.spawn_counter = 0
-        self.next_obstacle_size = random.choice(config.OBSTACLE_WIDTH)
-        self.time_between_spawns = random.choice(
-            self.next_obstacle_size / config.OBSTACLE_VELOCITY * np.array(config.OBSTACLE_SPAWN_TIME_MULTIPLIERS))
-        self.next_spawn_event = 5
-        # print(f"self.next_spawn_event={self.next_spawn_event}")
-        # print(f"self.time_between_spawns={self.time_between_spawns}")
-        # print(f"self.next_obstacle_size={self.next_obstacle_size}")
-        # print(f"self.next_spawn_event={self.next_spawn_event}")
+        # lane dynamics
+        self.velocity = lane_velocity
+        self.direction = lane_direction
+        self.distance_between_obstacles = distance_between_obstacles
+        self.obstacle_size = obstacle_size
+        self.obstacles_without_gap = obstacles_without_gap
+        self.gap_counter = 0
+        self.obstacle_counter = 0
 
     def spawn_entity(self) -> None:
-        # if counter is over time for next event, spawn entity
-        if self.spawn_counter > self.next_spawn_event:
-            if self.direction == LaneDirection.RIGHT:
-                obst_delta_x = 1
-                spawn_x = -1
+
+        # if gap is complete, spawn next obstacle
+        if self.gap_counter >= self.distance_between_obstacles:  # TODO > or >=?
+            # skip obstacle if all obstacles with gap have been spawned
+            if self.obstacle_counter == self.obstacles_without_gap:
+                self.obstacle_counter = 0
+                self.gap_counter = 0
             else:
-                obst_delta_x = -1
-                spawn_x = len(self)
+                if self.direction == LaneDirection.RIGHT:
+                    obst_delta_x = self.velocity
+                    spawn_x = -1
+                else:
+                    obst_delta_x = -self.velocity
+                    spawn_x = len(self)
 
-            new_entity: DynamicObject = self.dynamic_object_constructor(self.world, spawn_x, self.row,
-                                                                        self.next_obstacle_size, 1,
-                                                                        delta_x=obst_delta_x)
+                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, spawn_x, self.row,
+                                                                            self.obstacle_size, 1,
+                                                                            delta_x=obst_delta_x)
 
-            # spawn entity behind if it overlaps with current last entity
-            if self.non_player_sprites.sprites():
-                last_sprite = self.non_player_sprites.sprites()[0]
-                if collision_handler.check_collision(new_entity, last_sprite):
-                    if self.direction == LaneDirection.RIGHT:
-                        new_entity.x = last_sprite.rect.x - new_entity.rect.width
-                    else:
-                        new_entity.x = last_sprite.rect.x + last_sprite.rect.width
-                    new_entity.rect.x = new_entity.x
-
-            self.non_player_sprites.add(new_entity)
-            self._reset_spawn_counter()
+                self.non_player_sprites.add(new_entity)
+                self.gap_counter = 0
+                self.obstacle_counter += 1
         else:
-            self.spawn_counter += 1
+            self.gap_counter += 1
 
     def update(self) -> None:
         self.non_player_sprites.update()

@@ -22,6 +22,7 @@ class GameObject(pygame.sprite.Sprite, ABC):
         if img_path:
             img = pygame.image.load(img_path).convert_alpha()
             img = pygame.transform.scale(img, [width * config.FIELD_WIDTH, height * config.FIELD_HEIGHT])
+            self.base_img = img
             self.image = img
             self.image.set_colorkey(colors.WHITE)
             self.rect = self.image.get_rect()
@@ -66,9 +67,26 @@ class DynamicObject(GameObject):
         self.delta_x: int = delta_x
         self.delta_y: int = delta_y
 
+    def set_rotated_sprite_img(self):
+        """Sets the sprite image for the respective current direction of movement."""
+        if self.delta_x > 0:
+            self.image = pygame.transform.rotate(self.base_img, 270)
+        if self.delta_y > 0:
+            self.image = pygame.transform.rotate(self.base_img, 180)
+        if self.delta_x < 0:
+            self.image = pygame.transform.rotate(self.base_img, 90)
+        if self.delta_y < 0:
+            self.image = pygame.transform.rotate(self.base_img, 0)
+
+        self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
+        self.image.set_colorkey(colors.WHITE)
+
     def update(self) -> None:
         """Updates the object's position by adding the current deltas to the current position.
         The sprite dies if it moves outside of the movement boundaries."""
+
+        self.set_rotated_sprite_img()
+
         new_x = self.x + self.delta_x
         new_y = self.y + self.delta_y
 
@@ -87,7 +105,7 @@ class Vehicle(DynamicObject):
     """Vehicles are moving on the streets with specific properties given by the lane they are on (passed to the
     vehicle constructor upon spawning in the lane)"""
 
-    def __init__(self, world,x: int = 0, y: int = 0,
+    def __init__(self, world, x: int = 0, y: int = 0,
                  width: int = 1, height: int = 1,
                  delta_x: int = 0,
                  delta_y: int = 0):

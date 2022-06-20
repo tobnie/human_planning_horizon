@@ -26,4 +26,5 @@ OBSTACLE_VELOCITY = 1.0
 FPS = 60  # frame rate
 
 # directory
-SPRITES_DIR = "sprites"
+SPRITES_DIR = "./sprites/"
+LEVELS_DIR = "./levels/"

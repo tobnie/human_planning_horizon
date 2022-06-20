@@ -14,7 +14,7 @@ Variables
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, world_name: str = None):
         """
         Sets up the game by initializing PyGame.
         """
@@ -35,7 +35,10 @@ class Game:
         # set screen information
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
 
-        self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES)
+        if world_name:
+            self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES, world_name=world_name)
+        else:
+            self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES)
         self.screen.fill(colors.BLACK)
 
         self.text_displayer = TextDisplayer(self)
