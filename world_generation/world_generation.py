@@ -40,7 +40,7 @@ class LilyPadWidth(Enum):
     SMALL = ValueWithProbability(1, 0.05)
     MEDIUM = ValueWithProbability(2, 0.35)
     LARGE = ValueWithProbability(3, 0.4)
-    XLarge = ValueWithProbability(4, 0.2)
+    XLARGE = ValueWithProbability(4, 0.2)
 
 
 class TargetPositionX(Enum):
@@ -60,7 +60,7 @@ class DistanceBetweenObstacles(Enum):
     SMALL = ValueWithProbability(1, 0.1)
     MEDIUM = ValueWithProbability(2, 0.4)
     LARGE = ValueWithProbability(3, 0.4)
-    XLarge = ValueWithProbability(4, 0.1)
+    XLARGE = ValueWithProbability(4, 0.1)
 
 
 class ObstaclesWithoutGap(Enum):
@@ -70,7 +70,7 @@ class ObstaclesWithoutGap(Enum):
     SMALL = ValueWithProbability(2, 0.35)
     MEDIUM = ValueWithProbability(3, 0.4)
     LARGE = ValueWithProbability(4, 0.2)
-    XLarge = ValueWithProbability(5, 0.05)
+    XLARGE = ValueWithProbability(5, 0.05)
 
 
 def get_values_and_probs_from_enum(enum):

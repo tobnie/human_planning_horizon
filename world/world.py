@@ -1,17 +1,27 @@
 import json
+from enum import Enum
 
 import pygame
 
 import colors
 import config
+import event_handler
 from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
 from world.player import Player
 import json_fix
 
 
+class GameStatus(Enum):
+    RUNNING = 0,
+    WON = 1,
+    LOST = 2
+
+
 class World:
 
-    def __init__(self, width: int = None, height: int = None, world_name: str = None) -> None:
+    def __init__(self, game, width: int = None, height: int = None, world_name: str = None) -> None:
+        self.game = game
+
         # game boundaries
         self.width = width if width is not None else 1
         self.height = height if height is not None else 1
@@ -58,12 +68,42 @@ class World:
         """
         self.player.update()
 
-    def update(self):
+    def update(self, game_clock):
         """
         Updates the current world state by updating all objects in lanes.
         """
-        for lane in self.directed_lanes:
-            lane.update()
+        # event handling
+        if game_clock % 4 == 0:
+            event_handler.handle_events(self.game)
+            self.player_update()
+
+        # spawning street
+        # TODO outsource to spawn_handler or similar?
+        if game_clock % 50 == 0:  # TODO
+            for lane in self.directed_lanes:
+                lane.spawn_entity()
+
+            # update
+            for lane in self.directed_lanes:
+                lane.update()
+
+        # check if player is dead and end game
+        if self.player.is_dead:
+            # show screen for restart
+            return GameStatus.LOST
+
+        if self.check_game_won():
+            return GameStatus.WON
+
+        return GameStatus.RUNNING
+
+    def check_game_won(self):
+        """
+        Checks if the game has been won.
+        """
+        finish_lane = self.finish_lanes.sprites()[0]
+        if self.player.y == 0 and self.player.x == finish_lane.target_position:
+            self.game_won = True
 
     def draw_lanes(self, screen) -> None:
         for lane in self.lanes.sprites():

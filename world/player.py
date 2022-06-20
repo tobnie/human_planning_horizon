@@ -1,7 +1,5 @@
 import os
 
-import pygame
-
 import collision_handler
 import config
 from world.game_object import DynamicObject

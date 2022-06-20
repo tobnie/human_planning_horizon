@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pygame
 
 from display_debug_information import TextDisplayer
@@ -5,11 +7,7 @@ from display_debug_information import TextDisplayer
 import colors
 import config
 import event_handler
-from world.world import World
-
-'''
-Variables
-'''
+from world.world import World, GameStatus
 
 
 class Game:
@@ -26,7 +24,7 @@ class Game:
         self.running = True
         self.pause = False
 
-        self.game_won = False
+        self.game_status = GameStatus.RUNNING
         self.world_name = world_name
 
         # collision counter
@@ -37,9 +35,9 @@ class Game:
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
 
         if world_name:
-            self.world = World(world_name=world_name)
+            self.world = World(self, world_name=world_name)
         else:
-            self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES)
+            self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES)
         self.screen.fill(colors.BLACK)
 
         self.text_displayer = TextDisplayer(self)
@@ -48,26 +46,7 @@ class Game:
         event_handler.handle_events(self)
 
     def run_normal(self):
-        # event handling
-        if self.game_clock % 4 == 0:
-            event_handler.handle_events(self)
-            self.world.player_update()
-
-        # spawning street
-        # TODO outsource to spawn_handler or similar?
-        if self.game_clock % 50 == 0:  # TODO
-            for lane in self.world.directed_lanes:
-                lane.spawn_entity()
-            self.world.update()
-
-        # check if player is dead and end game
-
-        if self.world.player.is_dead:
-            # show screen for restart
-            return False
-
-        if self.check_game_won():
-            return True
+        self.game_status = self.world.update(self.game_clock)  # won = True,
 
         # draw objects
         self.render()
@@ -83,28 +62,21 @@ class Game:
 
         while self.running:
 
+            # run next game step
             if self.pause:
                 self.run_pause()
             else:
-                game_won = self.run_normal()
-                if game_won is not None:
-                    if game_won:
-                        # game won
-                        self.start_world(self.world_name)
-                    else:
-                        # game lost
-                        self.start_world(self.world_name)
+                self.run_normal()
+
+            if self.game_status == GameStatus.WON:
+                # game won
+                self.start_world(self.world_name)
+            if self.game_status == GameStatus.LOST:
+                # game lost
+                self.start_world(self.world_name)
 
     def start_world(self, world_name):
-        self.world = World(world_name=world_name)
-
-    def check_game_won(self):
-        """
-        Checks if the game has been won.
-        """
-        finish_lane = self.world.finish_lanes.sprites()[0]
-        if self.world.player.y == 0 and self.world.player.x == finish_lane.target_position:
-            self.game_won = True
+        self.world = World(self, world_name=world_name)
 
     def render(self):
         """Renders the whole game."""
