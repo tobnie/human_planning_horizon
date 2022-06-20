@@ -94,7 +94,7 @@ class DirectedLane(Lane, ABC):
     def spawn_entity(self) -> None:
 
         # if gap is complete, spawn next obstacle
-        if self.gap_counter >= self.distance_between_obstacles:
+        if self.gap_counter > self.distance_between_obstacles:
             # skip obstacle if all obstacles with gap have been spawned
             if self.obstacle_counter == self.obstacles_without_gap:
                 self.obstacle_counter = 0

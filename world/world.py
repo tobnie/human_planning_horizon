@@ -73,7 +73,7 @@ class World:
         Updates the current world state by updating all objects in lanes.
         """
         # event handling
-        if game_clock % 4 == 0:
+        if game_clock % 6 == 0:
             event_handler.handle_events(self.game)
             self.player_update()
 

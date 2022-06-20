@@ -54,15 +54,17 @@ class TextDisplayer:
             else:
                 debug_information.append(f"{lane.__class__} ({lane.row})")
                 debug_information.append("Empty")
-        return reversed(debug_information)
+        return debug_information
 
     def debug_information_lanes(self) -> string:
         debug_information = []
         for i, lane in enumerate(self.game.world.lanes):
             debug_information.append("")
             if isinstance(lane, DirectedLane):
-                debug_information.append(f"{lane.__class__} \t row={lane.row} \t len={len(lane)} \t velocity={lane.velocity} \t obst_size={lane.obstacle_size} \t d={lane.distance_between_obstacles}")
+                debug_information.append(
+                    f"{lane.__class__} row={lane.row} len={len(lane)} v={lane.velocity} obst_size={lane.obstacle_size}"
+                    f"d={lane.distance_between_obstacles} gap_skip={lane.obstacles_without_gap}")
             else:
-                debug_information.append(f"{lane.__class__} \t row={lane.row} \t len={len(lane)}")
+                debug_information.append(f"{lane.__class__} row={lane.row} len={len(lane)}")
 
-        return reversed(debug_information)
+        return debug_information
