@@ -27,6 +27,7 @@ class Game:
         self.pause = False
 
         self.game_won = False
+        self.world_name = world_name
 
         # collision counter
         self.vehicle_collision = False
@@ -36,7 +37,7 @@ class Game:
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
 
         if world_name:
-            self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES, world_name=world_name)
+            self.world = World(world_name=world_name)
         else:
             self.world = World(config.N_FIELDS_PER_LANE, config.N_LANES)
         self.screen.fill(colors.BLACK)
@@ -60,10 +61,13 @@ class Game:
             self.world.update()
 
         # check if player is dead and end game
-        if self.world.player.check_status():
-            pass  # TODO
 
-        self.check_game_won()
+        if self.world.player.is_dead:
+            # show screen for restart
+            return False
+
+        if self.check_game_won():
+            return True
 
         # draw objects
         self.render()
@@ -82,7 +86,17 @@ class Game:
             if self.pause:
                 self.run_pause()
             else:
-                self.run_normal()
+                game_won = self.run_normal()
+                if game_won is not None:
+                    if game_won:
+                        # game won
+                        self.start_world(self.world_name)
+                    else:
+                        # game lost
+                        self.start_world(self.world_name)
+
+    def start_world(self, world_name):
+        self.world = World(world_name=world_name)
 
     def check_game_won(self):
         """

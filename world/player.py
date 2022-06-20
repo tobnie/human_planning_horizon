@@ -70,7 +70,6 @@ class Player(DynamicObject):
         new_y = self.y + self.delta_y
 
         # x position
-        print(self.movement_bounds_y)
         if new_x < self.movement_bounds_x[0]:
             new_x = self.movement_bounds_x[0]
         elif new_x > self.movement_bounds_x[1]:
@@ -87,6 +86,9 @@ class Player(DynamicObject):
             new_y = new_y
 
         self.set_position((new_x, new_y))
+
+        # check if dead
+        self.check_status()
 
     def print_information(self) -> None:
         print(f"Player Position (x, y) =  ({self.rect.x}, {self.rect.y})")
