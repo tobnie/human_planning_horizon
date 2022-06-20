@@ -63,6 +63,8 @@ class Game:
         if self.world.player.check_status():
             pass  # TODO
 
+        self.check_game_won()
+
         # draw objects
         self.render()
 
@@ -86,8 +88,8 @@ class Game:
         """
         Checks if the game has been won.
         """
-        # TODO extend to target positions
-        if self.world.player.y == 0:
+        finish_lane = self.world.finish_lanes.sprites()[0]
+        if self.world.player.y == 0 and self.world.player.x == finish_lane.target_position:
             self.game_won = True
 
     def render(self):

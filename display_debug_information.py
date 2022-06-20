@@ -35,6 +35,9 @@ class TextDisplayer:
                              f"Vehicle Collision = {self.game.world.player.check_vehicle_collision()}",
                              f"Water Collision = {self.game.world.player.check_water_collision()}",
                              "DEAD" if self.world.player.is_dead else "ALIVE"]
+        if self.game.game_won:
+            debug_information.append("GAME WON!")
+
         return debug_information
 
     def debug_information_objects(self) -> string:
