@@ -7,7 +7,7 @@ from display_debug_information import TextDisplayer
 import colors
 import config
 import event_handler
-from world.world import World, GameStatus
+from world.world import World, WorldStatus
 
 
 class Game:
@@ -24,7 +24,7 @@ class Game:
         self.running = True
         self.pause = False
 
-        self.game_status = GameStatus.RUNNING
+        self.game_status = WorldStatus.RUNNING
         self.world_name = world_name
 
         # collision counter
@@ -68,10 +68,10 @@ class Game:
             else:
                 self.run_normal()
 
-            if self.game_status == GameStatus.WON:
+            if self.game_status == WorldStatus.WON:
                 # game won
                 self.start_world(self.world_name)
-            if self.game_status == GameStatus.LOST:
+            if self.game_status == WorldStatus.LOST:
                 # game lost
                 self.start_world(self.world_name)
 

@@ -11,7 +11,7 @@ from world.player import Player
 import json_fix
 
 
-class GameStatus(Enum):
+class WorldStatus(Enum):
     RUNNING = 0,
     WON = 1,
     LOST = 2
@@ -90,12 +90,12 @@ class World:
         # check if player is dead and end game
         if self.player.is_dead:
             # show screen for restart
-            return GameStatus.LOST
+            return WorldStatus.LOST
 
         if self.check_game_won():
-            return GameStatus.WON
+            return WorldStatus.WON
 
-        return GameStatus.RUNNING
+        return WorldStatus.RUNNING
 
     def check_game_won(self):
         """
