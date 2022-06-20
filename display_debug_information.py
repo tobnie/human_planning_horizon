@@ -5,6 +5,7 @@ import pygame
 import colors
 import config
 from world.lane import DirectedLane
+from world.world import WorldStatus
 
 
 class TextDisplayer:
@@ -23,6 +24,8 @@ class TextDisplayer:
             self.render_debug_information(self.debug_information_player())
         if self.game.display_debug_information_objects:
             self.render_debug_information(self.debug_information_objects())
+        if self.game.display_debug_information_lanes:
+            self.render_debug_information(self.debug_information_lanes())
 
     def render_debug_information(self, debug_info):
         for i, debug_line in enumerate(debug_info):
@@ -35,7 +38,7 @@ class TextDisplayer:
                              f"Vehicle Collision = {self.game.world.player.check_vehicle_collision()}",
                              f"Water Collision = {self.game.world.player.check_water_collision()}",
                              "DEAD" if self.world.player.is_dead else "ALIVE"]
-        if self.game.game_won:
+        if self.game.world_status == WorldStatus.WON:
             debug_information.append("GAME WON!")
 
         return debug_information
@@ -51,4 +54,15 @@ class TextDisplayer:
             else:
                 debug_information.append(f"{lane.__class__} ({lane.row})")
                 debug_information.append("Empty")
+        return reversed(debug_information)
+
+    def debug_information_lanes(self) -> string:
+        debug_information = []
+        for i, lane in enumerate(self.game.world.lanes):
+            debug_information.append("")
+            if isinstance(lane, DirectedLane):
+                debug_information.append(f"{lane.__class__} \t row={lane.row} \t len={len(lane)} \t velocity={lane.velocity} \t obst_size={lane.obstacle_size} \t d={lane.distance_between_obstacles}")
+            else:
+                debug_information.append(f"{lane.__class__} \t row={lane.row} \t len={len(lane)}")
+
         return reversed(debug_information)

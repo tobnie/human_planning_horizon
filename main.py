@@ -3,5 +3,5 @@ pygame.init()
 
 from game import Game
 
-game = Game('test_world')
+game = Game('random_world')
 game.run()

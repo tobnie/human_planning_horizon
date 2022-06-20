@@ -80,11 +80,11 @@ class World:
         # spawning street
         # TODO outsource to spawn_handler or similar?
         if game_clock % 50 == 0:  # TODO
-            for lane in self.directed_lanes:
+            for lane in self.directed_lanes.sprites():
                 lane.spawn_entity()
 
             # update
-            for lane in self.directed_lanes:
+            for lane in self.directed_lanes.sprites():
                 lane.update()
 
         # check if player is dead and end game
@@ -181,8 +181,13 @@ class World:
                 self.lanes.add(starting_lane)
             # street lane
             elif lane_info['type'] == 'StreetLane':
-                street_lane = StreetLane(self, lane_info['row'], LaneDirection(lane_info['direction']))
+                street_lane = StreetLane(self, lane_info['row'], LaneDirection(lane_info['direction']),
+                                         velocity=lane_info['lane_velocity'],
+                                         distance_between_obstacles=lane_info['distance_between_obstacles'],
+                                         obstacle_size=lane_info['obstacle_size'],
+                                         obstacles_without_gap=lane_info['obstacles_without_gap'])
                 self.street_lanes.add(street_lane)
+                self.directed_lanes.add(street_lane)
                 self.lanes.add(street_lane)
             # finish lane
             elif lane_info['type'] == 'FinishLane':
@@ -191,8 +196,13 @@ class World:
                 self.lanes.add(finish_lane)
             # water lane
             elif lane_info['type'] == 'WaterLane':
-                water_lane = WaterLane(self, lane_info['row'], LaneDirection(lane_info['direction']))
+                water_lane = WaterLane(self, lane_info['row'], LaneDirection(lane_info['direction']),
+                                       velocity=lane_info['lane_velocity'],
+                                       distance_between_obstacles=lane_info['distance_between_obstacles'],
+                                       obstacle_size=lane_info['obstacle_size'],
+                                       obstacles_without_gap=lane_info['obstacles_without_gap'])
                 self.water_lanes.add(water_lane)
+                self.directed_lanes.add(water_lane)
                 self.lanes.add(water_lane)
             # interim lane
             elif lane_info['type'] == 'Lane':

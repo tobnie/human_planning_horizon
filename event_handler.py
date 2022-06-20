@@ -39,6 +39,13 @@ def handle_events(game):
             if event.key == pygame.K_F1:
                 game.display_debug_information_objects = False
                 game.display_debug_information_player = not game.display_debug_information_player
+                game.display_debug_information_lanes = False
             if event.key == pygame.K_F2:
                 game.display_debug_information_player = False
                 game.display_debug_information_objects = not game.display_debug_information_objects
+                game.display_debug_information_lanes = False
+            if event.key == pygame.K_F3:
+                game.display_debug_information_player = False
+                game.display_debug_information_objects = False
+                game.display_debug_information_lanes = not game.display_debug_information_lanes
+

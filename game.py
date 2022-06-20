@@ -1,5 +1,3 @@
-from enum import Enum
-
 import pygame
 
 from display_debug_information import TextDisplayer
@@ -21,10 +19,11 @@ class Game:
         self.game_clock = 0
         self.display_debug_information_player = False
         self.display_debug_information_objects = False
+        self.display_debug_information_lanes = False
         self.running = True
         self.pause = False
 
-        self.game_status = WorldStatus.RUNNING
+        self.world_status = WorldStatus.RUNNING
         self.world_name = world_name
 
         # collision counter
@@ -46,7 +45,7 @@ class Game:
         event_handler.handle_events(self)
 
     def run_normal(self):
-        self.game_status = self.world.update(self.game_clock)  # won = True,
+        self.world_status = self.world.update(self.game_clock)
 
         # draw objects
         self.render()
@@ -68,15 +67,16 @@ class Game:
             else:
                 self.run_normal()
 
-            if self.game_status == WorldStatus.WON:
+            if self.world_status == WorldStatus.WON:
                 # game won
                 self.start_world(self.world_name)
-            if self.game_status == WorldStatus.LOST:
+            if self.world_status == WorldStatus.LOST:
                 # game lost
                 self.start_world(self.world_name)
 
     def start_world(self, world_name):
         self.world = World(self, world_name=world_name)
+        self.text_displayer = TextDisplayer(self)
 
     def render(self):
         """Renders the whole game."""

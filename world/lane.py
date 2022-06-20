@@ -70,7 +70,7 @@ class FinishLane(Lane):
 
 class DirectedLane(Lane, ABC):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, lane_velocity: int = 1,
+    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, velocity: int = 1,
                  distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
         super().__init__(world, row, color)
 
@@ -83,7 +83,7 @@ class DirectedLane(Lane, ABC):
         self.dynamic_object_constructor = None
 
         # lane dynamics
-        self.velocity = lane_velocity
+        self.velocity = velocity
         self.direction = lane_direction
         self.distance_between_obstacles = distance_between_obstacles
         self.obstacle_size = obstacle_size
@@ -94,7 +94,7 @@ class DirectedLane(Lane, ABC):
     def spawn_entity(self) -> None:
 
         # if gap is complete, spawn next obstacle
-        if self.gap_counter >= self.distance_between_obstacles:  # TODO > or >=?
+        if self.gap_counter >= self.distance_between_obstacles:
             # skip obstacle if all obstacles with gap have been spawned
             if self.obstacle_counter == self.obstacles_without_gap:
                 self.obstacle_counter = 0
@@ -127,13 +127,18 @@ class DirectedLane(Lane, ABC):
 
 class StreetLane(DirectedLane):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
-        super().__init__(world, row, lane_direction, colors.BLACK)
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3
+                 ):
+        super().__init__(world, row, lane_direction, colors.BLACK, velocity,
+                         distance_between_obstacles, obstacle_size, obstacles_without_gap)
         self.dynamic_object_constructor = Vehicle
 
 
 class WaterLane(DirectedLane):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT):
-        super().__init__(world, row, lane_direction, colors.BLUE)
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
+        super().__init__(world, row, lane_direction, colors.BLUE, velocity,
+                         distance_between_obstacles, obstacle_size, obstacles_without_gap)
         self.dynamic_object_constructor = LilyPad
