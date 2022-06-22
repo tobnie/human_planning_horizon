@@ -25,6 +25,7 @@ class World:
         # game boundaries
         self.width = width if width is not None else 1
         self.height = height if height is not None else 1
+        self.game_clock = 0
 
         # lanes
         self.lanes = pygame.sprite.Group()
@@ -68,24 +69,25 @@ class World:
         """
         self.player.update()
 
-    def update(self, game_clock):
+    def update(self, ):
         """
         Updates the current world state by updating all objects in lanes.
         """
-        # event handling
-        if game_clock % 6 == 0:
-            event_handler.handle_events(self.game)
-            self.player_update()
 
         # spawning street
         # TODO outsource to spawn_handler or similar?
-        if game_clock % 50 == 0:  # TODO
-            for lane in self.directed_lanes.sprites():
-                lane.spawn_entity()
+        for lane in self.directed_lanes.sprites():
+            lane.spawn_entity()
 
-            # update
-            for lane in self.directed_lanes.sprites():
-                lane.update()
+        # update lanes
+        for lane in self.directed_lanes.sprites():
+            lane.update()
+
+        # event handling
+        event_handler.handle_events(self.game)
+
+        # update player
+        self.player_update()
 
         # check if player is dead and end game
         if self.player.is_dead:

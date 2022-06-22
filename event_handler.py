@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+import config
+
 blocked = False
 
 
@@ -10,6 +12,9 @@ def handle_events(game):
     :returns the delta directions in which the player is moving as (x, y)-tuple. E.g. moving to north is (0, -1),
     standing still is (0, 0) and moving to the bottom left is (-1, 1).
     """
+
+    if game.world.game_clock % config.PLAYER_UPDATE_RATE != 0:
+        return
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

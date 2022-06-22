@@ -62,6 +62,9 @@ class Player(DynamicObject):
         """Updates the object's position by adding the current deltas to the current position.
         The player is constrained by their movement boundaries."""
 
+        if self.world.game_clock % config.PLAYER_UPDATE_RATE != 0:
+            return
+
         self.set_rotated_sprite_img()
 
         new_x = self.x + self.delta_x

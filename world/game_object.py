@@ -17,6 +17,7 @@ class GameObject(pygame.sprite.Sprite, ABC):
         # assign object id
         self.id = id(self)
         self.world = world
+        self.rotatable = True
 
         # sprite image
         if img_path:
@@ -85,9 +86,10 @@ class DynamicObject(GameObject):
         """Updates the object's position by adding the current deltas to the current position.
         The sprite dies if it moves outside of the movement boundaries."""
 
-        self.set_rotated_sprite_img()
+        if self.rotatable:
+            self.set_rotated_sprite_img()
 
-        new_x = self.x + self.delta_x
+        new_x = self.x + abs(self.delta_x) / self.delta_x
         new_y = self.y + self.delta_y
 
         # x position
@@ -97,6 +99,11 @@ class DynamicObject(GameObject):
         # y position
         if new_y < self.movement_bounds_y[0] or new_y > self.movement_bounds_y[1]:
             self.kill()
+
+        # TODO update rect separately for pseudo-continuous display
+        # only update rect coordinates for pseudo-continuous display
+        sign = -1 if self.delta_x < 0 else (1 if self.delta_x > 0 else 0)
+        self.rect.x = self.rect.x + sign / config.OBSTACLE_SPAWN_RATE
 
         self.set_position((new_x, new_y))
 
@@ -109,7 +116,7 @@ class Vehicle(DynamicObject):
                  width: int = 1, height: int = 1,
                  delta_x: int = 0,
                  delta_y: int = 0):
-        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, "none.png"), delta_x,
+        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"), delta_x,
                          delta_y)
 
 
@@ -121,16 +128,22 @@ class LilyPad(DynamicObject):
                  width: int = 1, height: int = 1,
                  delta_x: int = 0,
                  delta_y: int = 0):
-        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, "none.png"), delta_x,
+        if width == 1:
+            img_file = config.LILYPAD_FILE
+        else:
+            img_file = config.LOG_FILE
+        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, img_file), delta_x,
                          delta_y)
+        self.rotatable = False
 
     def update(self) -> None:
         """Calls the super method as usual but also checks if the player is on the lilypad and if so,
         the player's position is also updated accordingly"""
+
         # also update player position if on lilypad
         player = self.world.player
         if player.rect.colliderect(self.rect):
-            player.set_position((player.x + self.delta_x, player.y))
+            player.set_position((player.x + abs(self.delta_x) / self.delta_x, player.y))
 
         # super call needs to be last, because otherwise the new position of the lilypad is already used
         super().update()

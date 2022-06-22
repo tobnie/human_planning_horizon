@@ -16,7 +16,7 @@ class Game:
         """
         # game clock
         self.clock = pygame.time.Clock()
-        self.game_clock = 0
+
         self.display_debug_information_player = False
         self.display_debug_information_objects = False
         self.display_debug_information_lanes = False
@@ -45,14 +45,14 @@ class Game:
         event_handler.handle_events(self)
 
     def run_normal(self):
-        self.world_status = self.world.update(self.game_clock)
+        self.world_status = self.world.update()
 
         # draw objects
         self.render()
 
         # tick game
         self.clock.tick(config.FPS)
-        self.game_clock += 1
+        self.world.game_clock += 1
 
     def run(self):
         """

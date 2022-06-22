@@ -1,12 +1,8 @@
-import random
 from abc import ABC
 from enum import Enum
 
-import numpy as np
-
 import pygame.sprite
 
-import collision_handler
 import colors
 import config
 from world.game_object import Vehicle, LilyPad, DynamicObject
@@ -34,13 +30,11 @@ class Lane(pygame.sprite.Sprite):
         self.row = row  # row number in the game (counting from the top)
         self.rect = pygame.Rect(0, self.row * config.FIELD_HEIGHT, config.DISPLAY_WIDTH_PX, config.FIELD_HEIGHT)
         self.color = color
-        self.fields = [Field(i, self.row) for i in range(config.N_FIELDS_PER_LANE)]
+        self.fields = [Field(i, self.row, color, config.SPRITES_DIR + 'grass.png') for i in range(config.N_FIELDS_PER_LANE)]
 
     def draw_lane(self, screen):
         for field in self.fields:
-            pygame.draw.rect(screen, self.color, field.rect)
-            for i in range(4):
-                pygame.draw.rect(screen, (0, 0, 0), (field.rect.x - i, field.rect.y - i, field.rect.width, field.rect.height), 1)
+            field.draw(screen)
 
     def __len__(self):
         return len(self.fields)
@@ -63,9 +57,15 @@ class FinishLane(Lane):
         super().draw_lane(screen)
         # draw target position
         target_field = self.fields[self.target_position]
-        for i in range(4):
-            pygame.draw.rect(screen, colors.YELLOW,
-                             (target_field.rect.x - i, target_field.rect.y - i, target_field.rect.width, target_field.rect.height), 1)
+
+        # draw star on target field
+        img_path = config.SPRITES_DIR + 'star.jpg'
+
+        img = pygame.image.load(img_path)
+        img.set_colorkey(colors.WHITE)
+        img.convert_alpha()
+        img = pygame.transform.scale(img, [config.FIELD_WIDTH, config.FIELD_HEIGHT])
+        screen.blit(img, (target_field.rect.x, target_field.rect.y))
 
 
 class DirectedLane(Lane, ABC):
@@ -93,6 +93,11 @@ class DirectedLane(Lane, ABC):
 
     def spawn_entity(self) -> None:
 
+        if self.world.game_clock % config.OBSTACLE_SPAWN_RATE != 0:
+            return
+
+        # TODO approach over self.non_player_sprites?
+
         # if gap is complete, spawn next obstacle
         if self.gap_counter > self.distance_between_obstacles:
             # skip obstacle if all obstacles with gap have been spawned
@@ -118,6 +123,10 @@ class DirectedLane(Lane, ABC):
             self.gap_counter += 1
 
     def update(self) -> None:
+
+        if self.world.game_clock % (config.OBSTACLE_SPAWN_RATE // self.velocity) != 0:
+            return
+
         self.non_player_sprites.update()
 
     def draw_lane(self, screen) -> None:
@@ -133,6 +142,7 @@ class StreetLane(DirectedLane):
         super().__init__(world, row, lane_direction, colors.BLACK, velocity,
                          distance_between_obstacles, obstacle_size, obstacles_without_gap)
         self.dynamic_object_constructor = Vehicle
+        self.fields = [Field(i, self.row, self.color, None) for i in range(config.N_FIELDS_PER_LANE)]
 
 
 class WaterLane(DirectedLane):
@@ -142,3 +152,4 @@ class WaterLane(DirectedLane):
         super().__init__(world, row, lane_direction, colors.BLUE, velocity,
                          distance_between_obstacles, obstacle_size, obstacles_without_gap)
         self.dynamic_object_constructor = LilyPad
+        self.fields = [Field(i, self.row, self.color, config.SPRITES_DIR + 'water.png') for i in range(config.N_FIELDS_PER_LANE)]
