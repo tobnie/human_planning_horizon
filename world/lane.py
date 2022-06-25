@@ -91,6 +91,21 @@ class DirectedLane(Lane, ABC):
         self.gap_counter = 0
         self.obstacle_counter = 0
 
+    def calc_distance_between_last_two_sprites(self) -> int:
+        """
+        Calculates distance between last two sprites in the lane.
+        :return: distance in fields
+        """
+        if len(self.non_player_sprites) < 2:
+            return 0
+        else:
+            sprite1 = self.non_player_sprites.sprites()[-1]
+            sprite2 = self.non_player_sprites.sprites()[-2]
+            if isinstance(sprite1, DynamicObject) and isinstance(sprite2, DynamicObject):
+                return abs(sprite1.x - (sprite2.x + sprite2.width))
+            else:
+                raise Exception('Only DynamicObjects are allowed in DirectedLane')
+
     def spawn_entity(self) -> None:
 
         # TODO approach over self.non_player_sprites?
