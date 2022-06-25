@@ -23,6 +23,7 @@ PLAYER_UPDATE_RATE = 100
 
 # game dynamics
 FPS = 60  # frame rate
+LEVEL_TIME = 60_000  # in ms
 
 # directory
 SPRITES_DIR = "./sprites/"

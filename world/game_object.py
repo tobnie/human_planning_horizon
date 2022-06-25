@@ -57,18 +57,33 @@ class StaticObject(GameObject):
         super().__init__(world, x, y, width, height, img_path=img_path)
 
 
-class DynamicObject(GameObject):
+class DynamicObject(GameObject, ABC):
     """A class for dynamic game objects, which are moving with a specified delta in either x- or y-direction."""
 
-    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0, width: int = 1, height: int = 1,
+    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0, width: int = 1, height: int = 1,
                  img_path: string = None,
                  movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
                  movement_bounds_y: (int, int) = (-1, config.N_LANES)):
-        super().__init__(world, velocity, int(x), int(y), width, height, img_path=img_path)
+        super().__init__(world, x, y, velocity, width, height, img_path=img_path)
 
         # dynamics
         self.movement_bounds_x = movement_bounds_x
         self.movement_bounds_y = movement_bounds_y
+
+
+class Obstacle(DynamicObject):
+
+    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0, width: int = 1, height: int = 1,
+                 img_path: string = None,
+                 movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
+                 movement_bounds_y: (int, int) = (-1, config.N_LANES)):
+        super().__init__(world, velocity, x, y, width, height, img_path=img_path, movement_bounds_x=movement_bounds_x,
+                         movement_bounds_y=movement_bounds_y)
+
+        if self.velocity == 0:
+            raise ValueError("Velocity of an obstacle must not be 0.")
+
+        self.delta_x = self.velocity // abs(self.velocity)
 
         # counts the calls of the update method and only updates the sprite if the update count is a multiple of the velocity
         self.update_cnt = 0
@@ -94,7 +109,7 @@ class DynamicObject(GameObject):
         if self.rotatable:
             self.set_rotated_sprite_img()
 
-        new_x = self.x + self.velocity
+        new_x = self.x + self.delta_x
 
         # x position
         if new_x + self.width < self.movement_bounds_x[0] or new_x > self.movement_bounds_x[1]:
@@ -104,38 +119,39 @@ class DynamicObject(GameObject):
         self.update_cnt = 0
 
 
-class Vehicle(DynamicObject):
+class Vehicle(Obstacle):
     """Vehicles are moving on the streets with specific properties given by the lane they are on (passed to the
     vehicle constructor upon spawning in the lane)"""
 
-    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0,
-                 width: int = 1, height: int = 1,):
-        super().__init__(world, velocity, x, y, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"))
+    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0,
+                 width: int = 1, height: int = 1):
+        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"))
 
 
-class LilyPad(DynamicObject):
+class LilyPad(Obstacle):
     """Lilypads are moving on water with specific properties given by the lane they are on (passed to the
         lilypad constructor upon spawning in the lane)"""
 
-    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0,
-                 width: int = 1, height: int = 1,
-                 delta_x: int = 0,
-                 delta_y: int = 0):
+    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0,
+                 width: int = 1, height: int = 1):
         if width == 1:
             img_file = config.LILYPAD_FILE
         else:
             img_file = config.LOG_FILE
-        super().__init__(world, velocity, x, y, width, height, os.path.join(config.SPRITES_DIR, img_file))
+        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, img_file))
         self.rotatable = False
 
     def update(self) -> None:
         """Calls the super method as usual but also checks if the player is on the lilypad and if so,
         the player's position is also updated accordingly"""
 
+        # super call needs to be last, because otherwise the new position of the lilypad is already used TODO really?
+        old_x = self.x
+        super().update()
+
         # also update player position if on lilypad
         player = self.world.player
         if player.rect.colliderect(self.rect):
-            player.set_position((player.x + abs(self.delta_x) / self.delta_x, player.y))
-
-        # super call needs to be last, because otherwise the new position of the lilypad is already used
-        super().update()
+            # only if lilypad moved in this step
+            if old_x != self.x:
+                player.set_position((player.x + self.delta_x, player.y))

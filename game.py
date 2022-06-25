@@ -1,5 +1,4 @@
-import sys
-
+import numpy as np
 import pygame
 
 from display_debug_information import TextDisplayer
@@ -9,23 +8,23 @@ import config
 import event_handler
 from world.world import World, WorldStatus
 
-RENDER_EVENT = pygame.USEREVENT + 0
-INPUT_EVENT = pygame.USEREVENT + 1
-UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 2
-UPDATE_PLAYER_EVENT = pygame.USEREVENT + 3
-SPAWN_EVENT = pygame.USEREVENT + 4
+INPUT_EVENT = pygame.USEREVENT + 0
+UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 1
+UPDATE_PLAYER_EVENT = pygame.USEREVENT + 2
+SPAWN_EVENT = pygame.USEREVENT + 3
 
 
 class Game:
 
-    def __init__(self, world_name: str = None):
+    def __init__(self, world_name: str = None, game_time=config.LEVEL_TIME):
         """
         Sets up the game by initializing PyGame.
         """
         # game clock
         self.clock = pygame.time.Clock()
+        self.game_time = game_time
 
-        self.display_debug_information_player = False
+        self.display_debug_information_player = True
         self.display_debug_information_objects = False
         self.display_debug_information_lanes = False
         self.running = True
@@ -44,11 +43,10 @@ class Game:
         if world_name:
             self.world = World(self, world_name=world_name)
         else:
-            self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES)
+            self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES, )
 
         self.screen.fill(colors.BLACK)
 
-        pygame.time.set_timer(RENDER_EVENT, config.RENDER_RATE)
         pygame.time.set_timer(UPDATE_OBSTACLES_EVENT, config.OBSTACLE_UPDATE_RATE)
         pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_RATE)
         pygame.time.set_timer(SPAWN_EVENT, config.SPAWN_RATE)
@@ -68,12 +66,10 @@ class Game:
                 self.world.spawn()
             elif e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
-            elif e.type == RENDER_EVENT:
-                pass
 
         self.world.update_player()
         self.render()
-        self.clock.tick(config.FPS)
+        self.game_time -= self.clock.tick_busy_loop(config.FPS)
 
     def run(self):
         """
@@ -99,10 +95,20 @@ class Game:
         self.world = World(self, world_name=world_name)
         self.text_displayer = TextDisplayer(self)
 
+    def draw_timer(self):
+        """
+        Draws the remaining time as a decreasing circle.
+        """
+        ratio_time_left = self.game_time / config.LEVEL_TIME
+        print(self.world.player.x, self.world.player.y)
+        pygame.draw.arc(self.screen, colors.RED, (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
+                        np.deg2rad(360 * ratio_time_left), 15)
+
     def render(self):
         """Renders the whole game."""
         self.world.draw(self.screen)
 
+        self.draw_timer()
         self.text_displayer.display_debug_information()
 
         pygame.display.flip()

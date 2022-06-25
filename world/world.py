@@ -24,7 +24,7 @@ class World:
         # game boundaries
         self.width = width if width is not None else 1
         self.height = height if height is not None else 1
-        self.game_clock = 0
+
 
         # lanes
         self.lanes = pygame.sprite.Group()
@@ -81,6 +81,10 @@ class World:
        """
         # update player
         self.player.update()
+
+    def update_time(self, time):
+        """ Updates the game clock. """
+        self.game_clock = time - self.start_time
 
     def check_game_state(self):
         # check if player is dead and end game

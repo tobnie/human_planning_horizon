@@ -103,12 +103,13 @@ class DirectedLane(Lane, ABC):
                 self.gap_counter = 0
             else:
                 if self.direction == LaneDirection.RIGHT:
-                    spawn_x = -self.obstacle_size
+                    obstacle_velocity = self.velocity
+                    obstacle_x = -self.obstacle_size
                 else:
-                    self.velocity = -self.velocity
-                    spawn_x = len(self)
+                    obstacle_velocity = -self.velocity
+                    obstacle_x = len(self)
 
-                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, self.velocity,  spawn_x, self.row,
+                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, obstacle_x, self.row, obstacle_velocity,
                                                                             self.obstacle_size, 1)
 
                 self.non_player_sprites.add(new_entity)
