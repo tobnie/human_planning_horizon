@@ -93,9 +93,6 @@ class DirectedLane(Lane, ABC):
 
     def spawn_entity(self) -> None:
 
-        if self.world.game_clock % config.OBSTACLE_SPAWN_RATE != 0:
-            return
-
         # TODO approach over self.non_player_sprites?
 
         # if gap is complete, spawn next obstacle
@@ -106,15 +103,13 @@ class DirectedLane(Lane, ABC):
                 self.gap_counter = 0
             else:
                 if self.direction == LaneDirection.RIGHT:
-                    obst_delta_x = self.velocity
-                    spawn_x = -1
+                    spawn_x = -self.obstacle_size
                 else:
-                    obst_delta_x = -self.velocity
+                    self.velocity = -self.velocity
                     spawn_x = len(self)
 
-                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, spawn_x, self.row,
-                                                                            self.obstacle_size, 1,
-                                                                            delta_x=obst_delta_x)
+                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, self.velocity,  spawn_x, self.row,
+                                                                            self.obstacle_size, 1)
 
                 self.non_player_sprites.add(new_entity)
                 self.gap_counter = 0
@@ -123,10 +118,6 @@ class DirectedLane(Lane, ABC):
             self.gap_counter += 1
 
     def update(self) -> None:
-
-        if self.world.game_clock % (config.OBSTACLE_SPAWN_RATE // self.velocity) != 0:
-            return
-
         self.non_player_sprites.update()
 
     def draw_lane(self, screen) -> None:

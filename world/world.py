@@ -5,7 +5,6 @@ import pygame
 
 import colors
 import config
-import event_handler
 from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
 from world.player import Player
 import json_fix
@@ -63,49 +62,44 @@ class World:
         # draw player
         self.player_list.draw(screen)
 
-    def player_update(self):
-        """
-        Updates the player.
-        """
-        self.player.update()
+    def spawn(self):
+        for lane in self.directed_lanes.sprites():
+            if isinstance(lane, DirectedLane):
+                lane.spawn_entity()
 
-    def update(self, ):
+    def update(self):
         """
         Updates the current world state by updating all objects in lanes.
         """
-
-        # spawning street
-        # TODO outsource to spawn_handler or similar?
-        for lane in self.directed_lanes.sprites():
-            lane.spawn_entity()
-
         # update lanes
         for lane in self.directed_lanes.sprites():
             lane.update()
 
-        # event handling
-        event_handler.handle_events(self.game)
-
+    def update_player(self):
+        """
+       Updates the player.
+       """
         # update player
-        self.player_update()
+        self.player.update()
 
+    def check_game_state(self):
         # check if player is dead and end game
         if self.player.is_dead:
             # show screen for restart
             return WorldStatus.LOST
 
-        if self.check_game_won():
+        if self._check_game_won():
             return WorldStatus.WON
 
         return WorldStatus.RUNNING
 
-    def check_game_won(self):
+    def _check_game_won(self):
         """
         Checks if the game has been won.
         """
         finish_lane = self.finish_lanes.sprites()[0]
         if self.player.y == 0 and self.player.x == finish_lane.target_position:
-            self.game_won = True
+            self.game.world_status = WorldStatus.WON
 
     def draw_lanes(self, screen) -> None:
         for lane in self.lanes.sprites():

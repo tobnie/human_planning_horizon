@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 from display_debug_information import TextDisplayer
@@ -6,6 +8,12 @@ import colors
 import config
 import event_handler
 from world.world import World, WorldStatus
+
+RENDER_EVENT = pygame.USEREVENT + 0
+INPUT_EVENT = pygame.USEREVENT + 1
+UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 2
+UPDATE_PLAYER_EVENT = pygame.USEREVENT + 3
+SPAWN_EVENT = pygame.USEREVENT + 4
 
 
 class Game:
@@ -37,28 +45,40 @@ class Game:
             self.world = World(self, world_name=world_name)
         else:
             self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES)
+
         self.screen.fill(colors.BLACK)
 
+        pygame.time.set_timer(RENDER_EVENT, config.RENDER_RATE)
+        pygame.time.set_timer(UPDATE_OBSTACLES_EVENT, config.OBSTACLE_UPDATE_RATE)
+        pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_RATE)
+        pygame.time.set_timer(SPAWN_EVENT, config.SPAWN_RATE)
+
+        self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
 
     def run_pause(self):
-        event_handler.handle_events(self)
+        self.event_handler.handle_input_event()
 
     def run_normal(self):
-        self.world_status = self.world.update()
 
-        # draw objects
+        for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
+            if e.type == UPDATE_OBSTACLES_EVENT:
+                self.world.update()
+            elif e.type == SPAWN_EVENT:
+                self.world.spawn()
+            elif e.type == UPDATE_PLAYER_EVENT:
+                self.event_handler.handle_input_event()
+            elif e.type == RENDER_EVENT:
+                pass
+
+        self.world.update_player()
         self.render()
-
-        # tick game
         self.clock.tick(config.FPS)
-        self.world.game_clock += 1
 
     def run(self):
         """
         Main Loop
         """
-
         while self.running:
 
             # run next game step
@@ -67,6 +87,7 @@ class Game:
             else:
                 self.run_normal()
 
+            self.world.check_game_state()
             if self.world_status == WorldStatus.WON:
                 # game won
                 self.start_world(self.world_name)

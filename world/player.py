@@ -1,6 +1,9 @@
 import os
 
+import pygame
+
 import collision_handler
+import colors
 import config
 from world.game_object import DynamicObject
 from world.lane import WaterLane, DirectedLane
@@ -15,6 +18,8 @@ class Player(DynamicObject):
         super().__init__(world, start_position[0], start_position[1], 1, 1,
                          movement_bounds_x=(0, config.N_FIELDS_PER_LANE-1), movement_bounds_y=(0, config.N_LANES-1),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
+        self.delta_x = 0
+        self.delta_y = 0
         self.is_dead = False
 
     def check_player_on_lilypad(self):
@@ -62,13 +67,14 @@ class Player(DynamicObject):
         """Updates the object's position by adding the current deltas to the current position.
         The player is constrained by their movement boundaries."""
 
-        if self.world.game_clock % config.PLAYER_UPDATE_RATE != 0:
-            return
-
         self.set_rotated_sprite_img()
 
         new_x = self.x + self.delta_x
         new_y = self.y + self.delta_y
+
+        # reset delta_x and delta_y
+        self.delta_x = 0
+        self.delta_y = 0
 
         # x position
         if new_x < self.movement_bounds_x[0]:
@@ -90,6 +96,20 @@ class Player(DynamicObject):
 
         # check if dead
         self.check_status()
+
+    def set_rotated_sprite_img(self):
+        """Sets the sprite image for the respective current direction of movement."""
+        if self.delta_x > 0:
+            self.image = pygame.transform.rotate(self.base_img, 270)
+        if self.delta_y > 0:
+            self.image = pygame.transform.rotate(self.base_img, 180)
+        if self.delta_x < 0:
+            self.image = pygame.transform.rotate(self.base_img, 90)
+        if self.delta_y < 0:
+            self.image = pygame.transform.rotate(self.base_img, 0)
+
+        self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
+        self.image.set_colorkey(colors.WHITE)
 
     def print_information(self) -> None:
         print(f"Player Position (x, y) =  ({self.rect.x}, {self.rect.y})")

@@ -1,3 +1,4 @@
+import math
 import os
 import string
 from abc import ABC
@@ -11,13 +12,17 @@ import config
 class GameObject(pygame.sprite.Sprite, ABC):
     """An abstract class for game objects"""
 
-    def __init__(self, world, x: int = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
+    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
         super().__init__()
 
         # assign object id
         self.id = id(self)
         self.world = world
+        self.velocity = velocity
         self.rotatable = True
+
+        self.width = width
+        self.height = height
 
         # sprite image
         if img_path:
@@ -55,29 +60,25 @@ class StaticObject(GameObject):
 class DynamicObject(GameObject):
     """A class for dynamic game objects, which are moving with a specified delta in either x- or y-direction."""
 
-    def __init__(self, world, x: int = 0, y: int = 0, width: int = 1, height: int = 1,
-                 img_path: string = None, delta_x: int = 0,
-                 delta_y: int = 0,
+    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0, width: int = 1, height: int = 1,
+                 img_path: string = None,
                  movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
                  movement_bounds_y: (int, int) = (-1, config.N_LANES)):
-        super().__init__(world, x, y, width, height, img_path=img_path)
+        super().__init__(world, velocity, int(x), int(y), width, height, img_path=img_path)
 
         # dynamics
         self.movement_bounds_x = movement_bounds_x
         self.movement_bounds_y = movement_bounds_y
-        self.delta_x: int = delta_x
-        self.delta_y: int = delta_y
+
+        # counts the calls of the update method and only updates the sprite if the update count is a multiple of the velocity
+        self.update_cnt = 0
 
     def set_rotated_sprite_img(self):
         """Sets the sprite image for the respective current direction of movement."""
-        if self.delta_x > 0:
+        if self.velocity > 0:
             self.image = pygame.transform.rotate(self.base_img, 270)
-        if self.delta_y > 0:
-            self.image = pygame.transform.rotate(self.base_img, 180)
-        if self.delta_x < 0:
+        if self.velocity < 0:
             self.image = pygame.transform.rotate(self.base_img, 90)
-        if self.delta_y < 0:
-            self.image = pygame.transform.rotate(self.base_img, 0)
 
         self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
         self.image.set_colorkey(colors.WHITE)
@@ -86,45 +87,37 @@ class DynamicObject(GameObject):
         """Updates the object's position by adding the current deltas to the current position.
         The sprite dies if it moves outside of the movement boundaries."""
 
+        if self.update_cnt != self.velocity:
+            self.update_cnt += 1
+            return
+
         if self.rotatable:
             self.set_rotated_sprite_img()
 
-        new_x = self.x + abs(self.delta_x) / self.delta_x
-        new_y = self.y + self.delta_y
+        new_x = self.x + self.velocity
 
         # x position
-        if new_x < self.movement_bounds_x[0] or new_x > self.movement_bounds_x[1]:
+        if new_x + self.width < self.movement_bounds_x[0] or new_x > self.movement_bounds_x[1]:
             self.kill()
 
-        # y position
-        if new_y < self.movement_bounds_y[0] or new_y > self.movement_bounds_y[1]:
-            self.kill()
-
-        # TODO update rect separately for pseudo-continuous display
-        # only update rect coordinates for pseudo-continuous display
-        sign = -1 if self.delta_x < 0 else (1 if self.delta_x > 0 else 0)
-        self.rect.x = self.rect.x + sign / config.OBSTACLE_SPAWN_RATE
-
-        self.set_position((new_x, new_y))
+        self.set_position((new_x, self.y))
+        self.update_cnt = 0
 
 
 class Vehicle(DynamicObject):
     """Vehicles are moving on the streets with specific properties given by the lane they are on (passed to the
     vehicle constructor upon spawning in the lane)"""
 
-    def __init__(self, world, x: int = 0, y: int = 0,
-                 width: int = 1, height: int = 1,
-                 delta_x: int = 0,
-                 delta_y: int = 0):
-        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"), delta_x,
-                         delta_y)
+    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0,
+                 width: int = 1, height: int = 1,):
+        super().__init__(world, velocity, x, y, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"))
 
 
 class LilyPad(DynamicObject):
     """Lilypads are moving on water with specific properties given by the lane they are on (passed to the
         lilypad constructor upon spawning in the lane)"""
 
-    def __init__(self, world, x: int = 0, y: int = 0,
+    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0,
                  width: int = 1, height: int = 1,
                  delta_x: int = 0,
                  delta_y: int = 0):
@@ -132,8 +125,7 @@ class LilyPad(DynamicObject):
             img_file = config.LILYPAD_FILE
         else:
             img_file = config.LOG_FILE
-        super().__init__(world, x, y, width, height, os.path.join(config.SPRITES_DIR, img_file), delta_x,
-                         delta_y)
+        super().__init__(world, velocity, x, y, width, height, os.path.join(config.SPRITES_DIR, img_file))
         self.rotatable = False
 
     def update(self) -> None:
