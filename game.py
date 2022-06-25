@@ -90,20 +90,29 @@ class Game:
             if self.world_status == WorldStatus.WON:
                 # game won
                 self.start_world(self.world_name)
+                # self.running = False
             if self.world_status == WorldStatus.LOST:
                 # game lost
                 self.start_world(self.world_name)
+                # self.running = False
 
     def start_world(self, world_name):
         self.world = World(self, world_name=world_name)
         self.text_displayer = TextDisplayer(self)
+
+    def check_timeout(self):
+        """
+        Checks if the game is over.
+        """
+        if self.game_time <= 0:
+            self.world_status = WorldStatus.TIMED_OUT
+            # self.running = False
 
     def draw_timer(self):
         """
         Draws the remaining time as a decreasing circle.
         """
         ratio_time_left = self.game_time / config.LEVEL_TIME
-        print(self.world.player.x, self.world.player.y)
         pygame.draw.arc(self.screen, colors.RED,
                         (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
                         np.deg2rad(360 * ratio_time_left), 15)

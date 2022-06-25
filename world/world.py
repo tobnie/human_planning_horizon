@@ -13,7 +13,8 @@ import json_fix
 class WorldStatus(Enum):
     RUNNING = 0,
     WON = 1,
-    LOST = 2
+    LOST = 2,
+    TIMED_OUT = 3
 
 
 class World:
