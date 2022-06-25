@@ -1,6 +1,7 @@
 from abc import ABC
 from enum import Enum
 
+import numpy as np
 import pygame.sprite
 
 import colors
@@ -88,35 +89,37 @@ class DirectedLane(Lane, ABC):
         self.distance_between_obstacles = distance_between_obstacles
         self.obstacle_size = obstacle_size
         self.obstacles_without_gap = obstacles_without_gap
-        self.gap_counter = 0
+        self.currently_in_spawn_gap = False
         self.obstacle_counter = 0
 
-    def calc_distance_between_last_two_sprites(self) -> int:
+        # counts the calls of the update method and only updates the sprites if the update count is a multiple of the velocity
+        self.update_cnt = 0
+
+    def calc_distance_of_new_to_last_sprite(self) -> int:
         """
-        Calculates distance between last two sprites in the lane.
+        Calculates distance to the last sprite in the lane if a new sprite was spawned now.
         :return: distance in fields
         """
-        if len(self.non_player_sprites) < 2:
-            return 0
+        if len(self.non_player_sprites) == 0:
+            return np.inf
         else:
-            sprite1 = self.non_player_sprites.sprites()[-1]
-            sprite2 = self.non_player_sprites.sprites()[-2]
-            if isinstance(sprite1, DynamicObject) and isinstance(sprite2, DynamicObject):
-                return abs(sprite1.x - (sprite2.x + sprite2.width))
+            if self.direction == LaneDirection.LEFT:
+                return len(self) - self.non_player_sprites.sprites()[-1].x
             else:
-                raise Exception('Only DynamicObjects are allowed in DirectedLane')
+                return self.non_player_sprites.sprites()[-1].x
 
     def spawn_entity(self) -> None:
+        # TODO fix that spawns stop if gap_skip is set once
+        # if currently in spawn gap, do not spawn new sprite and increase threshold for next spawn
+        threshold = self.distance_between_obstacles if not self.currently_in_spawn_gap else 2 * self.distance_between_obstacles + self.obstacle_size
 
-        # TODO approach over self.non_player_sprites?
-
-        # if gap is complete, spawn next obstacle
-        if self.gap_counter > self.distance_between_obstacles:
-            # skip obstacle if all obstacles with gap have been spawned
+        # if distance to last sprite is smaller than threshold, do not spawn new sprite
+        if self.calc_distance_of_new_to_last_sprite() >= threshold:
+            # skip obstacle if spawn gap is reached
             if self.obstacle_counter == self.obstacles_without_gap:
-                self.obstacle_counter = 0
-                self.gap_counter = 0
+                self.currently_in_spawn_gap = True
             else:
+                # spawn obstacle
                 if self.direction == LaneDirection.RIGHT:
                     obstacle_velocity = self.velocity
                     obstacle_x = -self.obstacle_size
@@ -128,13 +131,21 @@ class DirectedLane(Lane, ABC):
                                                                             self.obstacle_size, 1)
 
                 self.non_player_sprites.add(new_entity)
-                self.gap_counter = 0
-                self.obstacle_counter += 1
-        else:
-            self.gap_counter += 1
+                if not self.currently_in_spawn_gap:
+                    self.obstacle_counter += 1
+                else:
+                    self.currently_in_spawn_gap = False
+                    self.obstacle_counter = 0
 
     def update(self) -> None:
+
+        if self.update_cnt != self.velocity:
+            self.update_cnt += 1
+            return
+
         self.non_player_sprites.update()
+
+        self.update_cnt = 0
 
     def draw_lane(self, screen) -> None:
         super().draw_lane(screen)

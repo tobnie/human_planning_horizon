@@ -85,9 +85,6 @@ class Obstacle(DynamicObject):
 
         self.delta_x = self.velocity // abs(self.velocity)
 
-        # counts the calls of the update method and only updates the sprite if the update count is a multiple of the velocity
-        self.update_cnt = 0
-
     def set_rotated_sprite_img(self):
         """Sets the sprite image for the respective current direction of movement."""
         if self.velocity > 0:
@@ -102,10 +99,6 @@ class Obstacle(DynamicObject):
         """Updates the object's position by adding the current deltas to the current position.
         The sprite dies if it moves outside of the movement boundaries."""
 
-        if self.update_cnt != self.velocity:
-            self.update_cnt += 1
-            return
-
         if self.rotatable:
             self.set_rotated_sprite_img()
 
@@ -116,7 +109,6 @@ class Obstacle(DynamicObject):
             self.kill()
 
         self.set_position((new_x, self.y))
-        self.update_cnt = 0
 
 
 class Vehicle(Obstacle):

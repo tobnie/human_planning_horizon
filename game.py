@@ -39,6 +39,7 @@ class Game:
         # collision counter
         self.vehicle_collision = False
         self.water_collision = False
+        self.spawn_counter = 1
 
         # set screen information
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
@@ -65,8 +66,12 @@ class Game:
         for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
             if e.type == UPDATE_OBSTACLES_EVENT:
                 self.world.update()
-            elif e.type == SPAWN_EVENT:
-                self.world.spawn()
+                if self.spawn_counter == config.SPAWN_RATE:
+                    self.world.spawn()
+                    self.spawn_counter = 1
+                else:
+                    self.spawn_counter += 1
+
             elif e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
 
