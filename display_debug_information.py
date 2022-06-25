@@ -62,8 +62,8 @@ class TextDisplayer:
             debug_information.append("")
             if isinstance(lane, DirectedLane):
                 debug_information.append(
-                    f"{lane.__class__} row={lane.row} len={len(lane)} v={lane.velocity} obst_size={lane.obstacle_size}"
-                    f"d={lane.distance_between_obstacles} gap_skip={lane.obstacles_without_gap}")
+                    f"{lane.__class__} direction={lane.direction.name} row={lane.row} len={len(lane)} v={lane.velocity} obst_size={lane.obstacle_size}"
+                    f" d={lane.distance_between_obstacles} gap_skip={lane.obstacles_without_gap}")
             else:
                 debug_information.append(f"{lane.__class__} row={lane.row} len={len(lane)}")
 
