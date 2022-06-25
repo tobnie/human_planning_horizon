@@ -24,6 +24,9 @@ class Game:
         self.clock = pygame.time.Clock()
         self.game_time = game_time
 
+        # audio cue
+        self.audio_cue_played = False
+
         self.display_debug_information_player = True
         self.display_debug_information_objects = False
         self.display_debug_information_lanes = False
@@ -101,8 +104,15 @@ class Game:
         """
         ratio_time_left = self.game_time / config.LEVEL_TIME
         print(self.world.player.x, self.world.player.y)
-        pygame.draw.arc(self.screen, colors.RED, (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
+        pygame.draw.arc(self.screen, colors.RED,
+                        (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
                         np.deg2rad(360 * ratio_time_left), 15)
+
+        if self.game_time < config.LEVEL_TIME_AUDIO_CUE and not self.audio_cue_played:
+            self.audio_cue_played = True
+            pygame.mixer.init()
+            pygame.mixer.music.load(config.FROG_SOUND_FILEPATH)
+            pygame.mixer.music.play()
 
     def render(self):
         """Renders the whole game."""

@@ -24,10 +24,12 @@ PLAYER_UPDATE_RATE = 100
 # game dynamics
 FPS = 60  # frame rate
 LEVEL_TIME = 60_000  # in ms
+LEVEL_TIME_AUDIO_CUE = 10_000  # in ms
 
 # directory
 SPRITES_DIR = "./sprites/"
 LEVELS_DIR = "./levels/"
+FROG_SOUND_FILEPATH = "./sounds/frog.mp3"
 
 # sprite files
 LILYPAD_FILE = 'lilypad.jpg'
