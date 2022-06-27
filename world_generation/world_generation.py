@@ -1,7 +1,7 @@
 import numpy as np
 import pygame
 
-from world_generation.generation_config import GameDifficulty, ParameterDistributions, GameParameter
+from generation_config import GameDifficulty, ParameterDistributions, GameParameter
 
 pygame.init()
 
@@ -25,8 +25,9 @@ class WorldGenerator:
         """
         Draws a random value for the given game parameter
         """
+        test = ParameterDistributions[parameter]
         parameter_distribution = ParameterDistributions[parameter][self.difficulty]
-        values, probs = parameter_distribution.values, parameter_distribution.probs
+        values, probs = parameter_distribution.values, parameter_distribution.probabilities
         return int(np.random.choice(values, p=probs))
 
     def _generate_starting_lane(self, row):
@@ -78,6 +79,13 @@ class WorldGenerator:
                      'obstacles_without_gap': self._draw(GameParameter.LilyPadSpawnGap)}
 
         return lane_dict
+
+    def generate_and_save_world(self, difficulty: GameDifficulty, world_name: str):
+        """
+        Generates a world and saves it to a file.
+        """
+        world_dict = self.generate_world(difficulty)
+        world_generation_utils.save_world_dict(world_dict, world_name, path=self.save_directory)
 
     def generate_world(self, difficulty: GameDifficulty):
         """

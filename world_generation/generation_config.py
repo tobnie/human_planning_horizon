@@ -21,7 +21,7 @@ class GameParameter(Enum):
     DistanceBetweenObstacles = 3    # TODO also split this for LilyPads and Vehicles?
     VehicleSpawnGap = 4
     LilyPadSpawnGap = 5
-    TargetPositionX = 6
+    TargetPosition = 6
 
 
 # Lane Velocities
@@ -57,7 +57,12 @@ LilyPadWidths = {
 }
 
 # Target Positions
-TargetPositions = DiscreteDistribution(values=TARGET_POSITIONS, probabilities=[1 / len(TARGET_POSITIONS)] * len(TARGET_POSITIONS))
+TargetPositionsEasy = TargetPositionsMedium = TargetPositionsHard = DiscreteDistribution(values=TARGET_POSITIONS, probabilities=[1 / len(TARGET_POSITIONS)] * len(TARGET_POSITIONS))
+TargetPositions = {
+    GameDifficulty.EASY: TargetPositionsEasy,
+    GameDifficulty.NORMAL: TargetPositionsMedium,
+    GameDifficulty.HARD: TargetPositionsHard
+}
 
 # DistanceBetweenObstacles
 DistanceBetweenObstaclesEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[0.2, 0.5, 0.3])
@@ -94,7 +99,7 @@ ParameterDistributions = {
     GameParameter.VehicleWidth: VehicleWidths,
     GameParameter.LilyPadWidth: LilyPadWidths,
     GameParameter.DistanceBetweenObstacles: DistanceBetweenObstacles,
-    GameParameter.TargetPositionX: TargetPositions,
-    GameParameter.LilyPadSpawnGaps: LilyPadSpawnGaps,
-    GameParameter.VehicleSpawnGaps: VehicleSpawnGaps
+    GameParameter.TargetPosition: TargetPositions,
+    GameParameter.LilyPadSpawnGap: LilyPadSpawnGaps,
+    GameParameter.VehicleSpawnGap: VehicleSpawnGaps
 }
