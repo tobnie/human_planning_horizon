@@ -32,6 +32,7 @@ class Game:
         self.display_debug_information_lanes = False
         self.running = True
         self.pause = False
+        self.fps = config.FPS
 
         self.world_status = WorldStatus.RUNNING
         self.world_name = world_name
@@ -77,7 +78,7 @@ class Game:
 
         self.world.update_player()
         self.render()
-        self.game_time -= self.clock.tick_busy_loop(config.FPS)
+        self.game_time -= self.clock.tick_busy_loop(self.fps)
 
     def run(self):
         """

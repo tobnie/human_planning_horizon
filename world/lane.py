@@ -104,11 +104,13 @@ class DirectedLane(Lane, ABC):
             return np.inf
         else:
             if self.direction == LaneDirection.LEFT:
-                return len(self) - self.non_player_sprites.sprites()[-1].x
+                obstacle = self.non_player_sprites.sprites()[-1]
+                return len(self) - (obstacle.x + obstacle.width)
             else:
                 return self.non_player_sprites.sprites()[-1].x
 
     def spawn_entity(self) -> None:
+        """ Spawns a new entity in the lane conforming to the currently active entities and the specified lane parameters. """
         if self.obstacle_counter == self.obstacles_without_gap:
             self.currently_in_spawn_gap = True
 
@@ -122,7 +124,7 @@ class DirectedLane(Lane, ABC):
                 self.obstacle_counter = 0
             # skip obstacle if spawn gap is reached
             if not self.currently_in_spawn_gap:
-                # spawn obstacle
+                # get obstacle parameters
                 if self.direction == LaneDirection.RIGHT:
                     obstacle_velocity = self.velocity
                     obstacle_x = -self.obstacle_size
@@ -130,9 +132,9 @@ class DirectedLane(Lane, ABC):
                     obstacle_velocity = -self.velocity
                     obstacle_x = len(self)
 
+                # create new obstacles
                 new_entity: DynamicObject = self.dynamic_object_constructor(self.world, obstacle_x, self.row, obstacle_velocity,
                                                                             self.obstacle_size, 1)
-
                 self.non_player_sprites.add(new_entity)
                 self.obstacle_counter += 1
 
