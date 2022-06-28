@@ -53,6 +53,7 @@ class World:
         self.player.set_position((player_start_x, player_start_y))
 
     def draw(self, screen) -> None:
+        """ Draws the world on the screen. """
         screen.fill(colors.BLACK)
 
         # draw lanes
@@ -62,6 +63,7 @@ class World:
         self.player_list.draw(screen)
 
     def spawn(self):
+        """ Starts the check if a new entity should spawn for each directed lane. """
         for lane in self.directed_lanes.sprites():
             if isinstance(lane, DirectedLane):
                 lane.spawn_entity()
@@ -82,6 +84,7 @@ class World:
         self.player.update()
 
     def check_game_state(self):
+        """ Checks if the game has been won or lost. """
         # check if player is dead and end game
         if self.player.is_dead:
             # show screen for restart
@@ -96,16 +99,18 @@ class World:
         """
         Checks if the game has been won.
         """
-        finish_lane : FinishLane = self.finish_lanes.sprites()[0]
+        finish_lane: FinishLane = self.finish_lanes.sprites()[0]
         if self.player.y == 0 and self.player.x == finish_lane.target_position:
             self.game.world_status = WorldStatus.WON
 
     def draw_lanes(self, screen) -> None:
+        """ Draws all lanes on the screen. """
         for lane in self.lanes.sprites():
             if isinstance(lane, Lane):
                 lane.draw_lane(screen)
 
     def _generate_lanes(self) -> None:
+        """ Randomly generates lanes. """
         row = config.N_LANES - 1
 
         # starting lane
@@ -157,6 +162,7 @@ class World:
         assert row == 0, f"Error in lane generation, row={row}"
 
     def load_lanes_from_json(self, world_name: str) -> None:
+        """ Loads lanes from a json file with the specified world name. """
         # load json at given path
         with open(config.LEVELS_DIR + world_name + '.json', 'r', encoding='utf-8') as f:
             world_dict = json.load(f)
