@@ -50,7 +50,7 @@ class World:
         starting_lane: StartLane = self.starting_lanes.sprites()[0]
         player_start_x = starting_lane.starting_position[0]
         player_start_y = starting_lane.starting_position[1]
-        self.player.set_position((player_start_x, player_start_y))
+        self.player.set_position_and_rect((player_start_x, player_start_y))
 
     def draw(self, screen) -> None:
         """ Draws the world on the screen. """
@@ -75,6 +75,14 @@ class World:
         # update lanes
         for lane in self.directed_lanes.sprites():
             lane.update()
+
+    def update_obstacle_rects(self, dt):
+        """
+        Updates the obstacle rects of all lanes according to the given time delta dt.
+        """
+        for lane in self.directed_lanes.sprites():
+            if isinstance(lane, DirectedLane):
+                lane.update_obstacle_rects(dt)
 
     def update_player(self):
         """

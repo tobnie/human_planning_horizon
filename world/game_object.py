@@ -1,4 +1,3 @@
-import math
 import os
 import string
 from abc import ABC
@@ -38,16 +37,25 @@ class GameObject(pygame.sprite.Sprite, ABC):
 
         # internal position (int)
         self.x: int = x
+        self.float_x = float(x)
         self.y: int = y
-        self.set_position((x, y))
+        self.set_position_and_rect((x, y))
+
+    def set_position_and_rect(self, pos: (int, int)):
+        """Sets the current position of the player given as (x, y)-tuple."""
+        self.set_position(pos)
+        self.set_rect_position((pos[0] * config.FIELD_WIDTH, pos[1] * config.FIELD_HEIGHT))
 
     def set_position(self, pos: (int, int)):
         """Sets the current position of the player given as (x, y)-tuple."""
-
         self.x = pos[0]
         self.y = pos[1]
-        self.rect.x = self.x * config.FIELD_WIDTH
-        self.rect.y = self.y * config.FIELD_HEIGHT
+
+    def set_rect_position(self, pos: (float, float)):
+        """ Sets the current position of the player sprite rect given as (x, y)-tuple."""
+        self.rect.x = pos[0]
+        self.float_x = pos[0]
+        self.rect.y = pos[1]
 
 
 class StaticObject(GameObject):
@@ -76,7 +84,7 @@ class Obstacle(DynamicObject):
     def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0, width: int = 1, height: int = 1,
                  img_path: string = None,
                  movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
-                 movement_bounds_y: (int, int) = (-1, config.N_LANES)):
+                 movement_bounds_y: (int, int) = (-1, config.N_LANES), rotatable: bool = True):
         super().__init__(world, velocity, x, y, width, height, img_path=img_path, movement_bounds_x=movement_bounds_x,
                          movement_bounds_y=movement_bounds_y)
 
@@ -84,6 +92,10 @@ class Obstacle(DynamicObject):
             raise ValueError("Velocity of an obstacle must not be 0.")
 
         self.delta_x = self.velocity // abs(self.velocity)
+        self.rotatable = rotatable
+
+        if self.rotatable:
+            self.set_rotated_sprite_img()
 
     def set_rotated_sprite_img(self):
         """Sets the sprite image for the respective current direction of movement."""
@@ -99,16 +111,13 @@ class Obstacle(DynamicObject):
         """Updates the object's position by adding the current deltas to the current position.
         The sprite dies if it moves outside of the movement boundaries."""
 
-        if self.rotatable:
-            self.set_rotated_sprite_img()
-
         new_x = self.x + self.delta_x
 
         # x position
         if new_x + self.width < self.movement_bounds_x[0] or new_x > self.movement_bounds_x[1]:
             self.kill()
 
-        self.set_position((new_x, self.y))
+        self.set_position_and_rect((new_x, self.y))
 
 
 class Vehicle(Obstacle):
@@ -130,8 +139,7 @@ class LilyPad(Obstacle):
             img_file = config.LILYPAD_FILE
         else:
             img_file = config.LOG_FILE
-        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, img_file))
-        self.rotatable = False
+        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, img_file), rotatable=False)
 
     def update(self) -> None:
         """Calls the super method as usual but also checks if the player is on the lilypad and if so,

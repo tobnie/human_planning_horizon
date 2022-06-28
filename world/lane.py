@@ -6,7 +6,7 @@ import pygame.sprite
 
 import colors
 import config
-from world.game_object import Vehicle, LilyPad, DynamicObject
+from world.game_object import Vehicle, LilyPad, DynamicObject, GameObject
 from world.field import Field
 
 
@@ -19,7 +19,7 @@ class LaneType(Enum):
 
 
 class LaneDirection(Enum):
-    LEFT = 0
+    LEFT = -1
     RIGHT = 1
 
 
@@ -93,7 +93,7 @@ class DirectedLane(Lane, ABC):
         self.obstacle_counter = 0
 
         # counts the calls of the update method and only updates the sprites if the update count is a multiple of the velocity
-        self.update_cnt = 0
+        self.update_cnt = config.OBSTACLE_MAX_VELOCITY
 
     def calc_distance_of_new_to_last_sprite(self) -> int:
         """
@@ -144,18 +144,25 @@ class DirectedLane(Lane, ABC):
                 self.obstacle_counter += 1
 
     def update(self) -> None:
-
         if self.update_cnt != self.velocity:
-            self.update_cnt += 1
+            self.update_cnt -= 1
             return
 
         self.non_player_sprites.update()
 
-        self.update_cnt = 0
+        self.update_cnt = config.OBSTACLE_MAX_VELOCITY
 
     def draw_lane(self, screen) -> None:
         super().draw_lane(screen)
         self.non_player_sprites.draw(screen)
+
+    def update_obstacle_rects(self, dt) -> None:
+        for obstacle in self.non_player_sprites:
+            if isinstance(obstacle, GameObject):
+                obstacle.float_x += config.FIELD_WIDTH * (dt / config.OBSTACLE_UPDATE_INTERVAL) * obstacle.delta_x / config.OBSTACLE_MAX_VELOCITY
+                # obstacle.float_x += config.FIELD_WIDTH * dt / (obstacle.velocity * config.OBSTACLE_UPDATE_INTERVAL)
+                # obstacle.float_x += config.FIELD_WIDTH * obstacle.velocity / dt
+                obstacle.rect.x = int(round(obstacle.float_x))
 
 
 class StreetLane(DirectedLane):

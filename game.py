@@ -52,18 +52,19 @@ class Game:
 
         self.screen.fill(colors.BLACK)
 
-        pygame.time.set_timer(UPDATE_OBSTACLES_EVENT, config.OBSTACLE_UPDATE_RATE)
-        pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_RATE)
+        pygame.time.set_timer(UPDATE_OBSTACLES_EVENT, config.OBSTACLE_UPDATE_INTERVAL)
+        pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
         pygame.time.set_timer(SPAWN_EVENT, config.SPAWN_RATE)
 
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
 
     def run_pause(self):
+        """ Runs the game in pause mode. """
         self.event_handler.handle_input_event()
 
     def run_normal(self):
-
+        """ Runs the game normally. """
         for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
             if e.type == UPDATE_OBSTACLES_EVENT:
                 self.world.update()
@@ -78,7 +79,9 @@ class Game:
 
         self.world.update_player()
         self.render()
-        self.game_time -= self.clock.tick_busy_loop(self.fps)
+        dt = self.clock.tick_busy_loop(self.fps)
+        self.game_time -= dt
+        self.world.update_obstacle_rects(dt)
 
     def run(self):
         """

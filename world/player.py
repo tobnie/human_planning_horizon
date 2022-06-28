@@ -92,7 +92,7 @@ class Player(DynamicObject):
         else:
             new_y = new_y
 
-        self.set_position((new_x, new_y))
+        self.set_position_and_rect((new_x, new_y))
 
         # check if dead
         self.check_status()

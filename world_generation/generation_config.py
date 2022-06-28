@@ -4,7 +4,7 @@ from enum import Enum
 DiscreteDistribution = namedtuple('DiscreteDistribution', ['values', 'probabilities'])
 
 # Target Positions
-TARGET_POSITIONS = [2, 10, 18]
+TARGET_POSITIONS = [2, 9, 17]
 
 
 # Game Difficulty
@@ -27,8 +27,8 @@ class GameParameter(Enum):
 
 # Lane Velocities
 LaneVelocityEasy = DiscreteDistribution(values=[1, 2], probabilities=[0.8, 0.2])
-LaneVelocityNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.3, 0.5, 0.2])
-LaneVelocityHard = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[0.1, 0.5, 0.35, 0.05])
+LaneVelocityNormal = DiscreteDistribution(values=[1, 2, 4], probabilities=[0.3, 0.5, 0.2])
+LaneVelocityHard = DiscreteDistribution(values=[1, 2, 4, 8], probabilities=[0.1, 0.5, 0.35, 0.05])
 
 LaneVelocities = {
     GameDifficulty.EASY: LaneVelocityEasy,

@@ -8,7 +8,7 @@
         9,
         14
     ],
-    "target_position": 18,
+    "target_position": 9,
     "lanes": [
         {
             "row": 0,
@@ -26,45 +26,45 @@
         {
             "row": 2,
             "type": "WaterLane",
-            "direction": 0,
+            "direction": -1,
             "lane_velocity": 1,
-            "obstacle_size": 4,
-            "distance_between_obstacles": 1,
+            "obstacle_size": 3,
+            "distance_between_obstacles": 2,
             "obstacles_without_gap": 4
         },
         {
             "row": 3,
             "type": "WaterLane",
             "direction": 1,
-            "lane_velocity": 1,
-            "obstacle_size": 2,
-            "distance_between_obstacles": 2,
-            "obstacles_without_gap": 4
+            "lane_velocity": 2,
+            "obstacle_size": 4,
+            "distance_between_obstacles": 1,
+            "obstacles_without_gap": 3
         },
         {
             "row": 4,
             "type": "WaterLane",
-            "direction": 0,
+            "direction": -1,
             "lane_velocity": 1,
             "obstacle_size": 3,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 3
+            "obstacles_without_gap": 4
         },
         {
             "row": 5,
             "type": "WaterLane",
             "direction": 1,
-            "lane_velocity": 1,
-            "obstacle_size": 4,
+            "lane_velocity": 2,
+            "obstacle_size": 2,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 3
+            "obstacles_without_gap": 4
         },
         {
             "row": 6,
             "type": "WaterLane",
-            "direction": 0,
-            "lane_velocity": 2,
-            "obstacle_size": 4,
+            "direction": -1,
+            "lane_velocity": 1,
+            "obstacle_size": 3,
             "distance_between_obstacles": 2,
             "obstacles_without_gap": 4
         },
@@ -75,28 +75,28 @@
         {
             "row": 8,
             "type": "StreetLane",
-            "direction": 0,
+            "direction": -1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": 3,
-            "obstacles_without_gap": 2
+            "distance_between_obstacles": 4,
+            "obstacles_without_gap": 1
         },
         {
             "row": 9,
             "type": "StreetLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 2,
-            "distance_between_obstacles": 3,
+            "obstacle_size": 1,
+            "distance_between_obstacles": -1,
             "obstacles_without_gap": 2
         },
         {
             "row": 10,
             "type": "StreetLane",
-            "direction": 0,
-            "lane_velocity": 1,
+            "direction": -1,
+            "lane_velocity": 2,
             "obstacle_size": 1,
-            "distance_between_obstacles": -1,
+            "distance_between_obstacles": 3,
             "obstacles_without_gap": 2
         },
         {
@@ -105,17 +105,17 @@
             "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": -1,
+            "distance_between_obstacles": 3,
             "obstacles_without_gap": 2
         },
         {
             "row": 12,
             "type": "StreetLane",
-            "direction": 0,
-            "lane_velocity": 1,
+            "direction": -1,
+            "lane_velocity": 2,
             "obstacle_size": 1,
             "distance_between_obstacles": -1,
-            "obstacles_without_gap": 1
+            "obstacles_without_gap": 2
         },
         {
             "row": 13,
@@ -123,8 +123,8 @@
             "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": -1,
-            "obstacles_without_gap": 1
+            "distance_between_obstacles": 4,
+            "obstacles_without_gap": 2
         },
         {
             "row": 14,
