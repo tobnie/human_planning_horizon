@@ -111,6 +111,11 @@ class DirectedLane(Lane, ABC):
 
     def spawn_entity(self) -> None:
         """ Spawns a new entity in the lane conforming to the currently active entities and the specified lane parameters. """
+
+        # if the distance is set to be infinity, never spawn anything
+        if self.distance_between_obstacles == np.inf:
+            return
+
         if self.obstacle_counter == self.obstacles_without_gap:
             self.currently_in_spawn_gap = True
 
