@@ -7,7 +7,6 @@ import colors
 import config
 from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
 from world.player import Player
-import json_fix
 
 
 class WorldStatus(Enum):
@@ -25,7 +24,6 @@ class World:
         # game boundaries
         self.width = width if width is not None else 1
         self.height = height if height is not None else 1
-
 
         # lanes
         self.lanes = pygame.sprite.Group()
@@ -83,10 +81,6 @@ class World:
         # update player
         self.player.update()
 
-    def update_time(self, time):
-        """ Updates the game clock. """
-        self.game_clock = time - self.start_time
-
     def check_game_state(self):
         # check if player is dead and end game
         if self.player.is_dead:
@@ -102,7 +96,7 @@ class World:
         """
         Checks if the game has been won.
         """
-        finish_lane = self.finish_lanes.sprites()[0]
+        finish_lane : FinishLane = self.finish_lanes.sprites()[0]
         if self.player.y == 0 and self.player.x == finish_lane.target_position:
             self.game.world_status = WorldStatus.WON
 
@@ -229,9 +223,7 @@ class World:
         # rewrite lanes into dictionary
         lanes_list = []
         for lane in self.lanes:
-            lane_dict = {}
-            lane_dict['row'] = lane.row
-            lane_dict['type'] = lane.__class__.__name__
+            lane_dict = {'row': lane.row, 'type': lane.__class__.__name__}
 
             # spawn parameters
             if isinstance(lane, DirectedLane):

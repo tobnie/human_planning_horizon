@@ -1,1 +1,1 @@
-__all__ = ['world_generation', 'world_generation_utils']
+__all__ = ['world_generator', 'generate_worlds', 'world_generation_utils']

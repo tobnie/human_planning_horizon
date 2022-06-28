@@ -8,7 +8,7 @@
         9,
         14
     ],
-    "target_position": 2,
+    "target_position": 10,
     "lanes": [
         {
             "row": 0,
@@ -19,18 +19,18 @@
             "type": "WaterLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 2,
-            "distance_between_obstacles": 4,
-            "obstacles_without_gap": 3
+            "obstacle_size": 3,
+            "distance_between_obstacles": 2,
+            "obstacles_without_gap": 4
         },
         {
             "row": 2,
             "type": "WaterLane",
-            "direction": 1,
+            "direction": 0,
             "lane_velocity": 1,
-            "obstacle_size": 3,
-            "distance_between_obstacles": 4,
-            "obstacles_without_gap": 3
+            "obstacle_size": 4,
+            "distance_between_obstacles": 2,
+            "obstacles_without_gap": 4
         },
         {
             "row": 3,
@@ -38,16 +38,16 @@
             "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 3,
-            "distance_between_obstacles": 3,
-            "obstacles_without_gap": 4
+            "distance_between_obstacles": 2,
+            "obstacles_without_gap": 3
         },
         {
             "row": 4,
             "type": "WaterLane",
-            "direction": 1,
+            "direction": 0,
             "lane_velocity": 1,
             "obstacle_size": 2,
-            "distance_between_obstacles": 3,
+            "distance_between_obstacles": 1,
             "obstacles_without_gap": 4
         },
         {
@@ -55,14 +55,14 @@
             "type": "WaterLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 3,
-            "distance_between_obstacles": 3,
+            "obstacle_size": 4,
+            "distance_between_obstacles": 2,
             "obstacles_without_gap": 4
         },
         {
             "row": 6,
             "type": "WaterLane",
-            "direction": 1,
+            "direction": 0,
             "lane_velocity": 1,
             "obstacle_size": 4,
             "distance_between_obstacles": 2,
@@ -75,8 +75,8 @@
         {
             "row": 8,
             "type": "StreetLane",
-            "direction": 1,
-            "lane_velocity": 2,
+            "direction": 0,
+            "lane_velocity": 1,
             "obstacle_size": 1,
             "distance_between_obstacles": 3,
             "obstacles_without_gap": 2
@@ -86,26 +86,26 @@
             "type": "StreetLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 1,
-            "distance_between_obstacles": 4,
+            "obstacle_size": 2,
+            "distance_between_obstacles": 3,
             "obstacles_without_gap": 2
         },
         {
             "row": 10,
             "type": "StreetLane",
-            "direction": 1,
+            "direction": 0,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": 2,
-            "obstacles_without_gap": 1
+            "distance_between_obstacles": 4,
+            "obstacles_without_gap": 2
         },
         {
             "row": 11,
             "type": "StreetLane",
-            "direction": 0,
+            "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": 3,
+            "distance_between_obstacles": -1,
             "obstacles_without_gap": 2
         },
         {
@@ -115,15 +115,15 @@
             "lane_velocity": 1,
             "obstacle_size": 1,
             "distance_between_obstacles": 4,
-            "obstacles_without_gap": 2
+            "obstacles_without_gap": 1
         },
         {
             "row": 13,
             "type": "StreetLane",
-            "direction": 0,
+            "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": 3,
+            "distance_between_obstacles": -1,
             "obstacles_without_gap": 2
         },
         {

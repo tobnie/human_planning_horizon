@@ -25,7 +25,6 @@ class WorldGenerator:
         """
         Draws a random value for the given game parameter
         """
-        test = ParameterDistributions[parameter]
         parameter_distribution = ParameterDistributions[parameter][self.difficulty]
         values, probs = parameter_distribution.values, parameter_distribution.probabilities
         return int(np.random.choice(values, p=probs))
@@ -58,10 +57,11 @@ class WorldGenerator:
         """
         lane_dict = {'row': row,
                      'type': StreetLane.__name__,
-                     'direction': np.random.choice([LaneDirection.LEFT, LaneDirection.RIGHT]).value,
+                     # TODO vary lane directions ?
+                     'direction': LaneDirection.LEFT.value if row % 2 == 0 else LaneDirection.RIGHT.value,
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.VehicleWidth),
-                     'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstacles),
+                     'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesVehicle),
                      'obstacles_without_gap': self._draw(GameParameter.VehicleSpawnGap)}
 
         return lane_dict
@@ -72,10 +72,11 @@ class WorldGenerator:
         """
         lane_dict = {'row': row,
                      'type': WaterLane.__name__,
-                     'direction': np.random.choice([LaneDirection.LEFT, LaneDirection.RIGHT]).value,
+                     # TODO vary lane directions ?
+                     'direction': LaneDirection.LEFT.value if row % 2 == 0 else LaneDirection.RIGHT.value,
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.LilyPadWidth),
-                     'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstacles),
+                     'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesLilyPad),
                      'obstacles_without_gap': self._draw(GameParameter.LilyPadSpawnGap)}
 
         return lane_dict
@@ -97,7 +98,6 @@ class WorldGenerator:
         height = config.N_LANES
         width = config.N_FIELDS_PER_LANE
 
-        # TODO also draw probabilistically?
         n_street_lanes = config.N_STREET_LANES
         n_middle_lanes = 1
         n_water_lanes = config.N_WATER_LANES

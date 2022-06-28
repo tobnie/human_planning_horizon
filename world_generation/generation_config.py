@@ -18,10 +18,11 @@ class GameParameter(Enum):
     LaneVelocity = 0
     VehicleWidth = 1
     LilyPadWidth = 2
-    DistanceBetweenObstacles = 3    # TODO also split this for LilyPads and Vehicles?
-    VehicleSpawnGap = 4
-    LilyPadSpawnGap = 5
-    TargetPosition = 6
+    DistanceBetweenObstaclesLilyPad = 3
+    DistanceBetweenObstaclesVehicle = 4
+    VehicleSpawnGap = 5
+    LilyPadSpawnGap = 6
+    TargetPosition = 7
 
 
 # Lane Velocities
@@ -64,14 +65,24 @@ TargetPositions = {
     GameDifficulty.HARD: TargetPositionsHard
 }
 
-# DistanceBetweenObstacles
-DistanceBetweenObstaclesEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[0.2, 0.5, 0.3])
-DistanceBetweenObstaclesNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.2, 0.5, 0.3])
-DistanceBetweenObstaclesHard = DiscreteDistribution(values=[1, 2], probabilities=[0.4, 0.6])
-DistanceBetweenObstacles = {
-    GameDifficulty.EASY: DistanceBetweenObstaclesEasy,
-    GameDifficulty.NORMAL: DistanceBetweenObstaclesNormal,
-    GameDifficulty.HARD: DistanceBetweenObstaclesHard
+# DistanceBetweenObstacles LilyPad
+DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2], probabilities=[0.2, 0.8])
+DistanceBetweenObstaclesLilyPadNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.05, 0.35, 0.6])
+DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[3, 4], probabilities=[0.55, 0.45])
+DistanceBetweenObstaclesLilyPad = {
+    GameDifficulty.EASY: DistanceBetweenObstaclesLilyPadEasy,
+    GameDifficulty.NORMAL: DistanceBetweenObstaclesLilyPadNormal,
+    GameDifficulty.HARD: DistanceBetweenObstaclesLilyPadHard
+}
+
+# Distance Between Obstacles Vehicle
+DistanceBetweenObstaclesVehicleEasy = DiscreteDistribution(values=[-1, 3, 4], probabilities=[0.3, 0.4, 0.3])
+DistanceBetweenObstaclesVehicleNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.2, 0.5, 0.3])
+DistanceBetweenObstaclesVehicleHard = DiscreteDistribution(values=[1, 2], probabilities=[0.5, 0.5])
+DistanceBetweenObstaclesVehicle = {
+    GameDifficulty.EASY: DistanceBetweenObstaclesVehicleEasy,
+    GameDifficulty.NORMAL: DistanceBetweenObstaclesVehicleNormal,
+    GameDifficulty.HARD: DistanceBetweenObstaclesVehicleHard
 }
 
 # Spawn Gaps (after how many obstacles should there be a gap)
@@ -98,7 +109,8 @@ ParameterDistributions = {
     GameParameter.LaneVelocity: LaneVelocities,
     GameParameter.VehicleWidth: VehicleWidths,
     GameParameter.LilyPadWidth: LilyPadWidths,
-    GameParameter.DistanceBetweenObstacles: DistanceBetweenObstacles,
+    GameParameter.DistanceBetweenObstaclesLilyPad: DistanceBetweenObstaclesLilyPad,
+    GameParameter.DistanceBetweenObstaclesVehicle: DistanceBetweenObstaclesVehicle,
     GameParameter.TargetPosition: TargetPositions,
     GameParameter.LilyPadSpawnGap: LilyPadSpawnGaps,
     GameParameter.VehicleSpawnGap: VehicleSpawnGaps

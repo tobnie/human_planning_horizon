@@ -160,6 +160,11 @@ class StreetLane(DirectedLane):
                  ):
         super().__init__(world, row, lane_direction, colors.BLACK, velocity,
                          distance_between_obstacles, obstacle_size, obstacles_without_gap)
+
+        # set distance between vehicles to infinity if distance is coded as -1 in json (i.e. no obstacles)
+        if distance_between_obstacles == -1:
+            self.distance_between_obstacles = np.inf
+
         self.dynamic_object_constructor = Vehicle
         self.fields = [Field(i, self.row, self.color, None) for i in range(config.N_FIELDS_PER_LANE)]
 
