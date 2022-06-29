@@ -17,13 +17,14 @@ SPAWN_EVENT = pygame.USEREVENT + 3
 
 class Game:
 
-    def __init__(self, difficulty: GameDifficulty, world_name: str = None, game_time=config.LEVEL_TIME, screen=None):
+    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, screen=None):
         """
         Sets up the game by initializing PyGame.
         """
         # game clock
-        self.clock = pygame.time.Clock()
-        self.game_time = game_time
+        self.clock = None
+        self.time_limit = time_limit
+        self.game_time = time_limit
 
         # game difficulty
         self.difficulty = difficulty
@@ -47,7 +48,7 @@ class Game:
         self.spawn_counter = 1
 
         # set screen information
-        self.screen = screen #pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
+        self.screen = screen
 
         if world_name:
             self.world = World(self, world_name=world_name)
@@ -69,6 +70,10 @@ class Game:
             "game_time": [],
             "world_state": [],
         }
+
+    def reset_clock(self):
+        self.clock = pygame.time.Clock()
+        self.game_time = self.time_limit
 
     def run_pause(self):
         """ Runs the game in pause mode. """
@@ -98,6 +103,9 @@ class Game:
         """
         Main Loop
         """
+        pygame.event.clear()
+        self.reset_clock()
+
         while self.running:
 
             # run next game step
