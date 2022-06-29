@@ -7,6 +7,7 @@ import colors
 import config
 import event_handler
 from world.world import World, WorldStatus
+from world_generation.generation_config import GameDifficulty
 
 INPUT_EVENT = pygame.USEREVENT + 0
 UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 1
@@ -16,13 +17,16 @@ SPAWN_EVENT = pygame.USEREVENT + 3
 
 class Game:
 
-    def __init__(self, world_name: str = None, game_time=config.LEVEL_TIME):
+    def __init__(self, difficulty: GameDifficulty, world_name: str = None, game_time=config.LEVEL_TIME, screen=None):
         """
         Sets up the game by initializing PyGame.
         """
         # game clock
         self.clock = pygame.time.Clock()
         self.game_time = game_time
+
+        # game difficulty
+        self.difficulty = difficulty
 
         # audio cue
         self.audio_cue_played = False
@@ -43,7 +47,7 @@ class Game:
         self.spawn_counter = 1
 
         # set screen information
-        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
+        self.screen = screen #pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
 
         if world_name:
             self.world = World(self, world_name=world_name)
@@ -58,6 +62,13 @@ class Game:
 
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
+
+        self.log_data = {
+            "world_name": world_name,  # TODO save difficulty in world_name
+            "difficulty": None,  # TODO
+            "game_time": [],
+            "world_state": [],
+        }
 
     def run_pause(self):
         """ Runs the game in pause mode. """
@@ -140,3 +151,44 @@ class Game:
         self.text_displayer.display_debug_information()
 
         pygame.display.flip()
+
+    def calc_score(self):
+        # TODO integrate into experiment workflow
+        """
+        Calculates the score of the game.
+        """
+
+        score = {
+        }
+
+        # death penalty
+        if self.world_status == WorldStatus.LOST:
+            score['death_penalty'] = config.DEATH_PENALTY
+        else:
+            score['death_penalty'] = 0
+
+        # points for remaining time
+        # TODO idea: minus points for death and in timeout only provide no bonus points for winning?
+        if not self.world_status.TIMED_OUT:
+            score['remaining_time'] = self.game_time
+        else:
+            score['remaining_time'] = 0
+
+        # flat bonus for winning
+        if self.world_status == WorldStatus.WON:
+            score['win_bonus'] = config.WIN_BONUS
+        else:
+            score['win_bonus'] = 0
+
+        # points for each visited lane
+        score['visited_lanes'] = 0  # TODO
+
+        # point multiplier for difficulty
+        if self.difficulty == GameDifficulty.EASY:
+            score['difficulty_multiplier'] = config.EASY_MULTIPLIER
+        elif self.difficulty == GameDifficulty.MEDIUM:
+            score['difficulty_multiplier'] = config.MEDIUM_MULTIPLIER
+        elif self.difficulty == GameDifficulty.HARD:
+            score['difficulty_multiplier'] = config.HARD_MULTIPLIER
+
+        return score
