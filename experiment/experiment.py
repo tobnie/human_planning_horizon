@@ -26,15 +26,61 @@ class Experiment:
         """
         Shows welcome screen.
         """
+        self.screen.fill(colors.WHITE)
         self.show_message("Welcome to the experiment! You will now play multiple levels of frogger with different difficulty.")
         self.show_message("We will start with the rules of the game and some example levels.", y_offset=100)
         self.show_message("Press any key to continue.", y_offset=200)
+        pygame.display.flip()
         wait_keys()
+
+    # def draw_rules_screen_page(self):
+    #     """Draws the basic structure of the rules screen"""
+    #     self.screen.fill(colors.WHITE)
+    #     example_level_img = pygame.image.load(r'./images/example_level.png')
+    #     example_level_img = pygame.transform.scale(example_level_img, (config.DISPLAY_WIDTH_PX * 2 / 3, config.DISPLAY_HEIGHT_PX * 2 / 3))
+    #     self.screen.blit(example_level_img, (config.DISPLAY_WIDTH_PX / 6, 50))
+
+    def rules_screen(self):
+        """ Shows the rules of the game. """
+        self.screen.fill(colors.WHITE)
+        example_level_img = pygame.image.load(r'./images/example_level.png')
+        example_level_img = pygame.transform.scale(example_level_img, (config.DISPLAY_WIDTH_PX * 2 / 3, config.DISPLAY_HEIGHT_PX * 2 / 3))
+        self.screen.blit(example_level_img, (config.DISPLAY_WIDTH_PX / 6, 50))
+
+        self.show_message("You start as the frog at the bottom of the screen and your goal is to get to the star at the top.",
+                          y_offset=600)
+        self.show_message("You can move in any direction with the arrow keys.",
+                          y_offset=640)
+        self.show_message(
+            "You need to avoid cars and water to get to the star.",
+            y_offset=680)
+        self.show_message("Also, pay attention to the timer indicated by the circle on the frog. If it runs out, you lose.", y_offset=720)
+        self.show_message("You get points for remaining time, finishing the level and moving closer to the star.",
+                          y_offset=760)
+        self.show_message("We will start with some example levels to get you started. Press any key to continue.",
+                          y_offset=800)
+
+        pygame.display.flip()
+        wait_keys()
+
+    def pre_start_screen(self):
+        self.screen.fill(colors.WHITE)
+
+        self.show_message("Press SPACE to start!",
+                          y_offset=300, font_size=100)
+
+        pygame.display.flip()
+
+        # wait for space bar
+        wait_keys([pygame.K_SPACE])
+
+        # TODO show 3, 2, 1 Countdown?
 
     def run(self):
         """ Runs the experiment. """
 
         self.welcome_screen()
+        self.rules_screen()
 
         # run each level
         for difficulty in GameDifficulty:
@@ -43,25 +89,24 @@ class Experiment:
                 world_name = "{}/world_{}".format(difficulty.value, i)
                 self.current_game = Game(difficulty, world_name, screen=self.screen)
 
+                # Show pre-start screen
+                self.pre_start_screen()
+
                 # run game
-                pygame.event.clear()
                 self.current_game.run()
 
                 # log data
                 # TODO
 
-                # show score
-                # TODO
+                # show screen between levels with score and further instructions
+                self.show_screen_between_levels()
 
-                # show message between levels
-                self.show_message_between_levels()
-
-    def show_message_between_levels(self):
+    def show_screen_between_levels(self):
         """
         Shows message between levels.
         """
         self.show_message("You have finished the current level."),
-        self.display_score(self.current_game.calculate_score())
+        self.display_score(self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
     def display_score(self, score: dict):
@@ -69,21 +114,18 @@ class Experiment:
         # TODO
         self.show_message("SCORE", y_offset=200)
 
-    def show_message(self, msg, y_offset=0):
+    def show_message(self, msg, y_offset=0, font_size=30):
         """
         Shows message on psychopy window
 
+        :param font_size: size of the font to show the message
         :param y_offset: offset from top of text box
         :param wrap_width: width of the textbox
         :param msg: Message to show
         """
         drawText(self.screen, msg, colors.BLACK,
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 200 + y_offset, config.DISPLAY_WIDTH_PX / 2, config.DISPLAY_HEIGHT_PX / 2),
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), 30))
-
-        # self.screen.blit(text_surface, (200, 200))
-        pygame.display.flip()
-
+                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size))
 
     def log_data(self):
         """ Logs the data. """
@@ -91,13 +133,14 @@ class Experiment:
         pass
 
 
-def wait_keys():
+def wait_keys(keys=None):
     """ Waits for a key to be pressed. """
     waiting = True
     while waiting:
         event = pygame.event.wait()
         if event.type == pygame.KEYDOWN:
-            waiting = False
+            if keys is None or event.key in keys:
+                waiting = False
 
 
 # draw some text into an area of a surface
