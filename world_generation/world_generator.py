@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import pygame
 
@@ -51,14 +53,13 @@ class WorldGenerator:
                      'type': Lane.__name__, }
         return lane_dict
 
-    def _generate_street_lane(self, row):
+    def _generate_street_lane(self, row, direction):
         """
         Generates a street lane and returns it.
         """
         lane_dict = {'row': row,
                      'type': StreetLane.__name__,
-                     # TODO vary lane directions ?
-                     'direction': LaneDirection.LEFT.value if row % 2 == 0 else LaneDirection.RIGHT.value,
+                     'direction': LaneDirection.LEFT.value if direction == -1 else LaneDirection.RIGHT.value,
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.VehicleWidth),
                      'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesVehicle),
@@ -66,14 +67,13 @@ class WorldGenerator:
 
         return lane_dict
 
-    def _generate_water_lane(self, row):
+    def _generate_water_lane(self, row, direction):
         """
         Generates a water lane and returns it.
         """
         lane_dict = {'row': row,
                      'type': WaterLane.__name__,
-                     # TODO vary lane directions ?
-                     'direction': LaneDirection.LEFT.value if row % 2 == 0 else LaneDirection.RIGHT.value,
+                     'direction': LaneDirection.LEFT.value if direction == -1 else LaneDirection.RIGHT.value,
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.LilyPadWidth),
                      'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesLilyPad),
@@ -127,10 +127,14 @@ class WorldGenerator:
         lanes.append(finish_lane)
         row += 1
 
+        # determine movement direction of first lane
+        direction = random.choice([-1, 1])
+
         # create water lanes
         for i in range(n_water_lanes):
-            water_lane = self._generate_water_lane(row)
+            water_lane = self._generate_water_lane(row, direction)
             lanes.append(water_lane)
+            direction *= -1
             row += 1
 
         # create interim lanes
@@ -140,8 +144,9 @@ class WorldGenerator:
 
         # create street lanes
         for i in range(n_street_lanes):
-            street_lane = self._generate_street_lane(row)
+            street_lane = self._generate_street_lane(row, direction)
             lanes.append(street_lane)
+            direction *= -1
             row += 1
 
         # create start lane

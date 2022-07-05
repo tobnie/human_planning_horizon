@@ -1,4 +1,3 @@
-from experiment.experiment_config import N_WORLDS_PER_DIFFICULTY
 from generation_config import GameDifficulty
 from world_generation.world_generator import WorldGenerator
 
@@ -6,6 +5,7 @@ from tqdm import tqdm
 
 """ Generates worlds and saves them to config.LEVELS_DIR """
 
+N_WORLDS_PER_DIFFICULTY = 20
 n_difficulties = len(GameDifficulty)
 n_worlds = N_WORLDS_PER_DIFFICULTY * n_difficulties
 assert n_worlds % n_difficulties == 0, "n_worlds must be divisible by 3"
