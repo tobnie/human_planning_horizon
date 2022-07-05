@@ -42,6 +42,7 @@ LEVEL_TIME_AUDIO_CUE = 10_000  # in ms
 # directory
 SPRITES_DIR = "./sprites/"
 LEVELS_DIR = "./levels/"
+LOG_DIR = "./data/"
 FROG_SOUND_FILEPATH = "./sounds/frog.mp3"
 
 # sprite files

@@ -1,5 +1,5 @@
 import pygame
-
+from pygaze import libscreen
 import colors
 
 pygame.init()
@@ -17,6 +17,12 @@ class Experiment:
 
     def __init__(self):
         self.current_game = None
+
+        # create pygaze Display object
+        disp = libscreen.Display(disptype='pygame')
+        pygaze_screen = libscreen.Screen(disptype='pygame', screen=disp)
+
+        self.subject_id = "DUMMY"  # TODO
 
         # create a window
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
@@ -87,7 +93,7 @@ class Experiment:
             for i in range(N_WORLDS_PER_DIFFICULTY):
                 # create game
                 world_name = "{}/world_{}".format(difficulty.value, i)
-                self.current_game = Game(difficulty, world_name, screen=self.screen)
+                self.current_game = Game(difficulty, world_name, screen=self.screen, subject_id=self.subject_id)
 
                 # Show pre-start screen
                 self.pre_start_screen()
@@ -95,8 +101,9 @@ class Experiment:
                 # run game
                 self.current_game.run()
 
-                # log data
-                # TODO
+                # save logged data after level
+                # TODO maybe loading time or similar if it takes too long?
+                self.current_game.save_logging_data()
 
                 # show screen between levels with score and further instructions
                 self.show_screen_between_levels()

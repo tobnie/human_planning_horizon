@@ -6,6 +6,7 @@ from display_debug_information import TextDisplayer
 import colors
 import config
 import event_handler
+from logging.logger import Logger
 from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
 
@@ -17,7 +18,7 @@ SPAWN_EVENT = pygame.USEREVENT + 3
 
 class Game:
 
-    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, screen=None):
+    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, screen=None, subject_id=""):
         """
         Sets up the game by initializing PyGame.
         """
@@ -64,12 +65,8 @@ class Game:
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
 
-        self.log_data = {
-            "world_name": world_name,  # TODO save difficulty in world_name
-            "difficulty": None,  # TODO
-            "game_time": [],
-            "world_state": [],
-        }
+        # logging
+        self.logger = Logger(self.world, subject_id, world_name, difficulty, time_limit)
 
     def reset_clock(self):
         self.clock = pygame.time.Clock()
@@ -92,6 +89,9 @@ class Game:
 
             elif e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
+
+        # TODO save world state with every sample of eyetracker
+        self.logger.log(0) # TODO time
 
         self.world.update_player()
         self.render()
@@ -124,7 +124,12 @@ class Game:
                 self.start_world(self.world_name)
                 # self.running = False
 
+    def save_logging_data(self):
+        """ Saves the data in the game logger. """
+        self.logger.save_data()
+
     def start_world(self, world_name):
+        # TODO remove
         self.world = World(self, world_name=world_name)
         self.text_displayer = TextDisplayer(self)
 

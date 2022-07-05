@@ -7,6 +7,7 @@ import colors
 import config
 from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
 from world.player import Player
+from world.world_state import WorldState
 
 
 class WorldStatus(Enum):
@@ -37,9 +38,8 @@ class World:
         if world_name:
             self.load_lanes_from_json(world_name)
         else:
-            # TODO remove this as soon as we only load predefined worlds?
             # create lanes
-            self._generate_lanes()
+            self._generate_random_lanes()
 
         # create player
         self.player = Player(self)  # spawn player
@@ -117,7 +117,7 @@ class World:
             if isinstance(lane, Lane):
                 lane.draw_lane(screen)
 
-    def _generate_lanes(self) -> None:
+    def _generate_random_lanes(self) -> None:
         """ Randomly generates lanes. """
         row = config.N_LANES - 1
 
@@ -221,6 +221,9 @@ class World:
             else:
                 raise Exception("Unknown lane type: {}".format(lane_info['type']))
 
+    def get_world_state(self):
+        return WorldState(self)
+
     def __json__(self):
         """Returns a json (dict) representation of the world."""
         world_dict = {}
@@ -260,3 +263,4 @@ class World:
         world_dict["lanes"] = lanes_list
 
         return world_dict
+

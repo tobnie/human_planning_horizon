@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 import pygame
 
@@ -9,6 +10,14 @@ from world.game_object import DynamicObject
 from world.lane import WaterLane, DirectedLane
 
 
+class PlayerAction(Enum):
+    RIGHT = 0,
+    LEFT = 1,
+    UP = 2,
+    DOWN = 3,
+    NONE = 4
+
+
 class Player(DynamicObject):
     """
     Spawn a player
@@ -16,11 +25,24 @@ class Player(DynamicObject):
 
     def __init__(self, world, start_position=(0, config.N_FIELDS_PER_LANE // 2 + 1)):
         super().__init__(world, start_position[0], start_position[1], 1, 1,
-                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE-1), movement_bounds_y=(0, config.N_LANES-1),
+                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE - 1), movement_bounds_y=(0, config.N_LANES - 1),
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
         self.delta_x = 0
         self.delta_y = 0
         self.is_dead = False
+
+    def get_action(self) -> PlayerAction:
+        """ Returns the currently executed action of the player. """
+        if self.delta_x > 0:
+            return PlayerAction.RIGHT
+        elif self.delta_x < 0:
+            return PlayerAction.LEFT
+        elif self.delta_y < 0:
+            return PlayerAction.UP
+        elif self.delta_y > 0:
+            return PlayerAction.DOWN
+        else:
+            return PlayerAction.NONE
 
     def check_player_on_lilypad(self):
         """Returns True if the player is in a WaterLane on a Lilypad. Otherwise, False."""
