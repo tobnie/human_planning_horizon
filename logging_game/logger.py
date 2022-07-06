@@ -13,7 +13,7 @@ class Logger:
         self._set_log_directory(log_directory, subject_id, world_name)
         self.world = world
 
-        # logging variables
+        # loggerei variables
         self.game_properties = {
             "subject_id": subject_id,
             "world_name": world_name,
