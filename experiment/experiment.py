@@ -134,11 +134,6 @@ class Experiment:
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 200 + y_offset, config.DISPLAY_WIDTH_PX / 2, config.DISPLAY_HEIGHT_PX / 2),
                  font=pygame.font.SysFont(pygame.font.get_default_font(), font_size))
 
-    def log_data(self):
-        """ Logs the data. """
-        # TODO
-        pass
-
 
 def wait_keys(keys=None):
     """ Waits for a key to be pressed. """

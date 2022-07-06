@@ -12,6 +12,7 @@ class Logger:
         # set log directory
         self._set_log_directory(log_directory, subject_id, world_name)
         self.world = world
+
         # logging variables
         self.game_properties = {
             "subject_id": subject_id,
@@ -19,7 +20,6 @@ class Logger:
             "difficulty": difficulty.value,
             "time_limit": time_limit,
         }  # general world properties
-
         self.world_states = []  # list of world states as (time, world_state)
         self.player_actions = []  # list of (time, action)
 
@@ -49,12 +49,25 @@ class Logger:
 
     def _save_actions_as_npz(self):
         """ Saves the player actions as a .npz-file. """
-        np.savez_compressed(self.log_directory + 'actions.npz', actions=self.player_actions)
+
+        times, actions = zip(*self.player_actions)
+
+        # concatenate time and state
+        actions_with_time = np.concatenate((np.asarray(times).reshape(-1, 1), np.asarray(actions)), axis=1)
+
+        # save as .npz-file
+        np.savez_compressed(self.log_directory + 'actions.npz', actions_with_time)
 
     def _save_world_states_as_npz(self):
         """ Saves the world states as a .npz-file. """
-        for time, state in self.world_states:
-            np.savez_compressed(self.log_directory + 'state_{}.npz'.format(time), state)
+
+        times, states = zip(*self.world_states)
+
+        # concatenate time and state
+        states_with_time = np.concatenate((np.asarray(times).reshape(-1, 1), np.asarray(states)), axis=1)
+
+        # save as .npz-file
+        np.savez_compressed(self.log_directory + 'world_states.npz', states_with_time)
 
     def _set_log_directory(self, log_directory, subject_id, world_name):
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
