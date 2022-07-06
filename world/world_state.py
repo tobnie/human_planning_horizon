@@ -25,8 +25,7 @@ class WorldState:
         objects = []
 
         # add player
-        # TODO save x (discrete) or rect.x (continuous)
-        player_list = [self.OBJECT_TYPE_TO_INT[self.world.player.__class__], self.world.player.x, self.world.player.y,
+        player_list = [self.OBJECT_TYPE_TO_INT[self.world.player.__class__], self.world.player.rect.x, self.world.player.rect.y,
                        self.world.player.width]
         objects.append(player_list)
 
@@ -35,7 +34,7 @@ class WorldState:
             if lane is isinstance(lane, DirectedLane):
                 for obj in lane.non_player_sprites.sprites():
                     # TODO save x (discrete) or rect.x (continuous)
-                    object_list = [self.OBJECT_TYPE_TO_INT[obj.__class__], obj.x, obj.y, obj.width]
+                    object_list = [self.OBJECT_TYPE_TO_INT[obj.__class__], obj.rect.x, obj.rect.y, obj.width]
                     objects.append(object_list)
 
         return np.asarray(objects)
