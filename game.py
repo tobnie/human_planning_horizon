@@ -6,7 +6,7 @@ from display_debug_information import TextDisplayer
 import colors
 import config
 import event_handler
-from logging.logger import Logger
+from logging_game.logger import Logger
 from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
 
@@ -65,7 +65,7 @@ class Game:
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
 
-        # logging
+        # logging_game
         self.logger = Logger(self.world, subject_id, world_name, difficulty, time_limit)
 
     def reset_clock(self):
@@ -197,6 +197,7 @@ class Game:
         score['visited_lanes'] = 0  # TODO
 
         # point multiplier for difficulty
+        # TODO really use multiplier because it reveals the difficulty of a level?
         if self.difficulty == GameDifficulty.EASY:
             score['difficulty_multiplier'] = config.EASY_MULTIPLIER
         elif self.difficulty == GameDifficulty.MEDIUM:
