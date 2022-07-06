@@ -1,5 +1,5 @@
+import numpy as np
 import pygame
-from pygaze import libscreen
 import colors
 
 pygame.init()
@@ -18,11 +18,13 @@ class Experiment:
     def __init__(self):
         self.current_game = None
 
-        # create pygaze Display object
-        disp = libscreen.Display(disptype='pygame')
-        pygaze_screen = libscreen.Screen(disptype='pygame', screen=disp)
+        # TODO
+        # # create pygaze Display object
+        # disp = libscreen.Display(disptype='pygame')
+        # pygaze_screen = libscreen.Screen(disptype='pygame', screen=disp)
 
         self.subject_id = "DUMMY"  # TODO
+        self.subject_score = 0
 
         # create a window
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
@@ -38,13 +40,6 @@ class Experiment:
         self.show_message("Press any key to continue.", y_offset=200)
         pygame.display.flip()
         wait_keys()
-
-    # def draw_rules_screen_page(self):
-    #     """Draws the basic structure of the rules screen"""
-    #     self.screen.fill(colors.WHITE)
-    #     example_level_img = pygame.image.load(r'./images/example_level.png')
-    #     example_level_img = pygame.transform.scale(example_level_img, (config.DISPLAY_WIDTH_PX * 2 / 3, config.DISPLAY_HEIGHT_PX * 2 / 3))
-    #     self.screen.blit(example_level_img, (config.DISPLAY_WIDTH_PX / 6, 50))
 
     def rules_screen(self):
         """ Shows the rules of the game. """
@@ -112,14 +107,75 @@ class Experiment:
         """
         Shows message between levels.
         """
-        self.show_message("You have finished the current level."),
-        self.display_score(self.current_game.calc_score())
+        self.display_and_update_score({})  # TODO self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-    def display_score(self, score: dict):
+        pygame.display.flip()
+        wait_keys()
+
+    def display_and_update_score(self, score: dict):
         """ Displays the score. Requires the score as dict to provide a detailed explanation how the score is calculated"""
-        # TODO
-        self.show_message("SCORE", y_offset=200)
+
+        # score = {
+        #     'death_penalty': config.DEATH_PENALTY,
+        #     'remaining_time': 31,
+        #     'win_bonus': config.WIN_BONUS,
+        #     'visited_lanes': 0,
+        #     'difficulty_multiplier': 2,
+        # }
+        level_score = (np.sum(list(score.values())) - score['difficulty_multiplier'])
+        total_level_score = level_score * score['difficulty_multiplier']
+        self.subject_score += total_level_score
+
+        self.show_message("SCORE")
+        y_offset = 50
+
+        # Win Bonus
+        self._draw_score_row('Win Bonus', str(score['win_bonus']), y_offset)
+        y_offset += 50
+
+        # Death Penalty
+        self._draw_score_row('Death Penalty', str(score['death_penalty']), y_offset)
+        y_offset += 50
+
+        # Remaining Time
+        self._draw_score_row('Remaining Time', str(score['remaining_time']), y_offset)
+        y_offset += 50
+
+        # Visited Lanes
+        self._draw_score_row('Visited Lanes', str(score['visited_lanes']), y_offset)
+        y_offset += 25
+
+        # draw line
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+        y_offset += 15
+
+        self._draw_score_row('Level Score', str(level_score), y_offset)
+        y_offset += 50
+
+        self._draw_score_row('Difficulty Multiplier', 'X' + str(score['difficulty_multiplier']), y_offset)
+        y_offset += 50
+
+        # draw line
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+
+        y_offset += 15
+        self._draw_score_row('Total Level Score', str(total_level_score), y_offset)
+
+        y_offset += 100
+
+        self._draw_score_row('Your Total Score is now:', str(self.subject_score), y_offset)
+
+    def _draw_score_row(self, row_name, points, y_offset=0, font_size=30):
+        """ Draws a row with the given name (aligned left) and points (aligned right). """
+        drawText(self.screen, row_name, colors.BLACK,
+                 pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
+                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment='left')
+        drawText(self.screen, points, colors.BLACK,
+                 pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
+                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment='right')
 
     def show_message(self, msg, y_offset=0, font_size=30):
         """
@@ -148,7 +204,7 @@ def wait_keys(keys=None):
 # draw some text into an area of a surface
 # automatically wraps words
 # returns any text that didn't get blitted
-def drawText(surface, text, color, rect, font, aa=True, bkg=None):
+def drawText(surface, text, color, rect, font, aa=True, bkg=None, alignment='center'):
     rect = pygame.Rect(rect)
     y = rect.top
     lineSpacing = -2
@@ -178,7 +234,16 @@ def drawText(surface, text, color, rect, font, aa=True, bkg=None):
         else:
             image = font.render(text[:i], aa, color)
 
-        surface.blit(image, (rect.centerx - font.size(text)[0] / 2, y))
+        if alignment == 'center':
+            blit_x = rect.centerx - font.size(text)[0] / 2
+        elif alignment == 'left':
+            blit_x = rect.x
+        elif alignment == 'right':
+            blit_x = rect.right - font.size(text)[0]
+        else:
+            raise Exception("Unknown alignment: {}".format(alignment))
+
+        surface.blit(image, (blit_x, y))
         y += fontHeight + lineSpacing
 
         # remove the text we just blitted
