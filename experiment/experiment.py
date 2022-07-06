@@ -13,11 +13,10 @@ from world_generation.generation_config import GameDifficulty
 
 # TODO move to experiment config
 N_WORLDS_PER_DIFFICULTY = 20
+N_SCORES_DISPLAYED = 10
 
 
 class Experiment:
-
-    N_SCORES_DISPLAYED = 10
 
     def __init__(self):
         self.current_game = None
@@ -81,7 +80,17 @@ class Experiment:
         # wait for space bar
         wait_keys([pygame.K_SPACE])
 
-        # TODO show 3, 2, 1 Countdown?
+        # show countdown
+        self._show_countdown()
+
+    def _show_countdown(self):
+        """ Shows the countdown. """
+        for i in reversed(range(1, 4)):
+            self.screen.fill(colors.WHITE)
+            self.show_message(str(i),
+                              y_offset=300, font_size=100)
+            pygame.display.flip()
+            pygame.time.wait(1000)
 
     def run(self):
         """ Runs the experiment. """
@@ -154,7 +163,7 @@ class Experiment:
 
         print(scores)
         scores.sort(key=lambda x: int(x[1]), reverse=True)  # sort in place by points
-        scores = np.array(scores[:self.N_SCORES_DISPLAYED])
+        scores = np.array(scores[:N_SCORES_DISPLAYED])
 
         return scores
 
