@@ -1,3 +1,5 @@
+import csv
+
 import numpy as np
 import pygame
 import colors
@@ -15,6 +17,8 @@ N_WORLDS_PER_DIFFICULTY = 20
 
 class Experiment:
 
+    N_SCORES_DISPLAYED = 10
+
     def __init__(self):
         self.current_game = None
 
@@ -25,6 +29,8 @@ class Experiment:
 
         self.subject_id = "DUMMY"  # TODO
         self.subject_score = 0
+
+        self.level_num = 1
 
         # create a window
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
@@ -102,27 +108,78 @@ class Experiment:
 
                 # show screen between levels with score and further instructions
                 self.show_screen_between_levels()
+                self.level_num += 1
 
     def show_screen_between_levels(self):
         """
         Shows message between levels.
         """
-        self.display_and_update_score({})  # TODO self.current_game.calc_score())
+        # show score of current level
+        self.display_and_update_score(self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
         pygame.display.flip()
         wait_keys()
 
+        # show highscore after that number of levels (maybe not after each level but only after each 10 or so)
+        self.display_highscores()
+        self.show_message("Press any key to continue to the next level.", y_offset=600)
+
+        pygame.display.flip()
+        wait_keys()
+
+    def display_highscores(self):
+        """
+        Displays highscores.
+        """
+        self.screen.fill(colors.WHITE)
+
+        # load score data
+        scores = self.load_scores()
+
+        self.show_message("HIGHSCORES")
+
+        y_offset = 100
+        for name, score in scores:
+            self._draw_score_row(name, score, y_offset=y_offset)
+            y_offset += 50
+
+    def load_scores(self):
+        """ Loads the score from the database. """
+
+        # load from csv
+        with open(config.SCORE_DIR + "after_{}_levels.csv".format(self.level_num), 'r') as f:
+            reader = csv.reader(f, delimiter=';')
+            scores = list(reader)
+
+        print(scores)
+        scores.sort(key=lambda x: int(x[1]), reverse=True)  # sort in place by points
+        scores = np.array(scores[:self.N_SCORES_DISPLAYED])
+
+        return scores
+
+    def save_score(self):
+        """ Saves the score to the database. """
+
+        # open the file in the write mode or create it before if it doesn't exist
+        with open(config.SCORE_DIR + "after_{}_levels.csv".format(self.level_num), 'a') as f:
+            # create the csv writer
+            writer = csv.writer(f)
+
+            # write a row to the csv file
+            writer.writerow([self.subject_id, self.subject_score])
+
     def display_and_update_score(self, score: dict):
         """ Displays the score. Requires the score as dict to provide a detailed explanation how the score is calculated"""
 
-        # score = {
-        #     'death_penalty': config.DEATH_PENALTY,
-        #     'remaining_time': 31,
-        #     'win_bonus': config.WIN_BONUS,
-        #     'visited_lanes': 0,
-        #     'difficulty_multiplier': 2,
-        # }
+        score = {
+            'win_bonus': config.WIN_BONUS,
+            'death_penalty': config.DEATH_PENALTY,
+            'remaining_time': 31,
+            'difficulty_multiplier': 2,
+            'visited_lanes': 5,
+        }
+
         level_score = (np.sum(list(score.values())) - score['difficulty_multiplier'])
         total_level_score = level_score * score['difficulty_multiplier']
         self.subject_score += total_level_score
