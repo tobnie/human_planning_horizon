@@ -188,7 +188,7 @@ class Experiment:
         """ Displays the score. Requires the score as dict to provide a detailed explanation how the score is calculated"""
 
         level_score = (np.sum(list(score.values())) - score['difficulty_multiplier'])
-        total_level_score = level_score * score['difficulty_multiplier']
+        total_level_score = int(level_score * score['difficulty_multiplier'])
         self.subject_score += total_level_score
 
         self.show_message("SCORE")
