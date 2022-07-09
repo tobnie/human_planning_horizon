@@ -51,3 +51,9 @@ def drawText(surface, text, color, rect, font_size, aa=True, bkg=None, alignment
         text = text[i:]
 
     return text
+
+
+def get_size_of_text(text, font_size):
+    """ Returns the size of a text in pixels. """
+    font = pygame.font.SysFont(pygame.font.get_default_font(), font_size)
+    return font.size(text)
