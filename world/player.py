@@ -23,14 +23,19 @@ class Player(DynamicObject):
     Spawn a player
     """
 
-    def __init__(self, world, start_position=(0, config.N_FIELDS_PER_LANE // 2 + 1)):
+    def __init__(self, world, start_position=(0, (config.N_FIELDS_PER_LANE // 2 + 1) * config.FIELD_WIDTH)):
         super().__init__(world, start_position[0], start_position[1], 1, 1,
-                         movement_bounds_x=(0, config.N_FIELDS_PER_LANE - 1), movement_bounds_y=(0, config.N_LANES - 1),
+                         movement_bounds_x=config.PLAYER_MOVEMENT_BOUNDS_X, movement_bounds_y=config.PLAYER_MOVEMENT_BOUNDS_Y,
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
         self.delta_x = 0
         self.delta_y = 0
         self.is_dead = False
         self.current_action = PlayerAction.NONE
+        self.highest_visited_lane = 0
+
+    def set_position(self, pos: (float, int)):
+        super().set_position(pos)
+        self.highest_visited_lane = max(self.highest_visited_lane, self.y // config.FIELD_HEIGHT)
 
     def get_action(self) -> PlayerAction:
         """ Returns the currently executed action of the player. """
@@ -58,7 +63,8 @@ class Player(DynamicObject):
             if isinstance(lane, WaterLane):
                 for sprite in lane.non_player_sprites:
                     if self.rect.colliderect(sprite.rect):
-                        return True
+                        if sprite.rect.x < self.rect.centerx < sprite.rect.x + sprite.rect.width:
+                            return True
         return False
 
     def check_vehicle_collision(self):
@@ -78,7 +84,7 @@ class Player(DynamicObject):
         """
         # check collision with water
         water_rows = list(map(lambda lane: lane.row, self.world.water_lanes.sprites()))
-        on_water = self.y in water_rows
+        on_water = self.y // config.FIELD_HEIGHT in water_rows
 
         # return False if player is not on a water lane
         if not on_water:
@@ -99,30 +105,30 @@ class Player(DynamicObject):
 
         self.set_rotated_sprite_img()
 
-        new_x = self.x + self.delta_x
-        new_y = self.y + self.delta_y
+        new_x = self.x + self.delta_x * config.FIELD_WIDTH
+        new_y = self.y + self.delta_y * config.FIELD_HEIGHT
 
         # reset delta_x and delta_y
         self.delta_x = 0
         self.delta_y = 0
 
-        # x position
-        if new_x < self.movement_bounds_x[0]:
-            new_x = self.movement_bounds_x[0]
-        elif new_x > self.movement_bounds_x[1]:
-            new_x = self.movement_bounds_x[1]
+        # check bounds in x-direction
+        if new_x <= self.movement_bounds_x[0]:
+            self.kill()
+        elif new_x >= self.movement_bounds_x[1]:
+            self.kill()
         else:
             new_x = new_x
 
-        # y position
-        if new_y < self.movement_bounds_y[0]:
+        # check bounds in y-direction
+        if new_y <= self.movement_bounds_y[0]:
             new_y = self.movement_bounds_y[0]
-        elif new_y > self.movement_bounds_y[1]:
+        elif new_y >= self.movement_bounds_y[1]:
             new_y = self.movement_bounds_y[1]
         else:
             new_y = new_y
 
-        self.set_position_and_rect((new_x, new_y))
+        self.set_position((new_x, new_y))
 
         # check if dead
         self.check_status()
@@ -140,6 +146,11 @@ class Player(DynamicObject):
 
         self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
         self.image.set_colorkey(colors.WHITE)
+
+    def kill(self) -> None:
+        """ Kills the player. """
+        self.is_dead = True
+        super().kill()
 
     def print_information(self) -> None:
         print(f"Player Position (x, y) =  ({self.rect.x}, {self.rect.y})")

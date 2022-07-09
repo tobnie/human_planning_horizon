@@ -11,9 +11,9 @@ from world.world_state import WorldState
 
 
 class WorldStatus(Enum):
-    RUNNING = 0,
-    WON = 1,
-    LOST = 2,
+    RUNNING = 0
+    WON = 1
+    LOST = 2
     TIMED_OUT = 3
 
 
@@ -48,9 +48,9 @@ class World:
 
         # start position
         starting_lane: StartLane = self.starting_lanes.sprites()[0]
-        player_start_x = starting_lane.starting_position[0]
-        player_start_y = starting_lane.starting_position[1]
-        self.player.set_position_and_rect((player_start_x, player_start_y))
+        player_start_x = starting_lane.starting_position[0] * config.FIELD_WIDTH
+        player_start_y = starting_lane.starting_position[1] * config.FIELD_HEIGHT
+        self.player.set_position((player_start_x, player_start_y))
 
     def draw(self, screen) -> None:
         """ Draws the world on the screen. """
@@ -70,26 +70,12 @@ class World:
 
     def update(self):
         """
-        Updates the current world state by updating all objects in lanes.
+        Updates the obstacle rects of all lanes
         """
-        # update lanes
-        for lane in self.directed_lanes.sprites():
-            lane.update()
-
-    def update_obstacle_rects(self, dt):
-        """
-        Updates the obstacle rects of all lanes according to the given time delta dt.
-        """
+        self.player.update()
         for lane in self.directed_lanes.sprites():
             if isinstance(lane, DirectedLane):
-                lane.update_obstacle_rects(dt)
-
-    def update_player(self):
-        """
-       Updates the player.
-       """
-        # update player
-        self.player.update()
+                lane.update()
 
     def check_game_state(self):
         """ Checks if the game has been won or lost. """
@@ -108,8 +94,9 @@ class World:
         Checks if the game has been won.
         """
         finish_lane: FinishLane = self.finish_lanes.sprites()[0]
-        if self.player.y == 0 and self.player.x == finish_lane.target_position:
-            self.game.world_status = WorldStatus.WON
+        if self.player.rect.y == 0 and finish_lane.target_position * config.FIELD_WIDTH <= self.player.rect.x <= (
+                finish_lane.target_position + 1) * config.FIELD_WIDTH:
+            return True
 
     def draw_lanes(self, screen) -> None:
         """ Draws all lanes on the screen. """
@@ -263,4 +250,3 @@ class World:
         world_dict["lanes"] = lanes_list
 
         return world_dict
-

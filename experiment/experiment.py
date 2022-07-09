@@ -58,7 +58,7 @@ class Experiment:
         self.show_message("You can move in any direction with the arrow keys.",
                           y_offset=640)
         self.show_message(
-            "You need to avoid cars and water to get to the star.",
+            "You need to avoid cars and water to get to the star, while staying inside the level borders.",
             y_offset=680)
         self.show_message("Also, pay attention to the timer indicated by the circle on the frog. If it runs out, you lose.", y_offset=720)
         self.show_message("You get points for remaining time, finishing the level and moving closer to the star.",

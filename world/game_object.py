@@ -11,13 +11,12 @@ import config
 class GameObject(pygame.sprite.Sprite, ABC):
     """An abstract class for game objects"""
 
-    def __init__(self, world, velocity: int = 0, x: int = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
+    def __init__(self, world, x: float = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
         super().__init__()
 
         # assign object id
         self.id = id(self)
         self.world = world
-        self.velocity = velocity
         self.rotatable = True
 
         self.width = width
@@ -36,43 +35,37 @@ class GameObject(pygame.sprite.Sprite, ABC):
                                     height * config.FIELD_HEIGHT)
 
         # internal position (int)
-        self.x: int = x
-        self.float_x = float(x)
-        self.y: int = y
-        self.set_position_and_rect((x, y))
+        self.x: float = 0
+        self.y: int = 0
+        self.highest_visited_lane = 0
+        self.set_position((x, y))
 
-    def set_position_and_rect(self, pos: (int, int)):
-        """Sets the current position of the player given as (x, y)-tuple."""
-        self.set_position(pos)
-        self.set_rect_position((pos[0] * config.FIELD_WIDTH, pos[1] * config.FIELD_HEIGHT))
+    def set_position(self, pos: (float, int)):
+        """ Sets the current position of the player sprite rect given as (x, y)-tuple."""
 
-    def set_position(self, pos: (int, int)):
-        """Sets the current position of the player given as (x, y)-tuple."""
         self.x = pos[0]
         self.y = pos[1]
-
-    def set_rect_position(self, pos: (float, float)):
-        """ Sets the current position of the player sprite rect given as (x, y)-tuple."""
-        self.rect.x = pos[0]
-        self.float_x = pos[0]
-        self.rect.y = pos[1]
+        self.rect.x = int(round(pos[0]))
+        self.rect.y = int(round(pos[1]))
 
 
 class StaticObject(GameObject):
     """A class for static game objects, i.e. they have no ability to move."""
 
-    def __init__(self, world, x: int = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
+    def __init__(self, world, x: float = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
         super().__init__(world, x, y, width, height, img_path=img_path)
 
 
 class DynamicObject(GameObject, ABC):
     """A class for dynamic game objects, which are moving with a specified delta in either x- or y-direction."""
 
-    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0, width: int = 1, height: int = 1,
+    def __init__(self, world, x: float = 0, y: int = 0, velocity: float = 0, width: int = 1, height: int = 1,
                  img_path: string = None,
-                 movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
-                 movement_bounds_y: (int, int) = (-1, config.N_LANES)):
-        super().__init__(world, x, y, velocity, width, height, img_path=img_path)
+                 movement_bounds_x: (int, int) = (0, config.DISPLAY_WIDTH_PX),
+                 movement_bounds_y: (int, int) = (0, config.DISPLAY_HEIGHT_PX - config.FIELD_HEIGHT - 1)):
+        super().__init__(world, x, y, width, height, img_path=img_path)
+
+        self.velocity = velocity
 
         # dynamics
         self.movement_bounds_x = movement_bounds_x
@@ -81,11 +74,11 @@ class DynamicObject(GameObject, ABC):
 
 class Obstacle(DynamicObject):
 
-    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0, width: int = 1, height: int = 1,
+    def __init__(self, world, x: float = 0, y: int = 0, velocity: float = 0, width: int = 1, height: int = 1,
                  img_path: string = None,
                  movement_bounds_x: (int, int) = (-1, config.N_FIELDS_PER_LANE),
                  movement_bounds_y: (int, int) = (-1, config.N_LANES), rotatable: bool = True):
-        super().__init__(world, velocity, x, y, width, height, img_path=img_path, movement_bounds_x=movement_bounds_x,
+        super().__init__(world, x, y, velocity, width, height, img_path=img_path, movement_bounds_x=movement_bounds_x,
                          movement_bounds_y=movement_bounds_y)
 
         if self.velocity == 0:
@@ -108,23 +101,16 @@ class Obstacle(DynamicObject):
         self.image.set_colorkey(colors.WHITE)
 
     def update(self) -> None:
-        """Updates the object's position by adding the current deltas to the current position.
-        The sprite dies if it moves outside of the movement boundaries."""
-
+        """Updates the position of the obstacle."""
         new_x = self.x + self.delta_x
-
-        # x position
-        if new_x + self.width < self.movement_bounds_x[0] or new_x > self.movement_bounds_x[1]:
-            self.kill()
-
-        self.set_position_and_rect((new_x, self.y))
+        self.set_position((new_x, self.y))
 
 
 class Vehicle(Obstacle):
     """Vehicles are moving on the streets with specific properties given by the lane they are on (passed to the
     vehicle constructor upon spawning in the lane)"""
 
-    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0,
+    def __init__(self, world, x: float = 0, y: int = 0, velocity: int = 0,
                  width: int = 1, height: int = 1):
         super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"))
 
@@ -133,7 +119,7 @@ class LilyPad(Obstacle):
     """Lilypads are moving on water with specific properties given by the lane they are on (passed to the
         lilypad constructor upon spawning in the lane)"""
 
-    def __init__(self, world, x: int = 0, y: int = 0, velocity: int = 0,
+    def __init__(self, world, x: float = 0, y: int = 0, velocity: int = 0,
                  width: int = 1, height: int = 1):
         if width == 1:
             img_file = config.LILYPAD_FILE

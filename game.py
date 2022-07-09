@@ -11,9 +11,10 @@ from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
 
 INPUT_EVENT = pygame.USEREVENT + 0
-UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 1
+SPAWN_OBSTACLE_EVENT = pygame.USEREVENT + 1
 UPDATE_PLAYER_EVENT = pygame.USEREVENT + 2
 SPAWN_EVENT = pygame.USEREVENT + 3
+
 
 class Game:
 
@@ -42,9 +43,7 @@ class Game:
         self.world_status = WorldStatus.RUNNING
         self.world_name = world_name
 
-        # collision counter
-        self.vehicle_collision = False
-        self.water_collision = False
+        # spawn counter
         self.spawn_counter = 1
 
         # set screen information
@@ -57,7 +56,7 @@ class Game:
 
         self.screen.fill(colors.BLACK)
 
-        pygame.time.set_timer(UPDATE_OBSTACLES_EVENT, config.OBSTACLE_UPDATE_INTERVAL)
+        pygame.time.set_timer(SPAWN_OBSTACLE_EVENT, config.OBSTACLE_UPDATE_INTERVAL)
         pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
         pygame.time.set_timer(SPAWN_EVENT, config.SPAWN_RATE)
 
@@ -77,9 +76,9 @@ class Game:
 
     def run_normal(self):
         """ Runs the game normally. """
+
         for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
-            if e.type == UPDATE_OBSTACLES_EVENT:
-                self.world.update()
+            if e.type == SPAWN_OBSTACLE_EVENT:
                 if self.spawn_counter == config.SPAWN_RATE:
                     self.world.spawn()
                     self.spawn_counter = 1
@@ -88,16 +87,16 @@ class Game:
 
             elif e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
-                self.logger.log_action()        # actions are logged every time a update_player_event occurs
+                self.logger.log_action()  # actions are logged every time a update_player_event occurs
 
-        # TODO save world state and eye tracking data with every sample of eyetracker
-        self.logger.log_state()     # states are sampled every time
-        self.logger.log_eyetracker_data(None) # TODO give eyetracker data
-        self.world.update_player()
         self.render()
         dt = self.clock.tick_busy_loop(self.fps)
         self.game_time -= dt
-        self.world.update_obstacle_rects(dt)
+        self.world.update()
+
+        # TODO save world state and eye tracking data with every sample of eyetracker
+        self.logger.log_state()  # states are sampled every time
+        self.logger.log_eyetracker_data(None)  # TODO give eyetracker data
 
     def run(self):
         """
@@ -170,7 +169,6 @@ class Game:
         pygame.display.flip()
 
     def calc_score(self):
-        # TODO integrate into experiment workflow
         """
         Calculates the score of the game.
         """
@@ -185,7 +183,6 @@ class Game:
             score['death_penalty'] = 0
 
         # points for remaining time
-        # TODO idea: minus points for death and in timeout only provide no bonus points for winning?
         if not self.world_status.TIMED_OUT:
             score['remaining_time'] = self.game_time
         else:
@@ -198,7 +195,10 @@ class Game:
             score['win_bonus'] = 0
 
         # points for each visited lane
-        score['visited_lanes'] = 0  # TODO
+        if self.world_status == WorldStatus.LOST:
+            score['visited_lanes'] = 0
+        else:
+            score['visited_lanes'] = 5 * self.world.player.highest_visited_lane
 
         # point multiplier for difficulty
         # TODO really use multiplier because it reveals the difficulty of a level?

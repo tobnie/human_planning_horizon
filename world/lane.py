@@ -6,7 +6,7 @@ import pygame.sprite
 
 import colors
 import config
-from world.game_object import Vehicle, LilyPad, DynamicObject, GameObject
+from world.game_object import Vehicle, LilyPad, DynamicObject, Obstacle
 from world.field import Field
 
 
@@ -81,7 +81,7 @@ class DirectedLane(Lane, ABC):
         else:
             self.direction = lane_direction
         self.non_player_sprites = pygame.sprite.Group()
-        self.dynamic_object_constructor = None
+        self.obstacle_constructor = None
 
         # lane dynamics
         self.velocity = velocity
@@ -105,9 +105,10 @@ class DirectedLane(Lane, ABC):
         else:
             if self.direction == LaneDirection.LEFT:
                 obstacle = self.non_player_sprites.sprites()[-1]
-                return len(self) - (obstacle.x + obstacle.width)
+                dist_px = len(self) * config.FIELD_WIDTH - (obstacle.rect.x + obstacle.rect.width)
+                return dist_px
             else:
-                return self.non_player_sprites.sprites()[-1].x
+                return self.non_player_sprites.sprites()[-1].rect.x
 
     def spawn_entity(self) -> None:
         """ Spawns a new entity in the lane conforming to the currently active entities and the specified lane parameters. """
@@ -123,7 +124,7 @@ class DirectedLane(Lane, ABC):
         threshold = self.distance_between_obstacles if not self.currently_in_spawn_gap else 2 * self.distance_between_obstacles + self.obstacle_size
 
         # if distance to last sprite is smaller than threshold, do not spawn new sprite
-        if self.calc_distance_of_new_to_last_sprite() >= threshold:
+        if self.calc_distance_of_new_to_last_sprite() >= threshold * config.FIELD_WIDTH:
             if self.currently_in_spawn_gap:
                 self.currently_in_spawn_gap = False
                 self.obstacle_counter = 0
@@ -132,37 +133,27 @@ class DirectedLane(Lane, ABC):
                 # get obstacle parameters
                 if self.direction == LaneDirection.RIGHT:
                     obstacle_velocity = self.velocity
-                    obstacle_x = -self.obstacle_size
+                    obstacle_x = -self.obstacle_size * config.FIELD_WIDTH
                 else:
                     obstacle_velocity = -self.velocity
-                    obstacle_x = len(self)
+                    obstacle_x = len(self) * config.FIELD_WIDTH
 
                 # create new obstacles
-                new_entity: DynamicObject = self.dynamic_object_constructor(self.world, obstacle_x, self.row, obstacle_velocity,
-                                                                            self.obstacle_size, 1)
+                obstacle_y = self.row * config.FIELD_HEIGHT
+                new_entity: Obstacle = self.obstacle_constructor(self.world, obstacle_x, obstacle_y, obstacle_velocity,
+                                                                 self.obstacle_size, 1)
                 self.non_player_sprites.add(new_entity)
                 self.obstacle_counter += 1
 
-    def update(self) -> None:
-        if self.update_cnt != self.velocity:
-            self.update_cnt -= 1
-            return
-
-        self.non_player_sprites.update()
-
-        self.update_cnt = config.OBSTACLE_MAX_VELOCITY
-
     def draw_lane(self, screen) -> None:
+        """ Draws the lane and all its entities on the given screen object.  """
         super().draw_lane(screen)
         self.non_player_sprites.draw(screen)
 
-    def update_obstacle_rects(self, dt) -> None:
+    def update(self) -> None:
+        """ Updates the position of all obstacles in the lane. """
         for obstacle in self.non_player_sprites:
-            if isinstance(obstacle, GameObject):
-                obstacle.float_x += config.FIELD_WIDTH * (dt / config.OBSTACLE_UPDATE_INTERVAL) * obstacle.delta_x / config.OBSTACLE_MAX_VELOCITY
-                # obstacle.float_x += config.FIELD_WIDTH * dt / (obstacle.velocity * config.OBSTACLE_UPDATE_INTERVAL)
-                # obstacle.float_x += config.FIELD_WIDTH * obstacle.velocity / dt
-                obstacle.rect.x = int(round(obstacle.float_x))
+            obstacle.update()
 
 
 class StreetLane(DirectedLane):
@@ -177,7 +168,7 @@ class StreetLane(DirectedLane):
         if distance_between_obstacles == -1:
             self.distance_between_obstacles = np.inf
 
-        self.dynamic_object_constructor = Vehicle
+        self.obstacle_constructor = Vehicle
         self.fields = [Field(i, self.row, self.color, None) for i in range(config.N_FIELDS_PER_LANE)]
 
 
@@ -187,5 +178,5 @@ class WaterLane(DirectedLane):
                  distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
         super().__init__(world, row, lane_direction, colors.BLUE, velocity,
                          distance_between_obstacles, obstacle_size, obstacles_without_gap)
-        self.dynamic_object_constructor = LilyPad
+        self.obstacle_constructor = LilyPad
         self.fields = [Field(i, self.row, self.color, config.SPRITES_DIR + 'water.png') for i in range(config.N_FIELDS_PER_LANE)]
