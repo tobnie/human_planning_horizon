@@ -131,7 +131,7 @@ class LilyPad(Obstacle):
         """Calls the super method as usual but also checks if the player is on the lilypad and if so,
         the player's position is also updated accordingly"""
 
-        # super call needs to be last, because otherwise the new position of the lilypad is already used TODO really?
+        # super call needs to be last, because otherwise the new position of the lilypad is already used
         old_x = self.x
         super().update()
 

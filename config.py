@@ -27,6 +27,7 @@ PLAYER_MOVEMENT_BOUNDS_Y = (0, DISPLAY_HEIGHT_PX - FIELD_HEIGHT)
 FPS = 60  # frame rate
 LEVEL_TIME = 60_000  # in ms
 LEVEL_TIME_AUDIO_CUE = 10_000  # in ms
+DELAY_AFTER_LEVEL_FINISH = 1_000  # in ms (time until game is closed after level is finished)
 
 # obstacles
 SPAWN_RATE = 2

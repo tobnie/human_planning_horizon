@@ -36,7 +36,6 @@ class WorldState:
         for lane in self.world.directed_lanes:
             if lane is isinstance(lane, DirectedLane):
                 for obj in lane.non_player_sprites.sprites():
-                    # TODO save x (discrete) or rect.x (continuous)
                     object_list = [self.OBJECT_TYPE_TO_INT[obj.__class__], obj.rect.x, obj.rect.y, obj.width]
                     objects.append(object_list)
 

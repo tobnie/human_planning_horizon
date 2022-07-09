@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import pygame
 import colors
+from text_utils import drawText
 
 pygame.init()
 
@@ -67,7 +68,7 @@ class Experiment:
                     input_active = True
                     text = ""
                 elif event.type == pygame.KEYDOWN and input_active:
-                    if event.key == pygame.K_RETURN:
+                    if event.key == pygame.K_RETURN and len(text) == 6:
                         run = False
                     elif event.key == pygame.K_BACKSPACE:
                         text = text[:-1]
@@ -269,10 +270,10 @@ class Experiment:
         """ Draws a row with the given name (aligned left) and points (aligned right). """
         drawText(self.screen, row_name, colors.BLACK,
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment='left')
+                 font_size=font_size, alignment='left')
         drawText(self.screen, points, colors.BLACK,
                  pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment='right')
+                 font_size=font_size, alignment='right')
 
     def show_message(self, msg, y_offset=0, font_size=30, alignment='center'):
         """
@@ -285,7 +286,7 @@ class Experiment:
         """
         drawText(self.screen, msg, colors.BLACK,
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 200 + y_offset, config.DISPLAY_WIDTH_PX / 2, config.DISPLAY_HEIGHT_PX / 2),
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment=alignment)
+                 font_size=font_size, alignment=alignment)
 
 
 def wait_keys(keys=None):
@@ -302,58 +303,6 @@ def wait_keys(keys=None):
 
             if keys is None or event.key in keys:
                 waiting = False
-
-
-# draw some text into an area of a surface
-# automatically wraps words
-# returns any text that didn't get blitted
-def drawText(surface, text, color, rect, font, aa=True, bkg=None, alignment='center'):
-    rect = pygame.Rect(rect)
-    y = rect.top
-    lineSpacing = -2
-
-    # get the height of the font
-    fontHeight = font.size("Tg")[1]
-
-    while text:
-        i = 1
-
-        # determine if the row of text will be outside our area
-        if y + fontHeight > rect.bottom:
-            break
-
-        # determine maximum width of line
-        while font.size(text[:i])[0] < rect.width and i < len(text):
-            i += 1
-
-        # if we've wrapped the text, then adjust the wrap to the last word
-        if i < len(text):
-            i = text.rfind(" ", 0, i) + 1
-
-        # render the line and blit it to the surface
-        if bkg:
-            image = font.render(text[:i], 1, color, bkg)
-            image.set_colorkey(bkg)
-        else:
-            image = font.render(text[:i], aa, color)
-
-        if alignment == 'center':
-            blit_x = rect.centerx - font.size(text)[0] / 2
-        elif alignment == 'left':
-            blit_x = rect.x
-        elif alignment == 'right':
-            blit_x = rect.right - font.size(text)[0]
-        else:
-            raise Exception("Unknown alignment: {}".format(alignment))
-
-        surface.blit(image, (blit_x, y))
-        y += fontHeight + lineSpacing
-
-        # remove the text we just blitted
-        text = text[i:]
-
-    return text
-
 
 exp = Experiment()
 exp.run()

@@ -6,6 +6,7 @@ from display_debug_information import TextDisplayer
 import colors
 import config
 import event_handler
+from text_utils import drawText
 from logging_game.logger import Logger
 from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
@@ -117,22 +118,22 @@ class Game:
 
             self.world_status = self.world.check_game_state()
             if self.world_status != WorldStatus.RUNNING:
+
+                # draw text whether game was won, lost or time is up
+                drawText(self.screen, self.world_status.value, colors.DARK_GREEN if self.world_status == WorldStatus.WON else colors.RED,
+                         pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 7 * config.FIELD_HEIGHT, config.DISPLAY_WIDTH_PX / 2,
+                                          config.DISPLAY_HEIGHT_PX / 2), font_size=90)
+
+                pygame.display.flip()
+
                 # game won
-                pygame.time.wait(1000)
-                self.start_world(self.difficulty, self.world_name)
+                pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
                 self.save_logging_data()
                 self.running = False
 
     def save_logging_data(self):
         """ Saves the data in the game logger. """
         self.logger.save_data()
-
-    def start_world(self, difficulty, world_name):
-        # TODO remove
-        self.difficulty = difficulty
-        self.world_name = world_name
-        self.world = World(self, world_path=difficulty.value + '/' + world_name)
-        self.text_displayer = TextDisplayer(self)
 
     def check_timeout(self):
         """
@@ -149,10 +150,13 @@ class Game:
         ratio_time_left = self.game_time / config.LEVEL_TIME
 
         margin_x = 20
-        offset_y = 5/8 * config.FIELD_HEIGHT
+        offset_y = 5 / 8 * config.FIELD_HEIGHT
         height = 20
 
-        pygame.draw.rect(self.screen, colors.RED, (self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, ratio_time_left * (config.FIELD_WIDTH - margin_x), height))
+        pygame.draw.rect(self.screen, colors.RED, (
+            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y,
+            ratio_time_left * (config.FIELD_WIDTH - margin_x),
+            height))
         pygame.draw.rect(self.screen, colors.BLACK, (
             self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, config.FIELD_WIDTH - margin_x, height), 3)
 

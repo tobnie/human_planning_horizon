@@ -11,10 +11,10 @@ from world.world_state import WorldState
 
 
 class WorldStatus(Enum):
-    RUNNING = 0
-    WON = 1
-    LOST = 2
-    TIMED_OUT = 3
+    RUNNING = "Game Running."
+    WON = "Game Won!"
+    LOST = "Game Over"
+    TIMED_OUT = "Time's up!"
 
 
 class World:
