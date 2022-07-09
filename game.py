@@ -117,18 +117,12 @@ class Game:
                 self.run_normal()
 
             self.world_status = self.world.check_game_state()
-            if self.world_status == WorldStatus.WON:
+            if self.world_status != WorldStatus.RUNNING:
                 # game won
                 pygame.time.wait(1000)
                 self.start_world(self.difficulty, self.world_name)
                 self.save_logging_data()
-                # self.running = False
-            if self.world_status == WorldStatus.LOST:
-                # game lost
-                pygame.time.wait(1000)
-                self.start_world(self.difficulty, self.world_name)
-                self.save_logging_data()
-                # self.running = False
+                self.running = False
 
     def save_logging_data(self):
         """ Saves the data in the game logger. """

@@ -1,4 +1,5 @@
 import csv
+import sys
 
 import numpy as np
 import pygame
@@ -123,12 +124,17 @@ class Experiment:
         """
         Shows message between levels.
         """
+        self.screen.fill(colors.WHITE)
+
         # show score of current level
         self.display_and_update_score(self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
         pygame.display.flip()
         wait_keys()
+
+        # save own score
+        self.save_score()
 
         # show highscore after that number of levels (maybe not after each level but only after each 10 or so)
         self.display_highscores()
@@ -171,23 +177,15 @@ class Experiment:
         """ Saves the score to the database. """
 
         # open the file in the write mode or create it before if it doesn't exist
-        with open(config.SCORE_DIR + "after_{}_levels.csv".format(self.level_num), 'a') as f:
+        with open(config.SCORE_DIR + "after_{}_levels.csv".format(self.level_num), 'a', newline='') as f:
             # create the csv writer
-            writer = csv.writer(f)
+            writer = csv.writer(f, delimiter=';')
 
             # write a row to the csv file
             writer.writerow([self.subject_id, self.subject_score])
 
     def display_and_update_score(self, score: dict):
         """ Displays the score. Requires the score as dict to provide a detailed explanation how the score is calculated"""
-
-        score = {
-            'win_bonus': config.WIN_BONUS,
-            'death_penalty': config.DEATH_PENALTY,
-            'remaining_time': 31,
-            'difficulty_multiplier': 2,
-            'visited_lanes': 5,
-        }
 
         level_score = (np.sum(list(score.values())) - score['difficulty_multiplier'])
         total_level_score = level_score * score['difficulty_multiplier']
@@ -263,6 +261,12 @@ def wait_keys(keys=None):
     while waiting:
         event = pygame.event.wait()
         if event.type == pygame.KEYDOWN:
+
+            # close program if escape is pressed
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+
             if keys is None or event.key in keys:
                 waiting = False
 
