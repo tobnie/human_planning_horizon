@@ -1,5 +1,5 @@
-import numpy as np
 import pygame
+import pygame.gfxdraw
 
 from display_debug_information import TextDisplayer
 
@@ -89,7 +89,6 @@ class Game:
                 self.event_handler.handle_input_event()
                 self.logger.log_action()  # actions are logged every time a update_player_event occurs
 
-
         dt = self.clock.tick_busy_loop(self.fps)
         self.game_time -= dt
         self.world.update()
@@ -148,9 +147,18 @@ class Game:
         Draws the remaining time as a decreasing circle.
         """
         ratio_time_left = self.game_time / config.LEVEL_TIME
-        pygame.draw.arc(self.screen, colors.RED,
-                        (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
-                        np.deg2rad(360 * ratio_time_left), 15)
+
+        margin_x = 20
+        offset_y = 5/8 * config.FIELD_HEIGHT
+        height = 20
+
+        pygame.draw.rect(self.screen, colors.RED, (self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, ratio_time_left * (config.FIELD_WIDTH - margin_x), height))
+        pygame.draw.rect(self.screen, colors.BLACK, (
+            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, config.FIELD_WIDTH - margin_x, height), 3)
+
+        # pygame.draw.arc(self.screen, colors.RED,
+        #                 (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
+        #                 np.deg2rad(360 * ratio_time_left), 15)
 
         if self.game_time < config.LEVEL_TIME_AUDIO_CUE and not self.audio_cue_played:
             self.audio_cue_played = True
