@@ -27,7 +27,7 @@ class Experiment:
         # disp = libscreen.Display(disptype='pygame')
         # pygaze_screen = libscreen.Screen(disptype='pygame', screen=disp)
 
-        self.subject_id = "DUMMY"  # TODO
+        self.subject_id = None
         self.subject_score = 0
 
         self.level_num = 1
@@ -36,16 +36,49 @@ class Experiment:
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
 
-    def welcome_screen(self):
-        """
-        Shows welcome screen.
-        """
+    def _welcome_screen_template(self):
+        """ Shows the welcome screen template. """
         self.screen.fill(colors.WHITE)
         self.show_message("Welcome to the experiment! You will now play multiple levels of frogger with different difficulty.")
-        self.show_message("We will start with the rules of the game and some example levels.", y_offset=100)
-        self.show_message("Press any key to continue.", y_offset=200)
-        pygame.display.flip()
-        wait_keys()
+        self.show_message("Please enter your subject ID first. It consists of the following parts:", y_offset=200, alignment="left")
+        self.show_message("1) The first two letters of the first name of your first parent", y_offset=250, alignment="left")
+        self.show_message("2) The number of your birth month (with leading zeroes)", y_offset=300, alignment="left")
+        self.show_message("3) The first two letters of the first name of your second parent", y_offset=350, alignment="left")
+        self.show_message("For example, the son of Claudia and Ralf, born on the 25.03.1998, will yield the code \'CL03RA\'.", y_offset=400,
+                          alignment="left")
+        self.show_message("Press enter to continue.", y_offset=600)
+
+    def welcome_screen(self):
+        """
+        Shows the welcome screen and receives the subject id.
+        """
+        clock = pygame.time.Clock()
+
+        text = ""
+        input_active = True
+        run = True
+        while run:
+            self._welcome_screen_template()
+            clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    input_active = True
+                    text = ""
+                elif event.type == pygame.KEYDOWN and input_active:
+                    if event.key == pygame.K_RETURN:
+                        run = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode
+
+            text = text.upper()
+
+            self.show_message(text, y_offset=450)
+            pygame.display.flip()
+            self.subject_id = text
 
     def rules_screen(self):
         """ Shows the rules of the game. """
@@ -241,18 +274,18 @@ class Experiment:
                  pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment='right')
 
-    def show_message(self, msg, y_offset=0, font_size=30):
+    def show_message(self, msg, y_offset=0, font_size=30, alignment='center'):
         """
         Shows message on psychopy window
 
+        :param alignment: alignment of text
         :param font_size: size of the font to show the message
         :param y_offset: offset from top of text box
-        :param wrap_width: width of the textbox
         :param msg: Message to show
         """
         drawText(self.screen, msg, colors.BLACK,
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 200 + y_offset, config.DISPLAY_WIDTH_PX / 2, config.DISPLAY_HEIGHT_PX / 2),
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size))
+                 font=pygame.font.SysFont(pygame.font.get_default_font(), font_size), alignment=alignment)
 
 
 def wait_keys(keys=None):
