@@ -31,7 +31,7 @@ def load_world(filename):
     """Loads and returns the world from the json at the given path."""
 
     print("Loading world {}...".format(filename))
-    world = World(world_name=filename)
+    world = World(world_path=filename)
     print("World \'{}\' loaded.".format(filename))
 
     return world

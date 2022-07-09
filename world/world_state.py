@@ -16,6 +16,9 @@ class WorldState:
         self.world = world
         self.object_arr = self._get_object_array()
 
+    def asarray(self):
+        return self.object_arr
+
     def _get_object_array(self):
         """ Returns an array representing all objects in the world state in the following form:
          [ObjectType, x, y, width]
@@ -38,7 +41,3 @@ class WorldState:
                     objects.append(object_list)
 
         return np.asarray(objects)
-
-    def save_to_file(self, filename):
-        """Saves the world state (all objects with corresponding location and width) to a .npz-file."""
-        np.savez_compressed(filename+".npz", self.object_arr)

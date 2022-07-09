@@ -15,7 +15,6 @@ UPDATE_OBSTACLES_EVENT = pygame.USEREVENT + 1
 UPDATE_PLAYER_EVENT = pygame.USEREVENT + 2
 SPAWN_EVENT = pygame.USEREVENT + 3
 
-
 class Game:
 
     def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, screen=None, subject_id=""):
@@ -52,7 +51,7 @@ class Game:
         self.screen = screen
 
         if world_name:
-            self.world = World(self, world_name=world_name)
+            self.world = World(self, world_path=difficulty.value + '/' + world_name)
         else:
             self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES, )
 
@@ -66,7 +65,7 @@ class Game:
         self.text_displayer = TextDisplayer(self)
 
         # logging_game
-        self.logger = Logger(self.world, subject_id, world_name, difficulty, time_limit)
+        self.logger = Logger(self, subject_id, world_name, difficulty, time_limit)
 
     def reset_clock(self):
         self.clock = pygame.time.Clock()
@@ -89,10 +88,11 @@ class Game:
 
             elif e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
+                self.logger.log_action()        # actions are logged every time a update_player_event occurs
 
-        # TODO save world state with every sample of eyetracker
-        self.logger.log(0) # TODO time
-
+        # TODO save world state and eye tracking data with every sample of eyetracker
+        self.logger.log_state()     # states are sampled every time
+        self.logger.log_eyetracker_data(None) # TODO give eyetracker data
         self.world.update_player()
         self.render()
         dt = self.clock.tick_busy_loop(self.fps)
@@ -114,23 +114,27 @@ class Game:
             else:
                 self.run_normal()
 
-            self.world.check_game_state()
+            self.world_status = self.world.check_game_state()
             if self.world_status == WorldStatus.WON:
                 # game won
-                self.start_world(self.world_name)
+                self.start_world(self.difficulty, self.world_name)
+                self.save_logging_data()
                 # self.running = False
             if self.world_status == WorldStatus.LOST:
                 # game lost
-                self.start_world(self.world_name)
+                self.start_world(self.difficulty, self.world_name)
+                self.save_logging_data()
                 # self.running = False
 
     def save_logging_data(self):
         """ Saves the data in the game logger. """
         self.logger.save_data()
 
-    def start_world(self, world_name):
+    def start_world(self, difficulty, world_name):
         # TODO remove
-        self.world = World(self, world_name=world_name)
+        self.difficulty = difficulty
+        self.world_name = world_name
+        self.world = World(self, world_path=difficulty.value + '/' + world_name)
         self.text_displayer = TextDisplayer(self)
 
     def check_timeout(self):

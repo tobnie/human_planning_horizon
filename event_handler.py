@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+from world.player import PlayerAction
+
 blocked = False
 
 
@@ -24,21 +26,16 @@ class EventHandler:
                 break
 
             if input_event.type == pygame.KEYDOWN:
-                # down
                 if input_event.key == pygame.K_DOWN:
-                    self.world.player.delta_y = 1
-
-                # left
-                if input_event.key == pygame.K_LEFT:
-                    self.world.player.delta_x = -1
-
-                # right
-                if input_event.key == pygame.K_RIGHT:
-                    self.world.player.delta_x = 1
-
-                # up
-                if input_event.key == pygame.K_UP:
-                    self.world.player.delta_y = -1
+                    self.world.player.set_action(PlayerAction.DOWN)
+                elif input_event.key == pygame.K_LEFT:
+                    self.world.player.set_action(PlayerAction.LEFT)
+                elif input_event.key == pygame.K_RIGHT:
+                    self.world.player.set_action(PlayerAction.RIGHT)
+                elif input_event.key == pygame.K_UP:
+                    self.world.player.set_action(PlayerAction.UP)
+            else:
+                self.world.player.set_action(PlayerAction.NONE)
 
         # process other non-movement-related events
         for input_event in input_events:
@@ -63,5 +60,12 @@ class EventHandler:
 
         # check if key is still pressed
         pressed_keys = pygame.key.get_pressed()
-        self.world.player.delta_x = pressed_keys[pygame.K_RIGHT] - pressed_keys[pygame.K_LEFT] if self.world.player.delta_y + self.world.player.delta_x == 0 else self.world.player.delta_x
-        self.world.player.delta_y = pressed_keys[pygame.K_DOWN] - pressed_keys[pygame.K_UP] if self.world.player.delta_y + self.world.player.delta_x == 0 else self.world.player.delta_y
+        if self.world.player.delta_y + self.world.player.delta_x == 0:
+            if pressed_keys[pygame.K_DOWN]:
+                self.world.player.set_action(PlayerAction.DOWN)
+            elif pressed_keys[pygame.K_LEFT]:
+                self.world.player.set_action(PlayerAction.LEFT)
+            elif pressed_keys[pygame.K_RIGHT]:
+                self.world.player.set_action(PlayerAction.RIGHT)
+            elif pressed_keys[pygame.K_UP]:
+                self.world.player.set_action(PlayerAction.UP)

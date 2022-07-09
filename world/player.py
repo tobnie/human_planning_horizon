@@ -11,10 +11,10 @@ from world.lane import WaterLane, DirectedLane
 
 
 class PlayerAction(Enum):
-    RIGHT = 0,
-    LEFT = 1,
-    UP = 2,
-    DOWN = 3,
+    RIGHT = 0
+    LEFT = 1
+    UP = 2
+    DOWN = 3
     NONE = 4
 
 
@@ -30,19 +30,27 @@ class Player(DynamicObject):
         self.delta_x = 0
         self.delta_y = 0
         self.is_dead = False
+        self.current_action = PlayerAction.NONE
 
     def get_action(self) -> PlayerAction:
         """ Returns the currently executed action of the player. """
-        if self.delta_x > 0:
-            return PlayerAction.RIGHT
-        elif self.delta_x < 0:
-            return PlayerAction.LEFT
-        elif self.delta_y < 0:
-            return PlayerAction.UP
-        elif self.delta_y > 0:
-            return PlayerAction.DOWN
+        return self.current_action
+
+    def set_action(self, action: PlayerAction) -> None:
+        """Sets the current action of the player and also sets their delta values accordingly."""
+        self.current_action = action
+
+        if action == PlayerAction.RIGHT:
+            self.delta_x = 1
+        elif action == PlayerAction.LEFT:
+            self.delta_x = -1
+        elif action == PlayerAction.UP:
+            self.delta_y = -1
+        elif action == PlayerAction.DOWN:
+            self.delta_y = 1
         else:
-            return PlayerAction.NONE
+            self.delta_x = 0
+            self.delta_y = 0
 
     def check_player_on_lilypad(self):
         """Returns True if the player is in a WaterLane on a Lilypad. Otherwise, False."""

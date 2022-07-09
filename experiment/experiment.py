@@ -102,7 +102,7 @@ class Experiment:
         for difficulty in GameDifficulty:
             for i in range(N_WORLDS_PER_DIFFICULTY):
                 # create game
-                world_name = "{}/world_{}".format(difficulty.value, i)
+                world_name = "world_{}".format(i)
                 self.current_game = Game(difficulty, world_name, screen=self.screen, subject_id=self.subject_id)
 
                 # Show pre-start screen

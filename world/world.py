@@ -19,7 +19,7 @@ class WorldStatus(Enum):
 
 class World:
 
-    def __init__(self, game, width: int = None, height: int = None, world_name: str = None) -> None:
+    def __init__(self, game, width: int = None, height: int = None, world_path: str = None) -> None:
         self.game = game
 
         # game boundaries
@@ -35,8 +35,8 @@ class World:
         self.water_lanes = pygame.sprite.Group()
         self.finish_lanes = pygame.sprite.Group()
 
-        if world_name:
-            self.load_lanes_from_json(world_name)
+        if world_path:
+            self.load_lanes_from_json(world_path)
         else:
             # create lanes
             self._generate_random_lanes()
@@ -169,10 +169,10 @@ class World:
 
         assert row == 0, f"Error in lane generation, row={row}"
 
-    def load_lanes_from_json(self, world_name: str) -> None:
+    def load_lanes_from_json(self, world_path: str) -> None:
         """ Loads lanes from a json file with the specified world name. """
         # load json at given path
-        with open(config.LEVELS_DIR + world_name + '.json', 'r', encoding='utf-8') as f:
+        with open(config.LEVELS_DIR + world_path + '.json', 'r', encoding='utf-8') as f:
             world_dict = json.load(f)
 
         # create world
