@@ -130,9 +130,6 @@ class Player(DynamicObject):
 
         self.set_position((new_x, new_y))
 
-        # check if dead
-        self.check_status()
-
     def set_rotated_sprite_img(self):
         """Sets the sprite image for the respective current direction of movement."""
         if self.delta_x > 0:

@@ -89,14 +89,16 @@ class Game:
                 self.event_handler.handle_input_event()
                 self.logger.log_action()  # actions are logged every time a update_player_event occurs
 
-        self.render()
+
         dt = self.clock.tick_busy_loop(self.fps)
         self.game_time -= dt
         self.world.update()
+        self.render()
 
         # TODO save world state and eye tracking data with every sample of eyetracker
         self.logger.log_state()  # states are sampled every time
         self.logger.log_eyetracker_data(None)  # TODO give eyetracker data
+        self.world.player.check_status()
 
     def run(self):
         """
@@ -104,6 +106,7 @@ class Game:
         """
         pygame.event.clear()
         self.reset_clock()
+        self.render()
 
         while self.running:
 
@@ -116,11 +119,13 @@ class Game:
             self.world_status = self.world.check_game_state()
             if self.world_status == WorldStatus.WON:
                 # game won
+                pygame.time.wait(1000)
                 self.start_world(self.difficulty, self.world_name)
                 self.save_logging_data()
                 # self.running = False
             if self.world_status == WorldStatus.LOST:
                 # game lost
+                pygame.time.wait(1000)
                 self.start_world(self.difficulty, self.world_name)
                 self.save_logging_data()
                 # self.running = False
