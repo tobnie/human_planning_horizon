@@ -81,6 +81,54 @@ class Experiment:
             pygame.display.flip()
             self.subject_id = text
 
+    def strategy_screen(self):
+
+        pygame.display.flip()
+        clock = pygame.time.Clock()
+
+        text_rows = [""]
+        text_row_ptr = 0
+        input_active = True
+        run = True
+        while run:
+            self.screen.fill(colors.WHITE)
+            self.show_message(
+                "Did you pursue a certain strategy playing? Did you change this strategy? Please write some sentences on that.",
+                alignment='left')
+            clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    input_active = True
+                elif event.type == pygame.KEYDOWN and input_active:
+                    if event.key == pygame.K_RETURN:
+                        text_row_ptr += 1
+                        if text_row_ptr >= len(text_rows):
+                            text_rows.append("")
+                    elif event.key == pygame.K_DOWN:
+                        text_row_ptr += 1
+                    elif event.key == pygame.K_TAB:
+                        input_active = False
+                        run = False
+                    elif event.key == pygame.K_UP:
+                        text_row_ptr -= 1
+                    elif event.key == pygame.K_BACKSPACE:
+                        text_rows[text_row_ptr] = text_rows[text_row_ptr][:-1]
+                    else:
+                        text_rows[text_row_ptr] += event.unicode
+
+            y_offset_base = 100
+            for i, row_text in enumerate(text_rows):
+                self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9*config.DISPLAY_WIDTH_PX, alignment='left')
+            pygame.display.flip()
+
+            self.show_message("Please press TAB to continue (this may take a moment)")
+
+        # TODO save text information
+
+        wait_keys()
+
     def rules_screen(self):
         """ Shows the rules of the game. """
         self.screen.fill(colors.WHITE)
@@ -129,6 +177,8 @@ class Experiment:
 
     def run(self):
         """ Runs the experiment. """
+
+        self.strategy_screen()
 
         self.welcome_screen()
         self.rules_screen()
@@ -275,17 +325,20 @@ class Experiment:
                  pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font_size=font_size, alignment='right')
 
-    def show_message(self, msg, y_offset=0, font_size=30, alignment='center'):
+    def show_message(self, msg, x=config.DISPLAY_WIDTH_PX / 4, width=config.DISPLAY_WIDTH_PX / 2, y_offset=0, font_size=30,
+                     alignment='center'):
         """
         Shows message on psychopy window
 
+        :param x: position of the textbox
+        :param width: width of the textbox
         :param alignment: alignment of text
         :param font_size: size of the font to show the message
         :param y_offset: offset from top of text box
         :param msg: Message to show
         """
         drawText(self.screen, msg, colors.BLACK,
-                 pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 200 + y_offset, config.DISPLAY_WIDTH_PX / 2, config.DISPLAY_HEIGHT_PX / 2),
+                 pygame.rect.Rect(x, 200 + y_offset, width, config.DISPLAY_HEIGHT_PX / 2),
                  font_size=font_size, alignment=alignment)
 
 
@@ -303,6 +356,7 @@ def wait_keys(keys=None):
 
             if keys is None or event.key in keys:
                 waiting = False
+
 
 exp = Experiment()
 exp.run()
