@@ -3,7 +3,11 @@ import sys
 
 import numpy as np
 import pygame
+from pygaze import libscreen
+
 import colors
+from EyeTrackerScreen import EyeTrackerScreen
+from eye_tracker import MyEyeTracker
 from text_utils import drawText
 
 pygame.init()
@@ -23,10 +27,10 @@ class Experiment:
     def __init__(self):
         self.current_game = None
 
-        # TODO
-        # # create pygaze Display object
-        # disp = libscreen.Display(disptype='pygame')
-        # pygaze_screen = libscreen.Screen(disptype='pygame', screen=disp)
+        # create pygaze Display object
+        self.disp = libscreen.Display(disptype='pygame', dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
+        self.screen = EyeTrackerScreen(dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
+        # self.eyetracker = MyEyeTracker(disp=self.disp)
 
         self.subject_id = None
         self.subject_score = 0
@@ -34,8 +38,10 @@ class Experiment:
         self.level_num = 1
 
         # create a window
-        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
-        self.screen.fill(colors.WHITE)
+        # self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
+        # self.screen.fill(colors.WHITE)
+        self.flip_display()
+        wait_keys()
 
     def _welcome_screen_template(self):
         """ Shows the welcome screen template. """
@@ -48,6 +54,10 @@ class Experiment:
         self.show_message("For example, the son of Claudia and Ralf, born on the 25.03.1998, will yield the code \'CL03RA\'.", y_offset=400,
                           alignment="left")
         self.show_message("Press enter to continue.", y_offset=600)
+
+    def flip_display(self):
+        self.disp.fill(screen=self.screen)
+        self.disp.show()
 
     def welcome_screen(self):
         """
@@ -72,18 +82,20 @@ class Experiment:
                         run = False
                     elif event.key == pygame.K_BACKSPACE:
                         text = text[:-1]
+                    elif event.key == pygame.K_SPACE:
+                        pass  # skip spaces since they are not allowed in the id
                     else:
                         text += event.unicode
 
             text = text.upper()
 
             self.show_message(text, y_offset=450)
-            pygame.display.flip()
+            self.flip_display()
             self.subject_id = text
 
     def strategy_screen(self):
 
-        pygame.display.flip()
+        self.flip_display()
         clock = pygame.time.Clock()
 
         text_rows = [""]
@@ -120,8 +132,8 @@ class Experiment:
 
             y_offset_base = 100
             for i, row_text in enumerate(text_rows):
-                self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9*config.DISPLAY_WIDTH_PX, alignment='left')
-            pygame.display.flip()
+                self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9 * config.DISPLAY_WIDTH_PX, alignment='left')
+            self.flip_display()
 
             self.show_message("Please press TAB to continue (this may take a moment)")
 
@@ -149,7 +161,7 @@ class Experiment:
         self.show_message("We will start with some example levels to get you started. Press any key to continue.",
                           y_offset=800)
 
-        pygame.display.flip()
+        self.flip_display()
         wait_keys()
 
     def pre_start_screen(self):
@@ -158,7 +170,7 @@ class Experiment:
         self.show_message("Press SPACE to start!",
                           y_offset=300, font_size=100)
 
-        pygame.display.flip()
+        self.flip_display()
 
         # wait for space bar
         wait_keys([pygame.K_SPACE])
@@ -172,13 +184,11 @@ class Experiment:
             self.screen.fill(colors.WHITE)
             self.show_message(str(i),
                               y_offset=300, font_size=100)
-            pygame.display.flip()
+            self.flip_display()
             pygame.time.wait(1000)
 
     def run(self):
         """ Runs the experiment. """
-
-        self.strategy_screen()
 
         self.welcome_screen()
         self.rules_screen()
@@ -188,7 +198,7 @@ class Experiment:
             for i in range(N_WORLDS_PER_DIFFICULTY):
                 # create game
                 world_name = "world_{}".format(i)
-                self.current_game = Game(difficulty, world_name, screen=self.screen, subject_id=self.subject_id)
+                self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
 
                 # Show pre-start screen
                 self.pre_start_screen()
@@ -204,6 +214,9 @@ class Experiment:
                 self.show_screen_between_levels()
                 self.level_num += 1
 
+        # TODO end screen
+        self.strategy_screen()
+
     def show_screen_between_levels(self):
         """
         Shows message between levels.
@@ -214,7 +227,7 @@ class Experiment:
         self.display_and_update_score(self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-        pygame.display.flip()
+        self.flip_display()
         wait_keys()
 
         # save own score
@@ -224,7 +237,7 @@ class Experiment:
         self.display_highscores()
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-        pygame.display.flip()
+        self.flip_display()
         wait_keys()
 
     def display_highscores(self):
@@ -295,8 +308,10 @@ class Experiment:
         y_offset += 25
 
         # draw line
-        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+        self.screen.draw_line(color=colors.BLACK,
+                              spos=(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                              epos=(4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                              pw=2)
         y_offset += 15
 
         self._draw_score_row('Level Score', str(level_score), y_offset)
@@ -306,8 +321,10 @@ class Experiment:
         y_offset += 50
 
         # draw line
-        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+        self.screen.draw_line(color=colors.BLACK,
+                              spos=(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                              epos=(4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                              pw=2)
 
         y_offset += 15
         self._draw_score_row('Total Level Score', str(total_level_score), y_offset)

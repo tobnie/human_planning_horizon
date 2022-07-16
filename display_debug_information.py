@@ -39,7 +39,8 @@ class TextDisplayer:
                              f"Water Collision = {self.game.world.player.check_water_collision()}",
                              "DEAD" if self.world.player.is_dead else "ALIVE",
                              f"Time (ms) = {self.game.game_time}",
-                             f"Time (s) = {self.game.game_time // 1000}"]
+                             f"Time (s) = {self.game.game_time // 1000}",
+                             f"Time left (s) = {(self.game.time_limit - self.game.game_time) // 1000}"]
         if self.game.world_status == WorldStatus.WON:
             debug_information.append("GAME WON!")
 

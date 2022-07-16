@@ -19,14 +19,14 @@ SPAWN_EVENT = pygame.USEREVENT + 3
 
 class Game:
 
-    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, screen=None, subject_id=""):
+    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, disp=None, screen=None, subject_id=""):
         """
         Sets up the game by initializing PyGame.
         """
         # game clock
         self.clock = None
         self.time_limit = time_limit
-        self.game_time = time_limit
+        self.game_time = 0.0
 
         # game difficulty
         self.difficulty = difficulty
@@ -48,6 +48,7 @@ class Game:
         self.spawn_counter = 1
 
         # set screen information
+        self.disp = disp
         self.screen = screen
 
         if world_name:
@@ -69,7 +70,7 @@ class Game:
 
     def reset_clock(self):
         self.clock = pygame.time.Clock()
-        self.game_time = self.time_limit
+        self.game_time = 0.0
 
     def run_pause(self):
         """ Runs the game in pause mode. """
@@ -91,7 +92,7 @@ class Game:
                 self.logger.log_action()  # actions are logged every time a update_player_event occurs
 
         dt = self.clock.tick_busy_loop(self.fps)
-        self.game_time -= dt
+        self.game_time += dt
         self.world.update()
         self.render()
 
@@ -118,13 +119,12 @@ class Game:
 
             self.world_status = self.world.check_game_state()
             if self.world_status != WorldStatus.RUNNING:
-
                 # draw text whether game was won, lost or time is up
                 drawText(self.screen, self.world_status.value, colors.DARK_GREEN if self.world_status == WorldStatus.WON else colors.RED,
                          pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 4, 7 * config.FIELD_HEIGHT, config.DISPLAY_WIDTH_PX / 2,
                                           config.DISPLAY_HEIGHT_PX / 2), font_size=90)
 
-                pygame.display.flip()
+                self.flip_display()
 
                 # game won
                 pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
@@ -139,30 +139,39 @@ class Game:
         """
         Checks if the game is over.
         """
-        if self.game_time <= 0:
+        if self.game_time >= self.time_limit:
             self.world_status = WorldStatus.TIMED_OUT
             # self.running = False
+
+    def flip_display(self):
+        self.disp.fill(screen=self.screen)
+        self.disp.show()
 
     def draw_timer(self):
         """
         Draws the remaining time as a decreasing circle.
         """
-        ratio_time_left = self.game_time / config.LEVEL_TIME
+        time_left = self.time_limit - self.game_time
+        ratio_time_left = time_left / config.LEVEL_TIME
 
         margin_x = 20
         offset_y = 5 / 8 * config.FIELD_HEIGHT
         height = 20
 
-        pygame.draw.rect(self.screen, colors.RED, (
-            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y,
-            ratio_time_left * (config.FIELD_WIDTH - margin_x),
-            height))
-        pygame.draw.rect(self.screen, colors.BLACK, (
-            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, config.FIELD_WIDTH - margin_x, height), 3)
+        self.screen.draw_rect(color='red',
+                              x=self.world.player.rect.x + margin_x // 2,
+                              y=self.world.player.rect.y + offset_y,
+                              w=ratio_time_left * (config.FIELD_WIDTH - margin_x),
+                              h=height,
+                              fill=True)
 
-        # pygame.draw.arc(self.screen, colors.RED,
-        #                 (self.world.player.rect.x, self.world.player.rect.y, config.FIELD_WIDTH, config.FIELD_HEIGHT), 0,
-        #                 np.deg2rad(360 * ratio_time_left), 15)
+        self.screen.draw_rect(color='black',
+                              x=self.world.player.rect.x + margin_x // 2,
+                              y=self.world.player.rect.y + offset_y,
+                              w=config.FIELD_WIDTH - margin_x,
+                              h=height,
+                              pw=3,
+                              fill=False)
 
         if self.game_time < config.LEVEL_TIME_AUDIO_CUE and not self.audio_cue_played:
             self.audio_cue_played = True
@@ -177,7 +186,7 @@ class Game:
         self.draw_timer()
         self.text_displayer.display_debug_information()
 
-        pygame.display.flip()
+        self.flip_display()
 
     def calc_score(self):
         """
