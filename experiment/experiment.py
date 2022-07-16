@@ -131,7 +131,7 @@ class Experiment:
 
             self.show_message("Please press TAB to continue (this may take a moment)")
 
-        # TODO save text information
+        # TODO save text information or create sosci survey for this
 
         wait_keys()
 
@@ -217,8 +217,16 @@ class Experiment:
                 self.show_screen_between_levels()
                 self.level_num += 1
 
-        # TODO end screen
-        self.strategy_screen()
+        # end screen
+        self.end_screen()
+
+    def end_screen(self):
+        self.screen.fill(colors.WHITE)
+        self.show_message('That\'s it, thank you very much for participating!',
+                          y_offset=300, font_size=60)
+        self.show_message('Please press any key to exit now.', y_offset=500)
+        self.flip_display()
+        wait_keys()
 
     def show_screen_between_levels(self):
         """
