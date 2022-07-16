@@ -195,6 +195,7 @@ class Experiment:
                 self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
 
                 # Show pre-start screen
+                self.current_game.pre_run()
                 self.pre_start_screen()
 
                 # run game

@@ -28,10 +28,9 @@ FPS = 60  # frame rate
 LEVEL_TIME = 60_000  # in ms
 LEVEL_TIME_AUDIO_CUE = 10_000  # in ms
 DELAY_AFTER_LEVEL_FINISH = 1_000  # in ms (time until game is closed after level is finished)
+PRE_RUN_ITERATIONS = 2000
 
 # obstacles
-SPAWN_RATE = 2
-OBSTACLE_UPDATE_INTERVAL = 500
 OBSTACLE_MAX_VELOCITY = 8
 PLAYER_UPDATE_INTERVAL = 100
 

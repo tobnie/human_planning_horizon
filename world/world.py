@@ -72,6 +72,7 @@ class World:
         """
         Updates the obstacle rects of all lanes
         """
+        self.spawn()
         self.player.update()
         for lane in self.directed_lanes.sprites():
             if isinstance(lane, DirectedLane):

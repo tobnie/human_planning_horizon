@@ -12,14 +12,12 @@ from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
 
 INPUT_EVENT = pygame.USEREVENT + 0
-SPAWN_OBSTACLE_EVENT = pygame.USEREVENT + 1
 UPDATE_PLAYER_EVENT = pygame.USEREVENT + 2
-SPAWN_EVENT = pygame.USEREVENT + 3
-
 
 class Game:
 
-    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, disp=None, screen=None, subject_id=""):
+    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, disp=None, screen=None,
+                 subject_id=""):
         """
         Sets up the game by initializing PyGame.
         """
@@ -58,9 +56,8 @@ class Game:
 
         self.screen.fill(colors.BLACK)
 
-        pygame.time.set_timer(SPAWN_OBSTACLE_EVENT, config.OBSTACLE_UPDATE_INTERVAL)
+        # TODO move to run()?
         pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
-        pygame.time.set_timer(SPAWN_EVENT, config.SPAWN_RATE)
 
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
@@ -76,23 +73,23 @@ class Game:
         """ Runs the game in pause mode. """
         self.event_handler.handle_input_event()
 
+    def pre_run(self):
+        """ Pre-runs the game such that obstacles are already on the lanes and not just starting to spawn for the first time."""
+
+        for i in range(config.PRE_RUN_ITERATIONS):
+            self.world.update()
+
     def run_normal(self):
         """ Runs the game normally. """
 
         for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
-            if e.type == SPAWN_OBSTACLE_EVENT:
-                if self.spawn_counter == config.SPAWN_RATE:
-                    self.world.spawn()
-                    self.spawn_counter = 1
-                else:
-                    self.spawn_counter += 1
-
-            elif e.type == UPDATE_PLAYER_EVENT:
+            if e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
                 self.logger.log_action()  # actions are logged every time a update_player_event occurs
 
         dt = self.clock.tick_busy_loop(self.fps)
         self.game_time += dt
+
         self.world.update()
         self.render()
 
