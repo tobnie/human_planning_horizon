@@ -95,7 +95,7 @@ class Game:
 
         # TODO save world state and eye tracking data with every sample of eyetracker
         self.logger.log_state()  # states are sampled every time
-        self.logger.log_eyetracker_data(None)  # TODO give eyetracker data
+        self.logger.log_eyetracker_data(None)  # TODO give eyetracker data or rely on native data saving in eye tracker
         self.world.player.check_status()
 
     def run(self):

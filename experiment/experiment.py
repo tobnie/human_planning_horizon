@@ -21,7 +21,6 @@ from world_generation.generation_config import GameDifficulty
 N_WORLDS_PER_DIFFICULTY = 20
 N_SCORES_DISPLAYED = 10
 
-
 class Experiment:
 
     def __init__(self):
@@ -130,9 +129,6 @@ class Experiment:
             self.flip_display()
 
             self.show_message("Please press TAB to continue (this may take a moment)")
-
-        # TODO save text information or create sosci survey for this
-
         wait_keys()
 
     def rules_screen(self):
