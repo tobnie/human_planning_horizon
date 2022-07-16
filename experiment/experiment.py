@@ -30,18 +30,12 @@ class Experiment:
         # create pygaze Display object
         self.disp = libscreen.Display(disptype='pygame', dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
         self.screen = EyeTrackerScreen(dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
-        # self.eyetracker = MyEyeTracker(disp=self.disp)
+        # self.eyetracker = MyEyeTracker(disp=self.disp) # TODO
 
         self.subject_id = None
         self.subject_score = 0
 
         self.level_num = 1
-
-        # create a window
-        # self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
-        # self.screen.fill(colors.WHITE)
-        self.flip_display()
-        wait_keys()
 
     def _welcome_screen_template(self):
         """ Shows the welcome screen template. """
@@ -204,7 +198,15 @@ class Experiment:
                 self.pre_start_screen()
 
                 # run game
+                # TODO
+                # self.eyetracker.start_recording()
+                # self.eyetracker.log_var('difficulty', difficulty.value)
+                # self.eyetracker.log_var('world_name', world_name)
+                # self.eyetracker.status_msg("trial %d" % self.level_num)
                 self.current_game.run()
+
+                # TODO
+                # self.eyetracker.stop_recording()
 
                 # save logged data after level
                 # TODO maybe loading time or similar if it takes too long?
