@@ -112,7 +112,7 @@ class Vehicle(Obstacle):
 
     def __init__(self, world, x: float = 0, y: int = 0, velocity: int = 0,
                  width: int = 1, height: int = 1):
-        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, "car.jpg"))
+        super().__init__(world, x, y, velocity, width, height, os.path.join(config.SPRITES_DIR, config.CAR_FILE))
 
 
 class LilyPad(Obstacle):

@@ -127,6 +127,7 @@ class Game:
                 pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
                 self.save_logging_data()
                 self.running = False
+        pygame.event.clear()
 
     def save_logging_data(self):
         """ Saves the data in the game logger. """

@@ -56,4 +56,5 @@ FROG_SOUND_FILEPATH = "./sounds/frog.mp3"
 
 # sprite files
 LILYPAD_FILE = 'lilypad.jpg'
-LOG_FILE = 'log.png'
+LOG_FILE = 'plank.jpg'
+CAR_FILE = 'car.png'

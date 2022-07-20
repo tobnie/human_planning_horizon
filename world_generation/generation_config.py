@@ -50,7 +50,7 @@ VehicleWidths = {
 # Lily Pad Widths
 LilyPadWidthEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .45, .45])
 LilyPadWidthNormal = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[.1, .45, .4, .05])
-LilyPadWidthHard = DiscreteDistribution(values=[1, 2], probabilities=[.4, .6])
+LilyPadWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.35, .55, .1])
 LilyPadWidths = {
     GameDifficulty.EASY: LilyPadWidthEasy,
     GameDifficulty.NORMAL: LilyPadWidthNormal,
