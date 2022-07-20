@@ -25,18 +25,18 @@ class WorldState:
          """
 
         # collect objects
-        objects = []
+        game_objects = []
 
         # add player
         player_list = [self.OBJECT_TYPE_TO_INT[self.world.player.__class__], self.world.player.rect.x, self.world.player.rect.y,
                        self.world.player.width]
-        objects.append(player_list)
+        game_objects.append(player_list)
 
         # add objects
         for lane in self.world.directed_lanes:
-            if lane is isinstance(lane, DirectedLane):
+            if isinstance(lane, DirectedLane):
                 for obj in lane.non_player_sprites.sprites():
                     object_list = [self.OBJECT_TYPE_TO_INT[obj.__class__], obj.rect.x, obj.rect.y, obj.width]
-                    objects.append(object_list)
+                    game_objects.append(object_list)
 
-        return np.asarray(objects)
+        return np.asarray(game_objects)
