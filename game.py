@@ -220,8 +220,9 @@ class Game:
             score['visited_lanes'] = 5 * self.world.player.highest_visited_lane
 
         # point multiplier for difficulty
-        # TODO really use multiplier because it reveals the difficulty of a level?
-        if self.difficulty == GameDifficulty.EASY:
+        if self.world_status == WorldStatus.LOST:
+            score['difficulty_multiplier'] = 0
+        elif self.difficulty == GameDifficulty.EASY:
             score['difficulty_multiplier'] = config.EASY_MULTIPLIER
         elif self.difficulty == GameDifficulty.NORMAL:
             score['difficulty_multiplier'] = config.NORMAL_MULTIPLIER
