@@ -63,7 +63,7 @@ class WorldGenerator:
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.VehicleWidth),
                      'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesVehicle),
-                     'obstacles_without_gap': self._draw(GameParameter.VehicleSpawnGap)}
+                     'spawn_probability': ParameterDistributions[GameParameter.VehicleSpawnProbability][self.difficulty]}
 
         return lane_dict
 
@@ -77,7 +77,7 @@ class WorldGenerator:
                      'lane_velocity': self._draw(GameParameter.LaneVelocity),
                      'obstacle_size': self._draw(GameParameter.LilyPadWidth),
                      'distance_between_obstacles': self._draw(GameParameter.DistanceBetweenObstaclesLilyPad),
-                     'obstacles_without_gap': self._draw(GameParameter.LilyPadSpawnGap)}
+                     'spawn_probability': ParameterDistributions[GameParameter.LilyPadSpawnProbability][self.difficulty]}
 
         return lane_dict
 
@@ -157,7 +157,3 @@ class WorldGenerator:
 
         world_dict['lanes'] = lanes
         return world_dict
-
-
-world_generator = WorldGenerator()
-world_generation_utils.save_world_dict(world_generator.generate_world(GameDifficulty.EASY), "random_world")

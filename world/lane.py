@@ -72,7 +72,8 @@ class FinishLane(Lane):
 class DirectedLane(Lane, ABC):
 
     def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, velocity: int = 1,
-                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1,
+                 spawn_probability: float = 0.5):
         super().__init__(world, row, color)
 
         # take given direction, otherwise choose randomly if left or right
@@ -86,11 +87,10 @@ class DirectedLane(Lane, ABC):
         # lane dynamics
         self.velocity = velocity
         self.direction = lane_direction
-        self.distance_between_obstacles = distance_between_obstacles
+        self.base_distance_between_obstacles = distance_between_obstacles
         self.obstacle_size = obstacle_size
-        self.obstacles_without_gap = obstacles_without_gap
-        self.currently_in_spawn_gap = False
-        self.obstacle_counter = 0
+        self.spawn_probability = spawn_probability  # probability of spawning an obstacle in a lane
+        self.missed_spawns = 0  # how many times no obstacle was spawned even though the distance threshold was reached
 
         # counts the calls of the update method and only updates the sprites if the update count is a multiple of the velocity
         self.update_cnt = config.OBSTACLE_MAX_VELOCITY
@@ -114,22 +114,15 @@ class DirectedLane(Lane, ABC):
         """ Spawns a new entity in the lane conforming to the currently active entities and the specified lane parameters. """
 
         # if the distance is set to be infinity, never spawn anything
-        if self.distance_between_obstacles == np.inf:
+        if self.base_distance_between_obstacles == -1:
             return
 
-        if self.obstacle_counter == self.obstacles_without_gap:
-            self.currently_in_spawn_gap = True
-
-        # if currently in spawn gap, do not spawn new sprite and increase threshold for next spawn
-        threshold = self.distance_between_obstacles if not self.currently_in_spawn_gap else 2 * self.distance_between_obstacles + self.obstacle_size
+        threshold = self.base_distance_between_obstacles + self.missed_spawns * (self.base_distance_between_obstacles + self.obstacle_size)
 
         # if distance to last sprite is smaller than threshold, do not spawn new sprite
         if self.calc_distance_of_new_to_last_sprite() >= threshold * config.FIELD_WIDTH:
-            if self.currently_in_spawn_gap:
-                self.currently_in_spawn_gap = False
-                self.obstacle_counter = 0
-            # skip obstacle if spawn gap is reached
-            if not self.currently_in_spawn_gap:
+
+            if np.random.random() < self.spawn_probability:
                 # get obstacle parameters
                 if self.direction == LaneDirection.RIGHT:
                     obstacle_velocity = self.velocity
@@ -138,12 +131,14 @@ class DirectedLane(Lane, ABC):
                     obstacle_velocity = -self.velocity
                     obstacle_x = len(self) * config.FIELD_WIDTH
 
-                # create new obstacles
+                # create new obstacle
                 obstacle_y = self.row * config.FIELD_HEIGHT
                 new_entity: Obstacle = self.obstacle_constructor(self.world, obstacle_x, obstacle_y, obstacle_velocity,
                                                                  self.obstacle_size, 1)
                 self.non_player_sprites.add(new_entity)
-                self.obstacle_counter += 1
+                self.missed_spawns = 0
+            else:
+                self.missed_spawns += 1
 
     def draw_lane(self, screen) -> None:
         """ Draws the lane and all its entities on the given screen object.  """
@@ -159,10 +154,10 @@ class DirectedLane(Lane, ABC):
 class StreetLane(DirectedLane):
 
     def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
-                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1, spawn_probability: int = 3
                  ):
         super().__init__(world, row, lane_direction, colors.BLACK, velocity,
-                         distance_between_obstacles, obstacle_size, obstacles_without_gap)
+                         distance_between_obstacles, obstacle_size, spawn_probability)
 
         # set distance between vehicles to infinity if distance is coded as -1 in json (i.e. no obstacles)
         if distance_between_obstacles == -1:
@@ -175,8 +170,8 @@ class StreetLane(DirectedLane):
 class WaterLane(DirectedLane):
 
     def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
-                 distance_between_obstacles: int = 4, obstacle_size: int = 1, obstacles_without_gap: int = 3):
+                 distance_between_obstacles: int = 4, obstacle_size: int = 1, spawn_probability: int = 3):
         super().__init__(world, row, lane_direction, colors.BLUE, velocity,
-                         distance_between_obstacles, obstacle_size, obstacles_without_gap)
+                         distance_between_obstacles, obstacle_size, spawn_probability)
         self.obstacle_constructor = LilyPad
         self.fields = [Field(i, self.row, self.color, config.SPRITES_DIR + 'water.png') for i in range(config.N_FIELDS_PER_LANE)]

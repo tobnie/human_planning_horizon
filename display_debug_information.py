@@ -66,7 +66,7 @@ class TextDisplayer:
             if isinstance(lane, DirectedLane):
                 debug_information.append(
                     f"{lane.__class__} direction={lane.direction.name} row={lane.row} len={len(lane)} v={lane.velocity} obst_size={lane.obstacle_size}"
-                    f" d={lane.distance_between_obstacles} gap_skip={lane.obstacles_without_gap} dist_between_last_two_sprites={lane.calc_distance_of_new_to_last_sprite()}")
+                    f" d={lane.base_distance_between_obstacles} spawn_p={lane.spawn_probability} dist_between_last_two_sprites={lane.calc_distance_of_new_to_last_sprite()}")
             elif isinstance(lane, FinishLane):
                 debug_information.append(
                     f"{lane.__class__} target_position={lane.target_position * config.FIELD_WIDTH} row={lane.row} len={len(lane)}")

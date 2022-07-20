@@ -20,8 +20,8 @@ class GameParameter(Enum):
     LilyPadWidth = 2
     DistanceBetweenObstaclesLilyPad = 3
     DistanceBetweenObstaclesVehicle = 4
-    VehicleSpawnGap = 5
-    LilyPadSpawnGap = 6
+    VehicleSpawnProbability = 5
+    LilyPadSpawnProbability = 6
     TargetPosition = 7
 
 
@@ -85,24 +85,42 @@ DistanceBetweenObstaclesVehicle = {
     GameDifficulty.HARD: DistanceBetweenObstaclesVehicleHard
 }
 
-# Spawn Gaps (after how many obstacles should there be a gap)
-LilyPadSpawnGapsEasy = DiscreteDistribution(values=[3, 4], probabilities=[.2, .8])
-LilyPadSpawnGapsNormal = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .5, .4])
-LilyPadSpawnGapsHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.1, .5, .4])
-LilyPadSpawnGaps = {
-    GameDifficulty.EASY: LilyPadSpawnGapsEasy,
-    GameDifficulty.NORMAL: LilyPadSpawnGapsNormal,
-    GameDifficulty.HARD: LilyPadSpawnGapsHard
+# # Spawn Gaps (after how many obstacles should there be a gap)
+# LilyPadSpawnGapsEasy = DiscreteDistribution(values=[3, 4], probabilities=[.2, .8])
+# LilyPadSpawnGapsNormal = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .5, .4])
+# LilyPadSpawnGapsHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.1, .5, .4])
+# LilyPadSpawnGaps = {
+#     GameDifficulty.EASY: LilyPadSpawnGapsEasy,
+#     GameDifficulty.NORMAL: LilyPadSpawnGapsNormal,
+#     GameDifficulty.HARD: LilyPadSpawnGapsHard
+# }
+#
+# # Spawn Gaps Vehicles
+# VehicleSpawnGapsEasy = DiscreteDistribution(values=[1, 2], probabilities=[.2, .8])
+# VehicleSpawnGapsNormal = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .5, .4])
+# VehicleSpawnGapsHard = DiscreteDistribution(values=[3, 4], probabilities=[.2, .8])
+# VehicleSpawnGaps = {
+#     GameDifficulty.EASY: VehicleSpawnGapsEasy,
+#     GameDifficulty.NORMAL: VehicleSpawnGapsNormal,
+#     GameDifficulty.HARD: VehicleSpawnGapsHard
+# }
+
+LilyPadSpawnProbabilityEasy = 0.9
+LilyPadSpawnProbabilityNormal = 0.7
+LilyPadSpawnProbabilityHard = 0.5
+LilyPadSpawnProbability = {
+    GameDifficulty.EASY: LilyPadSpawnProbabilityEasy,
+    GameDifficulty.NORMAL: LilyPadSpawnProbabilityNormal,
+    GameDifficulty.HARD: LilyPadSpawnProbabilityHard
 }
 
-# Spawn Gaps Vehicles
-VehicleSpawnGapsEasy = DiscreteDistribution(values=[1, 2], probabilities=[.2, .8])
-VehicleSpawnGapsNormal = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .5, .4])
-VehicleSpawnGapsHard = DiscreteDistribution(values=[3, 4], probabilities=[.2, .8])
-VehicleSpawnGaps = {
-    GameDifficulty.EASY: VehicleSpawnGapsEasy,
-    GameDifficulty.NORMAL: VehicleSpawnGapsNormal,
-    GameDifficulty.HARD: VehicleSpawnGapsHard
+VehicleSpawnProbabilityEasy = 0.5
+VehicleSpawnProbabilityNormal = 0.7
+VehicleSpawnProbabilityHard = 0.9
+VehicleSpawnProbability = {
+    GameDifficulty.EASY: VehicleSpawnProbabilityEasy,
+    GameDifficulty.NORMAL: VehicleSpawnProbabilityNormal,
+    GameDifficulty.HARD: VehicleSpawnProbabilityHard
 }
 
 ParameterDistributions = {
@@ -112,6 +130,6 @@ ParameterDistributions = {
     GameParameter.DistanceBetweenObstaclesLilyPad: DistanceBetweenObstaclesLilyPad,
     GameParameter.DistanceBetweenObstaclesVehicle: DistanceBetweenObstaclesVehicle,
     GameParameter.TargetPosition: TargetPositions,
-    GameParameter.LilyPadSpawnGap: LilyPadSpawnGaps,
-    GameParameter.VehicleSpawnGap: VehicleSpawnGaps
+    GameParameter.LilyPadSpawnProbability: LilyPadSpawnProbability,
+    GameParameter.VehicleSpawnProbability: VehicleSpawnProbability
 }

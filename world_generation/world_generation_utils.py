@@ -25,13 +25,3 @@ def save_world_dict(world_dict, filename, path=LEVELS_DIR, verbose=False):
 
     if verbose:
         print("World \'{}\' saved.".format(filename))
-
-
-def load_world(filename):
-    """Loads and returns the world from the json at the given path."""
-
-    print("Loading world {}...".format(filename))
-    world = World(world_path=filename)
-    print("World \'{}\' loaded.".format(filename))
-
-    return world

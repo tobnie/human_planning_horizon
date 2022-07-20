@@ -182,7 +182,7 @@ class World:
                                          velocity=lane_info['lane_velocity'],
                                          distance_between_obstacles=lane_info['distance_between_obstacles'],
                                          obstacle_size=lane_info['obstacle_size'],
-                                         obstacles_without_gap=lane_info['obstacles_without_gap'])
+                                         spawn_probability=lane_info['spawn_probability'])
                 self.street_lanes.add(street_lane)
                 self.directed_lanes.add(street_lane)
                 self.lanes.add(street_lane)
@@ -197,7 +197,7 @@ class World:
                                        velocity=lane_info['lane_velocity'],
                                        distance_between_obstacles=lane_info['distance_between_obstacles'],
                                        obstacle_size=lane_info['obstacle_size'],
-                                       obstacles_without_gap=lane_info['obstacles_without_gap'])
+                                       spawn_probability=lane_info['spawn_probability'])
                 self.water_lanes.add(water_lane)
                 self.directed_lanes.add(water_lane)
                 self.lanes.add(water_lane)
@@ -235,8 +235,8 @@ class World:
                 lane_dict['direction'] = lane.direction.value
                 lane_dict['velocity'] = lane.velocity
                 lane_dict['obstacle_size'] = lane.obstacle_size
-                lane_dict['distance_between_obstacles'] = lane.distance_between_obstacles
-                lane_dict['obstacles_without_gap'] = lane.obstacles_without_gap
+                lane_dict['distance_between_obstacles'] = lane.base_distance_between_obstacles
+                lane_dict['spawn_probability'] = lane.spawn_probability
 
             lanes_list.append(lane_dict)
 
