@@ -12,7 +12,8 @@ from world.world import World, WorldStatus
 from world_generation.generation_config import GameDifficulty
 
 INPUT_EVENT = pygame.USEREVENT + 0
-UPDATE_PLAYER_EVENT = pygame.USEREVENT + 2
+UPDATE_PLAYER_EVENT = pygame.USEREVENT + 1
+
 
 class Game:
 
