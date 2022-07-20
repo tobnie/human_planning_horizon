@@ -24,7 +24,7 @@ class Game:
         # game clock
         self.clock = None
         self.time_limit = time_limit
-        self.game_time = 0.0
+        self.game_time = 0
 
         # game difficulty
         self.difficulty = difficulty
@@ -67,7 +67,7 @@ class Game:
 
     def reset_clock(self):
         self.clock = pygame.time.Clock()
-        self.game_time = 0.0
+        self.game_time = 0
 
     def run_pause(self):
         """ Runs the game in pause mode. """

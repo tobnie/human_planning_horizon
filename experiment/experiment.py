@@ -1,4 +1,5 @@
 import csv
+import os
 import sys
 
 import numpy as np
@@ -20,6 +21,7 @@ from world_generation.generation_config import GameDifficulty
 # TODO move to experiment config
 N_WORLDS_PER_DIFFICULTY = 20
 N_SCORES_DISPLAYED = 10
+
 
 class Experiment:
 
@@ -84,7 +86,7 @@ class Experiment:
 
             self.show_message(text, y_offset=450)
             self.flip_display()
-            self.subject_id = text
+            self.subject_id = check_if_subject_id_exists(text)
 
     def strategy_screen(self):
 
@@ -364,6 +366,17 @@ class Experiment:
         drawText(self.screen, msg, colors.BLACK,
                  pygame.rect.Rect(x, 200 + y_offset, width, config.DISPLAY_HEIGHT_PX / 2),
                  font_size=font_size, alignment=alignment)
+
+
+def check_if_subject_id_exists(subject_id):
+    """ Checks if the subject id already exists and returns a modified subject id if it does. """
+    cnt = 0
+    for file in os.listdir(config.LEVEL_DATA_DIR):
+        # check if file is directory
+        if os.path.isdir(os.path.join(config.LEVEL_DATA_DIR, file)):
+            if file.startswith(subject_id):
+                cnt += 1
+    return subject_id + '_' + str(cnt) if cnt > 0 else subject_id
 
 
 def wait_keys(keys=None):

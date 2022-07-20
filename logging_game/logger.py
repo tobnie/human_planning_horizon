@@ -10,7 +10,7 @@ class Logger:
 
     def __init__(self, game, subject_id, world_name, difficulty, time_limit, log_directory=config.LEVEL_DATA_DIR):
         # set log directory
-        self._set_log_directory(log_directory, subject_id, world_name)
+        self._set_log_directory(log_directory, subject_id, difficulty, world_name)
         self.game = game
         self.world = game.world
 
@@ -69,27 +69,26 @@ class Logger:
         # concatenate time and state
         actions_with_time = np.vstack((times, actions)).T
 
-        # TODO remove print
-        print("Full array Actions:\n", actions_with_time)
-
         # save as .npz-file
         np.savez_compressed(self.log_directory + 'actions.npz', actions_with_time)
 
     def _save_world_states_as_npz(self):
         """ Saves the world states as a .npz-file. """
 
-        times, states = zip(*self.world_states)
-        states = np.asarray(states)
+        # times, states = zip(*self.world_states)
 
-        # concatenate time and state
-        times, states = np.asarray(times).reshape(-1, 1), states.reshape(states.shape[0], states.shape[2])
-        states_with_time = np.hstack((times, states))
+        for time, state in self.world_states:
+            # TODO remove print
+            print("Full array state at time {}:\n".format(time), state)
+            np.savez_compressed(self.log_directory + f'state_{time}.npz', state)
 
-        # TODO remove print
-        print("Full array state:\n", states_with_time)
-
-        # save as .npz-file
-        np.savez_compressed(self.log_directory + 'world_states.npz', states_with_time)
+        # # concatenate time and state
+        # states = np.asarray(states)
+        # times = np.reshape(np.asarray(times), (-1, 1, 1))
+        # states_with_time = np.concatenate((states, times))
+        #
+        # # save as .npz-file
+        # np.savez_compressed(self.log_directory + 'world_states.npz', states_with_time)
 
     def _save_eyetracker_data_as_npz(self):
         """ Saves the eyetracker data as a .npz-file. """
@@ -100,14 +99,14 @@ class Logger:
         gaze_with_time = np.vstack((times, gaze_x, gaze_y)).T
 
         # TODO remove print
-        print("Full array EyeTracking:\n", gaze_with_time)
+        # print("Full array EyeTracking:\n", gaze_with_time)
 
         # save as .npz-file
         np.savez_compressed(self.log_directory + 'eyetracker_data.npz', gaze_with_time)
 
-    def _set_log_directory(self, log_directory, subject_id, world_name):
+    def _set_log_directory(self, log_directory, subject_id, difficulty, world_name):
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
-        self.log_directory = log_directory + subject_id + '/' + world_name + '/'
+        self.log_directory = log_directory + subject_id + '/' + difficulty.value + '/' + world_name + '/'
 
         # check if path exists
         if not os.path.exists(self.log_directory):
