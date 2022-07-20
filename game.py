@@ -32,7 +32,7 @@ class Game:
         # audio cue
         self.audio_cue_played = False
 
-        self.display_debug_information_player = True
+        self.display_debug_information_player = False
         self.display_debug_information_objects = False
         self.display_debug_information_lanes = False
         self.running = True

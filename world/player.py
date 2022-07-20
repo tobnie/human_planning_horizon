@@ -113,16 +113,27 @@ class Player(DynamicObject):
         self.delta_y = 0
 
         # check bounds in x-direction
-        if new_x <= self.movement_bounds_x[0]:
-            self.kill()
-        elif new_x >= self.movement_bounds_x[1]:
-            self.kill()
+        if self.y != 0:
+            if new_x <= self.movement_bounds_x[0]:
+                self.kill()
+            elif new_x >= self.movement_bounds_x[1]:
+                self.kill()
+            else:
+                new_x = new_x
         else:
-            new_x = new_x
+            new_x = self.x
 
         # check bounds in y-direction
-        if new_y <= self.movement_bounds_y[0]:
+        if new_y < self.movement_bounds_y[0]:
             new_y = self.movement_bounds_y[0]
+        elif new_y == 0:
+            # only update y if the player will end on the target position
+            target_x = self.world.finish_lanes.sprites()[0].target_position * config.FIELD_WIDTH
+            new_center_x = new_x + self.rect.width / 2
+            if target_x <= new_center_x <= target_x + config.FIELD_WIDTH:
+                new_y = self.movement_bounds_y[0]
+            else:
+                new_y = self.y
         elif new_y >= self.movement_bounds_y[1]:
             new_y = self.movement_bounds_y[1]
         else:

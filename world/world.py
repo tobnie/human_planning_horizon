@@ -95,8 +95,8 @@ class World:
         Checks if the game has been won.
         """
         finish_lane: FinishLane = self.finish_lanes.sprites()[0]
-        if self.player.rect.y == 0 and finish_lane.target_position * config.FIELD_WIDTH <= self.player.rect.x <= (
-                finish_lane.target_position + 1) * config.FIELD_WIDTH:
+        target_x = finish_lane.target_position * config.FIELD_WIDTH
+        if self.player.rect.y == 0 and target_x <= self.player.rect.centerx <= target_x + config.FIELD_WIDTH:
             return True
 
     def draw_lanes(self, screen) -> None:
