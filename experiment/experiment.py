@@ -273,7 +273,6 @@ class Experiment:
             reader = csv.reader(f, delimiter=';')
             scores = list(reader)
 
-        print(scores)
         scores.sort(key=lambda x: int(x[1]), reverse=True)  # sort in place by points
         scores = np.array(scores[:N_SCORES_DISPLAYED])
 

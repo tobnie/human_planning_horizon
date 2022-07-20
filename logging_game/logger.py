@@ -74,21 +74,8 @@ class Logger:
 
     def _save_world_states_as_npz(self):
         """ Saves the world states as a .npz-file. """
-
-        # times, states = zip(*self.world_states)
-
         for time, state in self.world_states:
-            # TODO remove print
-            print("Full array state at time {}:\n".format(time), state)
             np.savez_compressed(self.log_directory + f'state_{time}.npz', state)
-
-        # # concatenate time and state
-        # states = np.asarray(states)
-        # times = np.reshape(np.asarray(times), (-1, 1, 1))
-        # states_with_time = np.concatenate((states, times))
-        #
-        # # save as .npz-file
-        # np.savez_compressed(self.log_directory + 'world_states.npz', states_with_time)
 
     def _save_eyetracker_data_as_npz(self):
         """ Saves the eyetracker data as a .npz-file. """
