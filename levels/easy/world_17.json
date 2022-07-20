@@ -8,7 +8,7 @@
         9,
         14
     ],
-    "target_position": 2,
+    "target_position": 17,
     "lanes": [
         {
             "row": 0,
@@ -19,9 +19,9 @@
             "type": "WaterLane",
             "direction": -1,
             "lane_velocity": 1,
-            "obstacle_size": 4,
+            "obstacle_size": 3,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 4
+            "spawn_probability": 0.9
         },
         {
             "row": 2,
@@ -29,8 +29,8 @@
             "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 4,
-            "distance_between_obstacles": 1,
-            "obstacles_without_gap": 4
+            "distance_between_obstacles": 2,
+            "spawn_probability": 0.9
         },
         {
             "row": 3,
@@ -39,16 +39,16 @@
             "lane_velocity": 1,
             "obstacle_size": 4,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 4
+            "spawn_probability": 0.9
         },
         {
             "row": 4,
             "type": "WaterLane",
             "direction": 1,
-            "lane_velocity": 1,
-            "obstacle_size": 3,
+            "lane_velocity": 2,
+            "obstacle_size": 4,
             "distance_between_obstacles": 1,
-            "obstacles_without_gap": 4
+            "spawn_probability": 0.9
         },
         {
             "row": 5,
@@ -57,16 +57,16 @@
             "lane_velocity": 2,
             "obstacle_size": 3,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 4
+            "spawn_probability": 0.9
         },
         {
             "row": 6,
             "type": "WaterLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 2,
+            "obstacle_size": 3,
             "distance_between_obstacles": 2,
-            "obstacles_without_gap": 4
+            "spawn_probability": 0.9
         },
         {
             "row": 7,
@@ -77,36 +77,36 @@
             "type": "StreetLane",
             "direction": -1,
             "lane_velocity": 1,
-            "obstacle_size": 1,
+            "obstacle_size": 2,
             "distance_between_obstacles": 3,
-            "obstacles_without_gap": 2
+            "spawn_probability": 0.5
         },
         {
             "row": 9,
             "type": "StreetLane",
             "direction": 1,
             "lane_velocity": 1,
-            "obstacle_size": 1,
+            "obstacle_size": 2,
             "distance_between_obstacles": 3,
-            "obstacles_without_gap": 2
+            "spawn_probability": 0.5
         },
         {
             "row": 10,
             "type": "StreetLane",
             "direction": -1,
             "lane_velocity": 1,
-            "obstacle_size": 1,
+            "obstacle_size": 2,
             "distance_between_obstacles": 4,
-            "obstacles_without_gap": 2
+            "spawn_probability": 0.5
         },
         {
             "row": 11,
             "type": "StreetLane",
             "direction": 1,
-            "lane_velocity": 1,
+            "lane_velocity": 2,
             "obstacle_size": 1,
-            "distance_between_obstacles": -1,
-            "obstacles_without_gap": 2
+            "distance_between_obstacles": 3,
+            "spawn_probability": 0.5
         },
         {
             "row": 12,
@@ -114,8 +114,8 @@
             "direction": -1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": -1,
-            "obstacles_without_gap": 2
+            "distance_between_obstacles": 3,
+            "spawn_probability": 0.5
         },
         {
             "row": 13,
@@ -123,8 +123,8 @@
             "direction": 1,
             "lane_velocity": 1,
             "obstacle_size": 1,
-            "distance_between_obstacles": 3,
-            "obstacles_without_gap": 2
+            "distance_between_obstacles": -1,
+            "spawn_probability": 0.5
         },
         {
             "row": 14,
