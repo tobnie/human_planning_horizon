@@ -1,8 +1,5 @@
 import pygame
 
-# screen information
-import config
-
 DISPLAY_WIDTH_PX = pygame.display.Info().current_w
 DISPLAY_HEIGHT_PX = pygame.display.Info().current_h
 
@@ -20,7 +17,7 @@ FIELD_WIDTH = DISPLAY_WIDTH_PX / N_FIELDS_PER_LANE
 FIELD_HEIGHT = ROW_HEIGHT = DISPLAY_HEIGHT_PX / N_LANES
 
 ############################################### PLAYER ################################################
-PLAYER_MOVEMENT_BOUNDS_X = (-config.FIELD_WIDTH, DISPLAY_WIDTH_PX)
+PLAYER_MOVEMENT_BOUNDS_X = (-FIELD_WIDTH, DISPLAY_WIDTH_PX)
 PLAYER_MOVEMENT_BOUNDS_Y = (0, DISPLAY_HEIGHT_PX - FIELD_HEIGHT)
 
 ############################################ GAME DYNAMICS ############################################
