@@ -239,15 +239,17 @@ class Experiment:
         self.flip_display()
         wait_keys()
 
-        # save own score
-        self.save_score()
+        # show highscore screen and save current score after the first and each five levels
+        if self.level_num == 1 or self.level_num % 5 == 0:
+            # save own score
+            self.save_score()
 
-        # show highscore after that number of levels (maybe not after each level but only after each 10 or so)
-        self.display_highscores()
-        self.show_message("Press any key to continue to the next level.", y_offset=600)
+            # show highscore after that number of levels (maybe not after each level but only after each 10 or so)
+            self.display_highscores()
+            self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-        self.flip_display()
-        wait_keys()
+            self.flip_display()
+            wait_keys()
 
     def display_highscores(self):
         """
