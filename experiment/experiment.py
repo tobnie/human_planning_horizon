@@ -1,5 +1,6 @@
 import csv
 import os
+import random
 import sys
 
 import numpy as np
@@ -185,37 +186,39 @@ class Experiment:
         self.welcome_screen()
         self.rules_screen()
         self.loading_screen()
+
+        # get all possible levels and shuffle them
+        possible_games = [(difficulty, 'world_{}'.format(i)) for difficulty in GameDifficulty for i in range(N_WORLDS_PER_DIFFICULTY)]
+        random.shuffle(possible_games)
+
         # run each level
-        for difficulty in GameDifficulty:
-            for i in range(N_WORLDS_PER_DIFFICULTY):
-                # create game
-                world_name = "world_{}".format(i)
-                self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
+        for difficulty, world_name in possible_games:
+            self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
 
-                # Show pre-start screen
+            # Show pre-start screen
 
-                self.current_game.pre_run()
-                self.pre_start_screen()
+            self.current_game.pre_run()
+            self.pre_start_screen()
 
-                # run game
-                # TODO
-                # self.eyetracker.start_recording()
-                # self.eyetracker.log_var('difficulty', difficulty.value)
-                # self.eyetracker.log_var('world_name', world_name)
-                # self.eyetracker.status_msg("trial %d" % self.level_num)
-                self.current_game.run()
+            # run game
+            # TODO
+            # self.eyetracker.start_recording()
+            # self.eyetracker.log_var('difficulty', difficulty.value)
+            # self.eyetracker.log_var('world_name', world_name)
+            # self.eyetracker.status_msg("trial %d" % self.level_num)
+            self.current_game.run()
 
-                # TODO
-                # self.eyetracker.stop_recording()
+            # TODO
+            # self.eyetracker.stop_recording()
 
-                # save logged data after level
-                # TODO maybe loading time or similar if it takes too long?
-                self.current_game.save_logging_data()
+            # save logged data after level
+            # TODO maybe loading time or similar if it takes too long?
+            self.current_game.save_logging_data()
 
-                # show screen between levels with score and further instructions
-                self.show_screen_between_levels()
-                self.loading_screen()
-                self.level_num += 1
+            # show screen between levels with score and further instructions
+            self.show_screen_between_levels()
+            self.loading_screen()
+            self.level_num += 1
 
         # end screen
         self.end_screen()

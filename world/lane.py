@@ -6,7 +6,7 @@ import pygame.sprite
 
 import colors
 import config
-from world.game_object import Vehicle, LilyPad, DynamicObject, Obstacle
+from world.game_object import Vehicle, LilyPad, Obstacle
 from world.field import Field
 
 
