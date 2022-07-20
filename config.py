@@ -42,7 +42,7 @@ VISITED_LANE_BONUS = 10
 
 # point multiplier
 EASY_MULTIPLIER = 1
-MEDIUM_MULTIPLIER = 2
+NORMAL_MULTIPLIER = 2
 HARD_MULTIPLIER = 3
 
 ################################################ FILES ################################################

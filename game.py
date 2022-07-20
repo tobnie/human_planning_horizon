@@ -223,8 +223,8 @@ class Game:
         # TODO really use multiplier because it reveals the difficulty of a level?
         if self.difficulty == GameDifficulty.EASY:
             score['difficulty_multiplier'] = config.EASY_MULTIPLIER
-        elif self.difficulty == GameDifficulty.MEDIUM:
-            score['difficulty_multiplier'] = config.MEDIUM_MULTIPLIER
+        elif self.difficulty == GameDifficulty.NORMAL:
+            score['difficulty_multiplier'] = config.NORMAL_MULTIPLIER
         elif self.difficulty == GameDifficulty.HARD:
             score['difficulty_multiplier'] = config.HARD_MULTIPLIER
 
