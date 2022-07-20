@@ -184,7 +184,7 @@ class Experiment:
 
         self.welcome_screen()
         self.rules_screen()
-
+        self.loading_screen()
         # run each level
         for difficulty in GameDifficulty:
             for i in range(N_WORLDS_PER_DIFFICULTY):
@@ -193,6 +193,7 @@ class Experiment:
                 self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
 
                 # Show pre-start screen
+
                 self.current_game.pre_run()
                 self.pre_start_screen()
 
@@ -213,10 +214,17 @@ class Experiment:
 
                 # show screen between levels with score and further instructions
                 self.show_screen_between_levels()
+                self.loading_screen()
                 self.level_num += 1
 
         # end screen
         self.end_screen()
+
+    def loading_screen(self):
+        self.screen.fill(colors.WHITE)
+        self.show_message('LOADING...',
+                          y_offset=300, font_size=100)
+        self.flip_display()
 
     def end_screen(self):
         self.screen.fill(colors.WHITE)
