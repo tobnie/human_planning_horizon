@@ -9,7 +9,7 @@ from pygaze import libscreen
 
 import colors
 from EyeTrackerScreen import EyeTrackerScreen
-from eye_tracker import MyEyeTracker
+
 from text_utils import drawText
 
 pygame.init()
@@ -18,6 +18,7 @@ import config
 
 from game import Game
 from world_generation.generation_config import GameDifficulty
+from eye_tracker import MyEyeTracker
 
 # TODO move to experiment config
 N_WORLDS_PER_DIFFICULTY = 20
@@ -26,13 +27,20 @@ N_SCORES_DISPLAYED = 10
 
 class Experiment:
 
-    def __init__(self):
+    def __init__(self, eye_tracker = False):
         self.current_game = None
 
         # create pygaze Display object
-        self.disp = libscreen.Display(disptype='pygame', dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
-        self.screen = EyeTrackerScreen(dispsize=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
-        # self.eyetracker = MyEyeTracker(disp=self.disp) # TODO
+
+        if eye_tracker:
+            eye_tracker_disp = libscreen.Display()
+            self.eye_tracker = MyEyeTracker(disp=eye_tracker_disp)
+            self.eye_tracker.calibrate()
+        else:
+            self.eye_tracker = None
+
+        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
+        self.screen.fill(colors.WHITE)
 
         self.subject_id = None
         self.subject_score = 0
@@ -52,8 +60,7 @@ class Experiment:
         self.show_message("Press enter to continue.", y_offset=600)
 
     def flip_display(self):
-        self.disp.fill(screen=self.screen)
-        self.disp.show()
+        pygame.display.flip()
 
     def welcome_screen(self):
         """
@@ -193,7 +200,7 @@ class Experiment:
 
         # run each level
         for difficulty, world_name in possible_games:
-            self.current_game = Game(difficulty, world_name, screen=self.screen, disp=self.disp, subject_id=self.subject_id)
+            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen, subject_id=self.subject_id)
 
             # Show pre-start screen
 
@@ -201,15 +208,7 @@ class Experiment:
             self.pre_start_screen()
 
             # run game
-            # TODO
-            # self.eyetracker.start_recording()
-            # self.eyetracker.log_var('difficulty', difficulty.value)
-            # self.eyetracker.log_var('world_name', world_name)
-            # self.eyetracker.status_msg("trial %d" % self.level_num)
             self.current_game.run()
-
-            # TODO
-            # self.eyetracker.stop_recording()
 
             # save logged data after level
             # TODO maybe loading time or similar if it takes too long?
@@ -329,10 +328,8 @@ class Experiment:
         y_offset += 25
 
         # draw line
-        self.screen.draw_line(color=colors.BLACK,
-                              spos=(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                              epos=(4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                              pw=2)
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
         y_offset += 15
 
         self._draw_score_row('Level Score', str(level_score), y_offset)
@@ -342,10 +339,8 @@ class Experiment:
         y_offset += 50
 
         # draw line
-        self.screen.draw_line(color=colors.BLACK,
-                              spos=(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                              epos=(4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                              pw=2)
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
 
         y_offset += 15
         self._draw_score_row('Total Level Score', str(total_level_score), y_offset)

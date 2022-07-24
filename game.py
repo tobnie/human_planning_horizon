@@ -1,11 +1,13 @@
 import pygame
 import pygame.gfxdraw
+from pygaze import libtime
 
 from display_debug_information import TextDisplayer
 
 import colors
 import config
 import event_handler
+from eye_tracker import MyEyeTracker
 from text_utils import drawText
 from logging_game.logger import Logger
 from world.world import World, WorldStatus
@@ -17,7 +19,8 @@ UPDATE_PLAYER_EVENT = pygame.USEREVENT + 1
 
 class Game:
 
-    def __init__(self, difficulty: GameDifficulty, world_name: str = None, time_limit=config.LEVEL_TIME, disp=None, screen=None,
+    def __init__(self, difficulty: GameDifficulty, eye_tracker: MyEyeTracker = None, world_name: str = None, time_limit=config.LEVEL_TIME,
+                 screen=None,
                  subject_id=""):
         """
         Sets up the game by initializing PyGame.
@@ -26,6 +29,7 @@ class Game:
         self.clock = None
         self.time_limit = time_limit
         self.game_time = 0
+        self.eye_tracker = eye_tracker
 
         # game difficulty
         self.difficulty = difficulty
@@ -47,7 +51,6 @@ class Game:
         self.spawn_counter = 1
 
         # set screen information
-        self.disp = disp
         self.screen = screen
 
         if world_name:
@@ -56,9 +59,6 @@ class Game:
             self.world = World(self, config.N_FIELDS_PER_LANE, config.N_LANES, )
 
         self.screen.fill(colors.BLACK)
-
-        # TODO move to run()?
-        pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
 
         self.event_handler = event_handler.EventHandler(self)
         self.text_displayer = TextDisplayer(self)
@@ -82,21 +82,33 @@ class Game:
 
     def run_normal(self):
         """ Runs the game normally. """
+        if self.eye_tracker:
+            time = self.eye_tracker.get_time()
+        else:
+            time = self.game_time
 
         for e in pygame.event.get(exclude=[pygame.KEYUP, pygame.KEYDOWN]):
             if e.type == UPDATE_PLAYER_EVENT:
                 self.event_handler.handle_input_event()
-                self.logger.log_action()  # actions are logged every time a update_player_event occurs
+                self.logger.log_action(time)  # actions are logged every time a update_player_event occurs
 
-        dt = self.clock.tick_busy_loop(self.fps)
-        self.game_time += dt
-
+        # update and render world
         self.world.update()
         self.render()
 
         # TODO save world state and eye tracking data with every sample of eyetracker
-        self.logger.log_state()  # states are sampled every time
-        self.logger.log_eyetracker_data(None)  # TODO give eyetracker data or rely on native data saving in eye tracker
+        # logging
+        if self.eye_tracker:
+            sample = self.eye_tracker.get_sample()
+            self.eye_tracker.extract_events()  # TODO check this
+            self.logger.log_state(time)
+            self.logger.log_eyetracker_samples(time, sample)
+
+        # update game_time
+        dt = self.clock.tick_busy_loop(self.fps)
+        self.game_time += dt
+
+        # check world status
         self.world.player.check_status()
 
     def run(self):
@@ -104,9 +116,14 @@ class Game:
         Main Loop
         """
         pygame.event.clear()
-        self.reset_clock()
+        pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
         self.render()
 
+        # reset times
+        self.reset_clock()  # game time
+        if self.eye_tracker:
+            libtime.expstart()  # libtime
+            self.eye_tracker.start_recording()  # eye tracker clock
         while self.running:
 
             # run next game step
@@ -128,6 +145,12 @@ class Game:
                 pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
                 self.save_logging_data()
                 self.running = False
+
+        # stop eye tracker recording and flush event buffer
+        if self.eye_tracker:
+            self.eye_tracker.stop_recording()
+            self.logger.log_eyetracker_events(self.eye_tracker.eyetracker_events)
+            print(self.eye_tracker.eyetracker_events)
         pygame.event.clear()
 
     def save_logging_data(self):
@@ -143,8 +166,7 @@ class Game:
             # self.running = False
 
     def flip_display(self):
-        self.disp.fill(screen=self.screen)
-        self.disp.show()
+        pygame.display.flip()
 
     def draw_timer(self):
         """
@@ -157,26 +179,12 @@ class Game:
         offset_y = 5 / 8 * config.FIELD_HEIGHT
         height = 20
 
-        self.screen.draw_rect(color='red',
-                              x=self.world.player.rect.x + margin_x // 2,
-                              y=self.world.player.rect.y + offset_y,
-                              w=ratio_time_left * (config.FIELD_WIDTH - margin_x),
-                              h=height,
-                              fill=True)
-
-        self.screen.draw_rect(color='black',
-                              x=self.world.player.rect.x + margin_x // 2,
-                              y=self.world.player.rect.y + offset_y,
-                              w=config.FIELD_WIDTH - margin_x,
-                              h=height,
-                              pw=3,
-                              fill=False)
-
-        if self.game_time < config.LEVEL_TIME_AUDIO_CUE and not self.audio_cue_played:
-            self.audio_cue_played = True
-            pygame.mixer.init()
-            pygame.mixer.music.load(config.FROG_SOUND_FILEPATH)
-            pygame.mixer.music.play()
+        pygame.draw.rect(self.screen, colors.RED, (
+            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y,
+            ratio_time_left * (config.FIELD_WIDTH - margin_x),
+            height))
+        pygame.draw.rect(self.screen, colors.BLACK, (
+            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, config.FIELD_WIDTH - margin_x, height), 3)
 
     def render(self):
         """Renders the whole game."""

@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import numpy as np
 
@@ -11,7 +12,6 @@ class Logger:
     def __init__(self, game, subject_id, world_name, difficulty, time_limit, log_directory=config.LEVEL_DATA_DIR):
         # set log directory
         self._set_log_directory(log_directory, subject_id, difficulty, world_name)
-        self.game = game
         self.world = game.world
 
         # logging_game variables
@@ -23,21 +23,25 @@ class Logger:
         }  # general world properties
         self.world_states = []  # list of world states as (time, world_state)
         self.player_actions = []  # list of (time, action)
-        self.eyetracker_data = []  # list of (time, gaze_x, gaze_y) # TODO extend
+        self.eyetracker_samples = []  # list of (time, gaze_x, gaze_y, pupil_size)
+        self.eyetracker_events = []  # list of (time, event)
 
-    def log_state(self,):
+    def log_state(self, time):
         """ Logs the current time and world state """
-        self.world_states.append((self.game.game_time, self.world.get_world_state().asarray()))
+        self.world_states.append((time, self.world.get_world_state().asarray()))
 
-    def log_action(self):
+    def log_action(self, time):
         """ Logs the current time and action """
-        self.player_actions.append((self.game.game_time, self.world.player.get_action().value))
+        self.player_actions.append((time, self.world.player.get_action().value))
 
-    def log_eyetracker_data(self, eyetracker_data):
+    def log_eyetracker_samples(self, time, sample):
         """ Logs the current time and given eyetracker data. """
-        gaze_x = np.random.rand()
-        gaze_y = np.random.rand()
-        self.eyetracker_data.append((self.game.game_time, gaze_x, gaze_y)) # TODO REMOVE DUMMY DATA
+        (gaze_x, gaze_y), pupil_size = sample
+        self.eyetracker_samples.append((time, gaze_x, gaze_y, pupil_size))  # TODO REMOVE DUMMY DATA
+
+    def log_eyetracker_events(self, eyetracker_events):
+        """ Logs the eyetracker events. """
+        self.eyetracker_events = eyetracker_events
 
     def save_data(self):
         """ Saves the data to files. The world properties are saved in a .csv-file,
@@ -52,8 +56,17 @@ class Logger:
         # save actions as .npz-file
         self._save_actions_as_npz()
 
-        # save eyetracking data as .npz file
-        self._save_eyetracker_data_as_npz()
+        if self.eyetracker_samples:
+            # save eyetracking data as .npz file
+            self._save_eyetracker_samples_as_npz()
+        else:
+            warnings.warn("No eye tracking Samples to save.", RuntimeWarning)
+
+        if self.eyetracker_events:
+            # save eyetracking events as .npz file
+            self._save_eyetracker_events_as_npz()
+        else:
+            warnings.warn("No eye tracking Events to save.", RuntimeWarning)
 
     def _save_properties_as_csv(self):
         """ Saves the game properties as a .csv-file. """
@@ -75,21 +88,32 @@ class Logger:
     def _save_world_states_as_npz(self):
         """ Saves the world states as a .npz-file. """
         for time, state in self.world_states:
-            np.savez_compressed(self.log_directory + f'state_{time}.npz', state)
+            np.savez_compressed(self.log_directory + f'states/state_{time}.npz', state)
 
-    def _save_eyetracker_data_as_npz(self):
+    def _save_eyetracker_samples_as_npz(self):
         """ Saves the eyetracker data as a .npz-file. """
 
-        times, gaze_x, gaze_y = zip(*self.eyetracker_data)
+        times, gaze_x, gaze_y, pupil_size = zip(*self.eyetracker_samples)
 
         # concatenate time and state
-        gaze_with_time = np.vstack((times, gaze_x, gaze_y)).T
+        gaze_with_time = np.vstack((times, gaze_x, gaze_y, pupil_size)).T
 
         # TODO remove print
         # print("Full array EyeTracking:\n", gaze_with_time)
 
         # save as .npz-file
-        np.savez_compressed(self.log_directory + 'eyetracker_data.npz', gaze_with_time)
+        np.savez_compressed(self.log_directory + 'eyetracker_samples.npz', gaze_with_time)
+
+    def _save_eyetracker_events_as_npz(self):
+        """ Saves the eyetracker events as a .npz-file. """
+
+        times, events = zip(*self.eyetracker_events)
+
+        # concatenate time and state
+        events_with_time = np.vstack((times, events)).T
+
+        # save as .npz-file
+        np.savez_compressed(self.log_directory + 'eyetracker_events.npz', events_with_time)
 
     def _set_log_directory(self, log_directory, subject_id, difficulty, world_name):
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
@@ -99,3 +123,22 @@ class Logger:
         if not os.path.exists(self.log_directory):
             # Create a new directory if it does not exist
             os.makedirs(self.log_directory)
+
+
+# TODO translation from event codes to actual event in analysis (or even change here, dont know yet)
+from pylink import *
+
+
+def get_event_string(event):
+    if event == STARTFIX:
+        return ["fixation", "start"]
+    if event == STARTSACC:
+        return ["saccade", "start"]
+    if event == STARTBLINK:
+        return ["blink", "start"]
+    if event == ENDFIX:
+        return ["fixation", "end"]
+    if event == ENDSACC:
+        return ["saccade", "end"]
+    if event == ENDBLINK:
+        return ["blink", "end"]
