@@ -22,7 +22,7 @@ class MyEyeTracker:
         self.eyetracker_events = None  # accumulator for events during recording
 
     def __del__(self):
-        self.close()
+        # self.close()
         print('EyeTracker instance deleted.')
 
     def calibrate(self):
