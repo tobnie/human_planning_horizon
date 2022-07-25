@@ -67,7 +67,6 @@ class Experiment:
 
     def flip_display(self):
         pygame.display.update()
-        pygame.display.flip()
 
     def welcome_screen(self):
         """
