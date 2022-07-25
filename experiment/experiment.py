@@ -66,6 +66,7 @@ class Experiment:
         self.show_message("Press enter to continue.", y_offset=600)
 
     def flip_display(self):
+        pygame.display.update()
         pygame.display.flip()
 
     def welcome_screen(self):
