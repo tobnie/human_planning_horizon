@@ -98,6 +98,8 @@ class Experiment:
 
             text = text.upper()
 
+            print(text)
+
             self.show_message(text, y_offset=450)
             self.flip_display()
             self.subject_id = check_if_subject_id_exists(text)
