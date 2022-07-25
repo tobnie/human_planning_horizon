@@ -12,8 +12,6 @@ from EyeTrackerScreen import EyeTrackerScreen
 
 from text_utils import drawText
 
-pygame.init()
-
 import config
 
 from game import Game
@@ -38,7 +36,12 @@ class Experiment:
             if self.eye_tracker.connected():
                 print("Connection to eye tracker established successfully")
 
-            self.eye_tracker.calibrate()
+            calibration_successful = self.eye_tracker.calibrate()
+            if not calibration_successful:
+                print("Calibration failed. Exiting.")
+                sys.exit(1)
+            else:
+                pygame.init()
         else:
             self.eye_tracker = None
 

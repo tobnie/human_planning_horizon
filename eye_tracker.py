@@ -27,7 +27,7 @@ class MyEyeTracker:
 
     def calibrate(self):
         """ Starts the calibration menu of the eye tracker. """
-        self.tracker.calibrate()
+        return self.tracker.calibrate()
 
     def start_recording(self):
         """ Starts recording of the eye tracker. """
