@@ -400,7 +400,3 @@ def wait_keys(keys=None):
 
             if keys is None or event.key in keys:
                 waiting = False
-
-
-exp = Experiment()
-exp.run()
