@@ -1,7 +1,8 @@
 import pygame
 
-DISPLAY_WIDTH_PX = 1920  # pygame.display.Info().current_w
-DISPLAY_HEIGHT_PX = 1080  # pygame.display.Info().current_h
+DISPLAY_WIDTH_PX = pygame.display.Info().current_w
+DISPLAY_HEIGHT_PX = pygame.display.Info().current_h
+
 
 # UI
 font_size = 24

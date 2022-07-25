@@ -12,7 +12,7 @@ from EyeTrackerScreen import EyeTrackerScreen
 
 from text_utils import drawText
 
-# pygame.init()
+pygame.init()
 
 import config
 
@@ -41,8 +41,6 @@ class Experiment:
             self.eye_tracker.calibrate()
         else:
             self.eye_tracker = None
-
-        pygame.init()
 
         self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
