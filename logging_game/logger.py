@@ -118,6 +118,7 @@ class Logger:
     def _set_log_directory(self, log_directory, subject_id, difficulty, world_name):
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
         self.log_directory = log_directory + subject_id + '/' + difficulty.value + '/' + world_name + '/'
+        print("Log directory:", self.log_directory)
 
         # check if path exists
         if not os.path.exists(self.log_directory):
