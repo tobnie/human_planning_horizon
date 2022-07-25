@@ -35,6 +35,9 @@ class Experiment:
         if eye_tracker:
             eye_tracker_disp = libscreen.Display()
             self.eye_tracker = MyEyeTracker(disp=eye_tracker_disp)
+            if self.eye_tracker.connected():
+                print("Connection to eye tracker established successfully")
+
             self.eye_tracker.calibrate()
         else:
             self.eye_tracker = None
