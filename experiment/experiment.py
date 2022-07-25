@@ -40,12 +40,12 @@ class Experiment:
             if not calibration_successful:
                 print("Calibration failed. Exiting.")
                 sys.exit(1)
-            else:
-                pygame.init()
+
         else:
             self.eye_tracker = None
 
-        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)
+        pygame.init()
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
 
         self.subject_id = None
