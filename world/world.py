@@ -98,6 +98,9 @@ class World:
         if self._check_game_won():
             return WorldStatus.WON
 
+        if self.game.game_time > self.game.time_limit:
+            return WorldStatus.TIMED_OUT
+
         return WorldStatus.RUNNING
 
     def _check_game_won(self):
