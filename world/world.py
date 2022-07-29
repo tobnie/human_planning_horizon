@@ -48,9 +48,19 @@ class World:
 
         # start position
         starting_lane: StartLane = self.starting_lanes.sprites()[0]
-        player_start_x = starting_lane.starting_position[0] * config.FIELD_WIDTH
-        player_start_y = starting_lane.starting_position[1] * config.FIELD_HEIGHT
+
+        # correct player position because of reduced player size for player to be in center
+        margin_x = (1 - config.PLAYER_WIDTH_TO_FIELD_WIDTH_RATIO) / 2
+        margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2
+
+        player_start_x = (starting_lane.starting_position[0] + margin_x) * config.FIELD_WIDTH
+        player_start_y = (starting_lane.starting_position[1] + margin_y) * config.FIELD_HEIGHT
+
         self.player.set_position((player_start_x, player_start_y))
+        print("field height: " + str(config.FIELD_HEIGHT))
+        print("player height: " + str(self.player.rect.height))
+        print("y normal:", starting_lane.starting_position[1] * config.FIELD_HEIGHT)
+        print("actual y:", self.player.rect.y)
 
     def draw(self, screen) -> None:
         """ Draws the world on the screen. """

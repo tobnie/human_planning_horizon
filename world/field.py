@@ -1,5 +1,6 @@
 import pygame
 
+import colors
 import config
 
 
@@ -25,5 +26,9 @@ class Field(pygame.sprite.Sprite):
             self.image = None
 
     def draw(self, screen):
+        # draw field (background)
         if self.image:
             screen.blit(self.image, (self.rect.x, self.rect.y))
+
+        # draw field border
+        pygame.draw.rect(screen, colors.WHITE, self.rect, 1)

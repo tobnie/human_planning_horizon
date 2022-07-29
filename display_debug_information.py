@@ -35,7 +35,7 @@ class TextDisplayer:
     def debug_information_player(self) -> string:
         debug_information = [f"Difficulty = {self.game.difficulty.value}",
                              f"World = {self.game.world_name}",
-                             f"Player Position = ({self.world.player.x}, {self.world.player.y})",
+                             f"Player Position = ({self.world.player.rect.x}, {self.world.player.rect.y})",
                              f"Player Delta = ({self.world.player.delta_x}, {self.world.player.delta_y})",
                              f"Vehicle Collision = {self.game.world.player.check_vehicle_collision()}",
                              f"Water Collision = {self.game.world.player.check_water_collision()}",

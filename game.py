@@ -37,7 +37,7 @@ class Game:
         # audio cue
         self.audio_cue_played = False
 
-        self.display_debug_information_player = False
+        self.display_debug_information_player = True
         self.display_debug_information_objects = False
         self.display_debug_information_lanes = False
         self.running = True
@@ -163,7 +163,6 @@ class Game:
         """
         if self.game_time >= self.time_limit:
             self.world_status = WorldStatus.TIMED_OUT
-            # self.running = False
 
     def flip_display(self):
         pygame.display.flip()
@@ -175,16 +174,15 @@ class Game:
         time_left = self.time_limit - self.game_time
         ratio_time_left = time_left / config.LEVEL_TIME
 
-        margin_x = 20
-        offset_y = 5 / 8 * config.FIELD_HEIGHT
-        height = 20
+        offset_y = 5 / 8 * config.PLAYER_HEIGHT
+        height = 15
 
         pygame.draw.rect(self.screen, colors.RED, (
-            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y,
-            ratio_time_left * (config.FIELD_WIDTH - margin_x),
+            self.world.player.rect.x, self.world.player.rect.y + offset_y,
+            ratio_time_left * config.PLAYER_WIDTH,
             height))
         pygame.draw.rect(self.screen, colors.BLACK, (
-            self.world.player.rect.x + margin_x // 2, self.world.player.rect.y + offset_y, config.FIELD_WIDTH - margin_x, height), 3)
+            self.world.player.rect.x, self.world.player.rect.y + offset_y, config.PLAYER_WIDTH, height), 3)
 
     def render(self):
         """Renders the whole game."""

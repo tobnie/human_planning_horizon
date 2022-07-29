@@ -20,20 +20,23 @@ class PlayerAction(Enum):
 
 class Player(DynamicObject):
     """
-    Spawn a player
+    Player Class
     """
 
     def __init__(self, world, start_position=(0, (config.N_FIELDS_PER_LANE // 2 + 1) * config.FIELD_WIDTH)):
-        super().__init__(world, start_position[0], start_position[1], 1, 1,
+
+        super().__init__(world, start_position[0], start_position[1], 0, config.PLAYER_WIDTH_TO_FIELD_WIDTH_RATIO,
+                         config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO,
                          movement_bounds_x=config.PLAYER_MOVEMENT_BOUNDS_X, movement_bounds_y=config.PLAYER_MOVEMENT_BOUNDS_Y,
                          img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
+
         self.delta_x = 0
         self.delta_y = 0
         self.is_dead = False
         self.current_action = PlayerAction.NONE
         self.highest_visited_lane = 0
 
-    def set_position(self, pos: (float, int)):
+    def set_position(self, pos: (float, float)):
         super().set_position(pos)
         self.highest_visited_lane = max(self.highest_visited_lane, self.y // config.FIELD_HEIGHT)
 
@@ -125,17 +128,20 @@ class Player(DynamicObject):
 
         # check bounds in y-direction
         if new_y < self.movement_bounds_y[0]:
-            new_y = self.movement_bounds_y[0]
+            margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2 * config.FIELD_HEIGHT
+            new_y = self.movement_bounds_y[0] + margin_y
         elif new_y == 0:
             # only update y if the player will end on the target position
             target_x = self.world.finish_lanes.sprites()[0].target_position * config.FIELD_WIDTH
             new_center_x = new_x + self.rect.width / 2
             if target_x <= new_center_x <= target_x + config.FIELD_WIDTH:
-                new_y = self.movement_bounds_y[0]
+                margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2 * config.FIELD_HEIGHT
+                new_y = self.movement_bounds_y[0] + margin_y
             else:
                 new_y = self.y
         elif new_y >= self.movement_bounds_y[1]:
-            new_y = self.movement_bounds_y[1]
+            margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2 * config.FIELD_HEIGHT
+            new_y = self.movement_bounds_y[1] + margin_y
         else:
             new_y = new_y
 

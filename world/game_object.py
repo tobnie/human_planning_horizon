@@ -11,7 +11,7 @@ import config
 class GameObject(pygame.sprite.Sprite, ABC):
     """An abstract class for game objects"""
 
-    def __init__(self, world, x: float = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
+    def __init__(self, world, x: float = 0, y: int = 0, width: float = 1, height: float = 1, img_path: string = None):
         super().__init__()
 
         # assign object id
@@ -36,30 +36,30 @@ class GameObject(pygame.sprite.Sprite, ABC):
 
         # internal position (int)
         self.x: float = 0
-        self.y: int = 0
+        self.y: float = 0
         self.highest_visited_lane = 0
         self.set_position((x, y))
 
-    def set_position(self, pos: (float, int)):
+    def set_position(self, pos: (float, float)):
         """ Sets the current position of the player sprite rect given as (x, y)-tuple."""
 
         self.x = pos[0]
         self.y = pos[1]
-        self.rect.x = int(round(pos[0]))
-        self.rect.y = int(round(pos[1]))
+        self.rect.x = int(round(self.x))
+        self.rect.y = int(round(self.y))
 
 
 class StaticObject(GameObject):
     """A class for static game objects, i.e. they have no ability to move."""
 
-    def __init__(self, world, x: float = 0, y: int = 0, width: int = 1, height: int = 1, img_path: string = None):
+    def __init__(self, world, x: float = 0, y: int = 0, width: float = 1, height: float = 1, img_path: string = None):
         super().__init__(world, x, y, width, height, img_path=img_path)
 
 
 class DynamicObject(GameObject, ABC):
     """A class for dynamic game objects, which are moving with a specified delta in either x- or y-direction."""
 
-    def __init__(self, world, x: float = 0, y: int = 0, velocity: float = 0, width: int = 1, height: int = 1,
+    def __init__(self, world, x: float = 0, y: int = 0, velocity: float = 0, width: float = 1, height: float = 1,
                  img_path: string = None,
                  movement_bounds_x: (int, int) = (0, config.DISPLAY_WIDTH_PX),
                  movement_bounds_y: (int, int) = (0, config.DISPLAY_HEIGHT_PX - config.FIELD_HEIGHT - 1)):
