@@ -8,7 +8,6 @@ import pygame
 from pygaze import libscreen
 
 import colors
-from EyeTrackerScreen import EyeTrackerScreen
 
 from text_utils import drawText
 
@@ -24,6 +23,7 @@ N_SCORES_DISPLAYED = 10
 N_EASY_TRAINING_GAMES = 3
 N_NORMAL_TRAINING_GAMES = 2
 
+
 class Experiment:
 
     def __init__(self, eye_tracker=False):
@@ -38,9 +38,9 @@ class Experiment:
                 print("Connection to eye tracker established successfully")
 
             calibration_successful = self.eye_tracker.calibrate()
-            if not calibration_successful:
-                print("Calibration failed. Exiting.")
-                sys.exit(1)
+            while not calibration_successful:
+                print("Calibration failed. Trying again.")
+                calibration_successful = self.eye_tracker.calibrate()
 
         else:
             self.eye_tracker = None
@@ -66,7 +66,7 @@ class Experiment:
                           alignment="left")
         self.show_message("Press enter to continue.", y_offset=600)
 
-    def flip_display(self):
+    def show_screen(self):
         pygame.display.update()
 
     def welcome_screen(self):
@@ -99,15 +99,13 @@ class Experiment:
 
             text = text.upper()
 
-            print(text)
-
             self.show_message(text, y_offset=450)
-            self.flip_display()
+            self.show_screen()
             self.subject_id = check_if_subject_id_exists(text)
 
     def strategy_screen(self):
 
-        self.flip_display()
+        self.show_screen()
         clock = pygame.time.Clock()
 
         text_rows = [""]
@@ -145,7 +143,7 @@ class Experiment:
             y_offset_base = 100
             for i, row_text in enumerate(text_rows):
                 self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9 * config.DISPLAY_WIDTH_PX, alignment='left')
-            self.flip_display()
+            self.show_screen()
 
             self.show_message("Please press TAB to continue (this may take a moment)")
         wait_keys()
@@ -170,7 +168,7 @@ class Experiment:
         self.show_message("We will start with some example levels to get you started. Press any key to continue.",
                           y_offset=800)
 
-        self.flip_display()
+        self.show_screen()
         wait_keys()
 
     def pre_start_screen(self):
@@ -179,7 +177,7 @@ class Experiment:
         self.show_message("Press SPACE to start!",
                           y_offset=300, font_size=100)
 
-        self.flip_display()
+        self.show_screen()
 
         # wait for space bar
         wait_keys([pygame.K_SPACE])
@@ -193,7 +191,7 @@ class Experiment:
             self.screen.fill(colors.WHITE)
             self.show_message(str(i),
                               y_offset=300, font_size=100)
-            self.flip_display()
+            self.show_screen()
             pygame.time.wait(1000)
 
     def training_explanation_screen(self):
@@ -202,7 +200,7 @@ class Experiment:
         self.show_message("We will start with some training examples. Please press any key to continue.",
                           y_offset=300)
 
-        self.flip_display()
+        self.show_screen()
         wait_keys()
 
     def experiment_start_screen(self):
@@ -214,42 +212,47 @@ class Experiment:
         self.show_message("Please press any button to continue, when you are ready.",
                           y_offset=400)
 
-        self.flip_display()
+        self.show_screen()
         wait_keys()
+
+    def run_trial(self, difficulty, world_name, training=False):
+        """Runs a trial / game for given difficulty and world."""
+        self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen,
+                                 subject_id=self.subject_id)
+
+        # Show pre-start screen
+        self.pre_start_screen()
+
+        # run game
+        self.current_game.run()
+
+        # save logged data after level
+        self.current_game.save_logging_data(training=training)
 
     def run(self):
         """ Runs the experiment. """
 
+        # -------- INTRO ----------
         self.welcome_screen()
         self.rules_screen()
+
+        # -------- TRAINING ----------
         self.training_explanation_screen()
         easy_training_games = [(GameDifficulty.EASY, 'world_{}'.format(i)) for i in range(N_EASY_TRAINING_GAMES)]
         normal_training_games = [(GameDifficulty.NORMAL, 'world_{}'.format(i)) for i in range(N_NORMAL_TRAINING_GAMES)]
         self.level_num = -(N_EASY_TRAINING_GAMES + N_NORMAL_TRAINING_GAMES)
         for difficulty, world_name in easy_training_games + normal_training_games:
-            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen,
-                                     subject_id=self.subject_id)
+            self.run_trial(difficulty, world_name, training=True)
 
-            # Show pre-start screen
-            self.current_game.pre_run()
-            self.pre_start_screen()
-
-            # run game
-            self.current_game.run()
-
-            # save logged data after level
-            self.current_game.save_logging_data(training=True)
-
-            # show screen between levels with score and further instructions
-            self.show_message("Press any key to continue to the next level.", y_offset=600)
-            self.flip_display()
-            wait_keys()
+            self.show_screen_between_levels_training()
             self.loading_screen()
             self.level_num += 1
 
         self.loading_screen()
 
+        # -------- EXPERIMENT ----------
         self.experiment_start_screen()
+        self.show_screen()
 
         # get all possible levels and shuffle them
         self.level_num = 1
@@ -258,20 +261,7 @@ class Experiment:
 
         # run each level
         for difficulty, world_name in possible_games:
-            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen,
-                                     subject_id=self.subject_id)
-
-            # Show pre-start screen
-
-            self.current_game.pre_run()
-            self.pre_start_screen()
-
-            # run game
-            self.current_game.run()
-
-            # save logged data after level
-            # TODO maybe loading time or similar if it takes too long?
-            self.current_game.save_logging_data()
+            self.run_trial(difficulty, world_name)
 
             # show screen between levels with score and further instructions
             self.show_screen_between_levels()
@@ -285,14 +275,14 @@ class Experiment:
         self.screen.fill(colors.WHITE)
         self.show_message('LOADING...',
                           y_offset=300, font_size=100)
-        self.flip_display()
+        self.show_screen()
 
     def end_screen(self):
         self.screen.fill(colors.WHITE)
         self.show_message('That\'s it, thank you very much for participating!',
                           y_offset=300, font_size=60)
         self.show_message('Please press any key to exit now.', y_offset=500)
-        self.flip_display()
+        self.show_screen()
         wait_keys()
 
     def show_screen_between_levels(self):
@@ -305,7 +295,7 @@ class Experiment:
         self.display_and_update_score(self.current_game.calc_score())
         self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-        self.flip_display()
+        self.show_screen()
         wait_keys()
 
         # show highscore screen and save current score after the first and each five levels
@@ -317,8 +307,14 @@ class Experiment:
             self.display_highscores()
             self.show_message("Press any key to continue to the next level.", y_offset=600)
 
-            self.flip_display()
+            self.show_screen()
             wait_keys()
+
+    def show_screen_between_levels_training(self):
+        self.screen.fill(colors.WHITE)
+        self.show_message("Press any key to continue to the next level.", y_offset=300)
+        self.show_screen()
+        wait_keys()
 
     def display_highscores(self):
         """

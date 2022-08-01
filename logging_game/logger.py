@@ -64,7 +64,7 @@ class Logger:
 
         if self.eyetracker_events:
             # save eyetracking events as .npz file
-            self._save_eyetracker_events_as_npz()
+            self._save_eyetracker_events_as_npz(training=training)
         else:
             warnings.warn("No eye tracking Events to save.", RuntimeWarning)
 
@@ -90,8 +90,13 @@ class Logger:
     def _save_world_states_as_npz(self, training=False):
         """ Saves the world states as a .npz-file. """
         log_directory = self.log_directory if not training else self.training_log_directory
+
+        state_directory = log_directory + 'states/'
+        if not os.path.exists(state_directory):
+            os.makedirs(state_directory)
+
         for time, state in self.world_states:
-            np.savez_compressed(log_directory + f'states/state_{time}.npz', state)
+            np.savez_compressed(state_directory + f'state_{time}.npz', state)
 
     def _save_eyetracker_samples_as_npz(self, training=False):
         """ Saves the eyetracker data as a .npz-file. """
@@ -124,13 +129,15 @@ class Logger:
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
         self.training_log_directory = log_directory + subject_id + '/training/' + difficulty.value + '/' + world_name + '/'
         self.log_directory = log_directory + subject_id + '/' + difficulty.value + '/' + world_name + '/'
-        print("Log directory:", self.log_directory)
-        print("Training log directory:", self.training_log_directory)
 
-        # check if path exists
+        # check if paths exist
         if not os.path.exists(self.log_directory):
             # Create a new directory if it does not exist
             os.makedirs(self.log_directory)
+
+        if not os.path.exists(self.training_log_directory):
+            # Create a new directory if it does not exist
+            os.makedirs(self.training_log_directory)
 
 
 # TODO translation from event codes to actual event in analysis (or even change here, dont know yet)

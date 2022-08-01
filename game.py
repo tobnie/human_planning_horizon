@@ -101,8 +101,10 @@ class Game:
         if self.eye_tracker:
             sample = self.eye_tracker.get_sample()
             self.eye_tracker.extract_events()  # TODO check this
-            self.logger.log_state(time)
             self.logger.log_eyetracker_samples(time, sample)
+
+        # log world state
+        self.logger.log_state(time)
 
         # update game_time
         dt = self.clock.tick_busy_loop(self.fps)
@@ -115,6 +117,7 @@ class Game:
         """
         Main Loop
         """
+        self.pre_run()
         pygame.event.clear()
         pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
         self.render()
@@ -143,7 +146,6 @@ class Game:
 
                 # game won
                 pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
-                self.save_logging_data()
                 self.running = False
 
         # stop eye tracker recording and flush event buffer
