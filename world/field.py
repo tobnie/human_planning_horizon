@@ -30,5 +30,5 @@ class Field(pygame.sprite.Sprite):
         if self.image:
             screen.blit(self.image, (self.rect.x, self.rect.y))
 
-        # draw field border
-        pygame.draw.rect(screen, colors.WHITE, self.rect, 1)
+        # # draw field border
+        # pygame.draw.rect(screen, colors.WHITE, self.rect, 1)
