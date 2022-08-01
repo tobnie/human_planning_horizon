@@ -109,7 +109,7 @@ class World:
         """
         finish_lane: FinishLane = self.finish_lanes.sprites()[0]
         target_x = finish_lane.target_position * config.FIELD_WIDTH
-        if self.player.rect.y == 0 and target_x <= self.player.rect.centerx <= target_x + config.FIELD_WIDTH:
+        if self.player.rect.y <= config.FIELD_HEIGHT and target_x <= self.player.rect.centerx <= target_x + config.FIELD_WIDTH:
             return True
 
     def draw_lanes(self, screen) -> None:

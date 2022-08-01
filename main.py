@@ -5,7 +5,7 @@ import config
 from world_generation.generation_config import GameDifficulty
 from game import Game
 
-difficulty = GameDifficulty.EASY
+difficulty = GameDifficulty.HARD
 world_number = 0
 
 screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.FULLSCREEN)

@@ -127,10 +127,8 @@ class Player(DynamicObject):
             new_x = self.x
 
         # check bounds in y-direction
-        if new_y < self.movement_bounds_y[0]:
-            margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2 * config.FIELD_HEIGHT
-            new_y = self.movement_bounds_y[0] + margin_y
-        elif new_y == 0:
+        print("self.movement_bounds_y: ", self.movement_bounds_y)
+        if new_y <= self.movement_bounds_y[0] + config.FIELD_HEIGHT:
             # only update y if the player will end on the target position
             target_x = self.world.finish_lanes.sprites()[0].target_position * config.FIELD_WIDTH
             new_center_x = new_x + self.rect.width / 2
