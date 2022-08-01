@@ -37,7 +37,7 @@ PLAYER_UPDATE_INTERVAL = 200
 
 ################################################ SCORE ################################################
 # points
-WIN_BONUS = 100
+WIN_BONUS = 200
 DEATH_PENALTY = -100
 VISITED_LANE_BONUS = 10
 
