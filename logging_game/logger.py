@@ -20,6 +20,16 @@ class Logger:
             "world_name": world_name,
             "difficulty": difficulty.value,
             "time_limit": time_limit,
+            "target_position": game.world.get_target_position(),
+            "n_lanes": config.N_LANES,
+            "n_water_lanes": config.N_WATER_LANES,
+            "n_street_lanes": config.N_STREET_LANES,
+            "field_width": config.FIELD_WIDTH,
+            "field_height": config.FIELD_HEIGHT,
+            "player_width": config.PLAYER_WIDTH,
+            "player_height": config.PLAYER_HEIGHT,
+            "display_x": config.DISPLAY_WIDTH_PX,
+            "display_y": config.DISPLAY_HEIGHT_PX,
         }  # general world properties
         self.world_states = []  # list of world states as (time, world_state)
         self.player_actions = []  # list of (time, action)

@@ -218,6 +218,10 @@ class World:
             else:
                 raise Exception("Unknown lane type: {}".format(lane_info['type']))
 
+    def get_target_position(self):
+        """ Returns the target position of the finish lane. """
+        return self.finish_lanes.sprites()[0].target_position
+
     def get_world_state(self):
         return WorldState(self)
 

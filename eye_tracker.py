@@ -10,7 +10,7 @@ EVENTS = [STARTFIX, STARTBLINK, STARTSACC, ENDFIX, ENDSACC, ENDBLINK]
 
 class MyEyeTracker:
 
-    # TODO only track dominant eye or in binocular mode or ...?
+    # TODO only track dominant eye
 
     def __init__(self, disp, edf_path='./edf_files/test.edf'):
         self.disp = disp  # TODO maybe this can even be declared and initialized here instead of an actual parameter
@@ -22,7 +22,7 @@ class MyEyeTracker:
         self.eyetracker_events = None  # accumulator for events during recording
 
     def __del__(self):
-        # self.close()
+        self.close()
         print('EyeTracker instance deleted.')
 
     def calibrate(self):
@@ -38,8 +38,6 @@ class MyEyeTracker:
         self.eyetracker_events = []
         libtime.expstart()
         self.t_start = getEYELINK().getCurrentTime()
-        # TODO what exactly happens at drift correction and do we need that?
-        # self.tracker.drift_correction()
         self.tracker.start_recording()
 
     def get_time(self):
