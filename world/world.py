@@ -57,10 +57,6 @@ class World:
         player_start_y = (starting_lane.starting_position[1] + margin_y) * config.FIELD_HEIGHT
 
         self.player.set_position((player_start_x, player_start_y))
-        print("field height: " + str(config.FIELD_HEIGHT))
-        print("player height: " + str(self.player.rect.height))
-        print("y normal:", starting_lane.starting_position[1] * config.FIELD_HEIGHT)
-        print("actual y:", self.player.rect.y)
 
     def draw(self, screen) -> None:
         """ Draws the world on the screen. """
