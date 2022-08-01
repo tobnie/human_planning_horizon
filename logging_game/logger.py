@@ -37,7 +37,7 @@ class Logger:
     def log_eyetracker_samples(self, time, sample):
         """ Logs the current time and given eyetracker data. """
         (gaze_x, gaze_y), pupil_size = sample
-        self.eyetracker_samples.append((time, gaze_x, gaze_y, pupil_size))  # TODO REMOVE DUMMY DATA
+        self.eyetracker_samples.append((time, gaze_x, gaze_y, pupil_size))
 
     def log_eyetracker_events(self, eyetracker_events):
         """ Logs the eyetracker events. """

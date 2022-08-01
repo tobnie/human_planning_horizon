@@ -8,6 +8,7 @@ import pygame
 from pygaze import libscreen
 
 import colors
+from experiment.experiment_config import *
 
 from text_utils import drawText
 
@@ -16,12 +17,6 @@ import config
 from game import Game
 from world_generation.generation_config import GameDifficulty
 from eye_tracker import MyEyeTracker
-
-# TODO move to experiment config
-N_WORLDS_PER_DIFFICULTY = 20
-N_SCORES_DISPLAYED = 10
-N_EASY_TRAINING_GAMES = 3
-N_NORMAL_TRAINING_GAMES = 2
 
 
 class Experiment:

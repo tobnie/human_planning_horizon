@@ -13,7 +13,7 @@ class MyEyeTracker:
     # TODO only track dominant eye or in binocular mode or ...?
 
     def __init__(self, disp, edf_path='./edf_files/test.edf'):
-        self.disp = disp  # TODO maybe this can even be introduced here
+        self.disp = disp  # TODO maybe this can even be declared and initialized here instead of an actual parameter
         print('Creating eyetracker instance...')
         self.tracker = EyeTracker(self.disp, data_file=edf_path,
                                   resolution=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
