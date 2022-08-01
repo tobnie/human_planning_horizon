@@ -33,7 +33,7 @@ PRE_RUN_ITERATIONS = 2000
 
 # obstacles
 OBSTACLE_MAX_VELOCITY = 8
-PLAYER_UPDATE_INTERVAL = 100
+PLAYER_UPDATE_INTERVAL = 200
 
 ################################################ SCORE ################################################
 # points
