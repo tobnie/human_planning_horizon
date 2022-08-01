@@ -21,11 +21,12 @@ from eye_tracker import MyEyeTracker
 # TODO move to experiment config
 N_WORLDS_PER_DIFFICULTY = 20
 N_SCORES_DISPLAYED = 10
-
+N_EASY_TRAINING_GAMES = 3
+N_NORMAL_TRAINING_GAMES = 2
 
 class Experiment:
 
-    def __init__(self, eye_tracker = False):
+    def __init__(self, eye_tracker=False):
         self.current_game = None
 
         # create pygaze Display object
@@ -195,20 +196,70 @@ class Experiment:
             self.flip_display()
             pygame.time.wait(1000)
 
+    def training_explanation_screen(self):
+        """ Explains that we will start with some training examples"""
+        self.screen.fill(colors.WHITE)
+        self.show_message("We will start with some training examples. Please press any key to continue.",
+                          y_offset=300)
+
+        self.flip_display()
+        wait_keys()
+
+    def experiment_start_screen(self):
+        """ Explains that the real experiment will start now."""
+        self.screen.fill(colors.WHITE)
+        self.show_message("We will start with the real experiment now. Do not hesitate do ask any questions.",
+                          y_offset=300)
+
+        self.show_message("Please press any button to continue, when you are ready.",
+                          y_offset=400)
+
+        self.flip_display()
+        wait_keys()
+
     def run(self):
         """ Runs the experiment. """
 
         self.welcome_screen()
         self.rules_screen()
+        self.training_explanation_screen()
+        easy_training_games = [(GameDifficulty.EASY, 'world_{}'.format(i)) for i in range(N_EASY_TRAINING_GAMES)]
+        normal_training_games = [(GameDifficulty.NORMAL, 'world_{}'.format(i)) for i in range(N_NORMAL_TRAINING_GAMES)]
+        self.level_num = -(N_EASY_TRAINING_GAMES + N_NORMAL_TRAINING_GAMES)
+        for difficulty, world_name in easy_training_games + normal_training_games:
+            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen,
+                                     subject_id=self.subject_id)
+
+            # Show pre-start screen
+            self.current_game.pre_run()
+            self.pre_start_screen()
+
+            # run game
+            self.current_game.run()
+
+            # save logged data after level
+            self.current_game.save_logging_data(training=True)
+
+            # show screen between levels with score and further instructions
+            self.show_message("Press any key to continue to the next level.", y_offset=600)
+            self.flip_display()
+            wait_keys()
+            self.loading_screen()
+            self.level_num += 1
+
         self.loading_screen()
 
+        self.experiment_start_screen()
+
         # get all possible levels and shuffle them
+        self.level_num = 1
         possible_games = [(difficulty, 'world_{}'.format(i)) for difficulty in GameDifficulty for i in range(N_WORLDS_PER_DIFFICULTY)]
         random.shuffle(possible_games)
 
         # run each level
         for difficulty, world_name in possible_games:
-            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen, subject_id=self.subject_id)
+            self.current_game = Game(difficulty, world_name=world_name, eye_tracker=self.eye_tracker, screen=self.screen,
+                                     subject_id=self.subject_id)
 
             # Show pre-start screen
 

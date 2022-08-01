@@ -153,9 +153,9 @@ class Game:
             print(self.eye_tracker.eyetracker_events)
         pygame.event.clear()
 
-    def save_logging_data(self):
+    def save_logging_data(self, training=False):
         """ Saves the data in the game logger. """
-        self.logger.save_data()
+        self.logger.save_data(training=training)
 
     def check_timeout(self):
         """

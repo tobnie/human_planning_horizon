@@ -43,22 +43,22 @@ class Logger:
         """ Logs the eyetracker events. """
         self.eyetracker_events = eyetracker_events
 
-    def save_data(self):
+    def save_data(self, training=False):
         """ Saves the data to files. The world properties are saved in a .csv-file,
         while the world states and player actions are saved in .npz-files """
 
         # save world properties
-        self._save_properties_as_csv()
+        self._save_properties_as_csv(training=training)
 
         # save world states as .npz-file
-        self._save_world_states_as_npz()
+        self._save_world_states_as_npz(training=training)
 
         # save actions as .npz-file
-        self._save_actions_as_npz()
+        self._save_actions_as_npz(training=training)
 
         if self.eyetracker_samples:
             # save eyetracking data as .npz file
-            self._save_eyetracker_samples_as_npz()
+            self._save_eyetracker_samples_as_npz(training=training)
         else:
             warnings.warn("No eye tracking Samples to save.", RuntimeWarning)
 
@@ -68,13 +68,14 @@ class Logger:
         else:
             warnings.warn("No eye tracking Events to save.", RuntimeWarning)
 
-    def _save_properties_as_csv(self):
+    def _save_properties_as_csv(self, training=False):
         """ Saves the game properties as a .csv-file. """
-        with open(self.log_directory + 'world_properties.csv', 'w') as f:
+        log_directory = self.log_directory if not training else self.training_log_directory
+        with open(log_directory + 'world_properties.csv', 'w') as f:
             for key in self.game_properties.keys():
                 f.write("%s, %s\n" % (key, self.game_properties[key]))
 
-    def _save_actions_as_npz(self):
+    def _save_actions_as_npz(self, training=False):
         """ Saves the player actions as a .npz-file. """
 
         times, actions = zip(*self.player_actions)
@@ -83,14 +84,16 @@ class Logger:
         actions_with_time = np.vstack((times, actions)).T
 
         # save as .npz-file
-        np.savez_compressed(self.log_directory + 'actions.npz', actions_with_time)
+        log_directory = self.log_directory if not training else self.training_log_directory
+        np.savez_compressed(log_directory + 'actions.npz', actions_with_time)
 
-    def _save_world_states_as_npz(self):
+    def _save_world_states_as_npz(self, training=False):
         """ Saves the world states as a .npz-file. """
+        log_directory = self.log_directory if not training else self.training_log_directory
         for time, state in self.world_states:
-            np.savez_compressed(self.log_directory + f'states/state_{time}.npz', state)
+            np.savez_compressed(log_directory + f'states/state_{time}.npz', state)
 
-    def _save_eyetracker_samples_as_npz(self):
+    def _save_eyetracker_samples_as_npz(self, training=False):
         """ Saves the eyetracker data as a .npz-file. """
 
         times, gaze_x, gaze_y, pupil_size = zip(*self.eyetracker_samples)
@@ -102,9 +105,10 @@ class Logger:
         # print("Full array EyeTracking:\n", gaze_with_time)
 
         # save as .npz-file
-        np.savez_compressed(self.log_directory + 'eyetracker_samples.npz', gaze_with_time)
+        log_directory = self.log_directory if not training else self.training_log_directory
+        np.savez_compressed(log_directory + 'eyetracker_samples.npz', gaze_with_time)
 
-    def _save_eyetracker_events_as_npz(self):
+    def _save_eyetracker_events_as_npz(self, training=False):
         """ Saves the eyetracker events as a .npz-file. """
 
         times, events = zip(*self.eyetracker_events)
@@ -113,12 +117,15 @@ class Logger:
         events_with_time = np.vstack((times, events)).T
 
         # save as .npz-file
-        np.savez_compressed(self.log_directory + 'eyetracker_events.npz', events_with_time)
+        log_directory = self.log_directory if not training else self.training_log_directory
+        np.savez_compressed(log_directory + 'eyetracker_events.npz', events_with_time)
 
     def _set_log_directory(self, log_directory, subject_id, difficulty, world_name):
         """ Sets the log directory as 'log_directory/subject_id/' and creates it if not existent. """
+        self.training_log_directory = log_directory + subject_id + '/training/' + difficulty.value + '/' + world_name + '/'
         self.log_directory = log_directory + subject_id + '/' + difficulty.value + '/' + world_name + '/'
         print("Log directory:", self.log_directory)
+        print("Training log directory:", self.training_log_directory)
 
         # check if path exists
         if not os.path.exists(self.log_directory):
