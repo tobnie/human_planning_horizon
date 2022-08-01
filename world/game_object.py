@@ -84,7 +84,7 @@ class Obstacle(DynamicObject):
         if self.velocity == 0:
             raise ValueError("Velocity of an obstacle must not be 0.")
 
-        self.delta_x = self.velocity // abs(self.velocity)
+        self.delta_x = self.velocity # // abs(self.velocity)
         self.rotatable = rotatable
 
         if self.rotatable:

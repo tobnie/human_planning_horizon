@@ -71,7 +71,7 @@ class FinishLane(Lane):
 
 class DirectedLane(Lane, ABC):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, velocity: int = 1,
+    def __init__(self, world, row: int, lane_direction: LaneDirection = None, color: (int, int, int) = colors.GREEN, velocity: float = 1,
                  distance_between_obstacles: int = 4, obstacle_size: int = 1,
                  spawn_probability: float = 0.5):
         super().__init__(world, row, color)
@@ -153,7 +153,7 @@ class DirectedLane(Lane, ABC):
 
 class StreetLane(DirectedLane):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: float = 1,
                  distance_between_obstacles: int = 4, obstacle_size: int = 1, spawn_probability: int = 3
                  ):
         super().__init__(world, row, lane_direction, colors.BLACK, velocity,
@@ -169,7 +169,7 @@ class StreetLane(DirectedLane):
 
 class WaterLane(DirectedLane):
 
-    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: int = 1,
+    def __init__(self, world, row: int, lane_direction: LaneDirection = LaneDirection.LEFT, velocity: float = 1,
                  distance_between_obstacles: int = 4, obstacle_size: int = 1, spawn_probability: int = 3):
         super().__init__(world, row, lane_direction, colors.BLUE, velocity,
                          distance_between_obstacles, obstacle_size, spawn_probability)

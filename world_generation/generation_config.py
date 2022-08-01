@@ -4,7 +4,7 @@ from enum import Enum
 DiscreteDistribution = namedtuple('DiscreteDistribution', ['values', 'probabilities'])
 
 # Target Positions
-TARGET_POSITIONS = [2, 9, 17]
+TARGET_POSITIONS = [3, 9, 16]
 
 
 # Game Difficulty
@@ -26,9 +26,9 @@ class GameParameter(Enum):
 
 
 # Lane Velocities
-LaneVelocityEasy = DiscreteDistribution(values=[1, 2], probabilities=[0.8, 0.2])
-LaneVelocityNormal = DiscreteDistribution(values=[1, 2, 4], probabilities=[0.3, 0.5, 0.2])
-LaneVelocityHard = DiscreteDistribution(values=[1, 2, 4, 8], probabilities=[0.1, 0.5, 0.35, 0.05])
+LaneVelocityEasy = DiscreteDistribution(values=[0.7, 1], probabilities=[.2, .8])
+LaneVelocityNormal = DiscreteDistribution(values=[0.7, 1, 1.3], probabilities=[.2, .75, .05])
+LaneVelocityHard = DiscreteDistribution(values=[1, 1.3], probabilities=[.8, .2])
 
 LaneVelocities = {
     GameDifficulty.EASY: LaneVelocityEasy,
@@ -37,9 +37,9 @@ LaneVelocities = {
 }
 
 # Vehicle Widths
-VehicleWidthEasy = DiscreteDistribution(values=[1, 2], probabilities=[0.8, 0.2])
-VehicleWidthNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.3, 0.5, 0.2])
-VehicleWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.55, 0.35])
+VehicleWidthEasy = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.6, 0.3, 0.1])
+VehicleWidthNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.35, 0.5, 0.15])
+VehicleWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.65, 0.25])
 
 VehicleWidths = {
     GameDifficulty.EASY: VehicleWidthEasy,
@@ -48,9 +48,9 @@ VehicleWidths = {
 }
 
 # Lily Pad Widths
-LilyPadWidthEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[.1, .45, .45])
-LilyPadWidthNormal = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[.1, .45, .4, .05])
-LilyPadWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.35, .55, .1])
+LilyPadWidthEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[.25, .55, .2])
+LilyPadWidthNormal = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[.1, .4, .4, .1])
+LilyPadWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.2, .65, .15])
 LilyPadWidths = {
     GameDifficulty.EASY: LilyPadWidthEasy,
     GameDifficulty.NORMAL: LilyPadWidthNormal,
@@ -66,9 +66,9 @@ TargetPositions = {
 }
 
 # DistanceBetweenObstacles LilyPad
-DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2], probabilities=[0.2, 0.8])
-DistanceBetweenObstaclesLilyPadNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.05, 0.35, 0.6])
-DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[3, 4], probabilities=[0.55, 0.45])
+DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.3, 0.55, 0.15])
+DistanceBetweenObstaclesLilyPadNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.5, 0.4])
+DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[2, 3, 4], probabilities=[0.1, 0.7, 0.2])
 DistanceBetweenObstaclesLilyPad = {
     GameDifficulty.EASY: DistanceBetweenObstaclesLilyPadEasy,
     GameDifficulty.NORMAL: DistanceBetweenObstaclesLilyPadNormal,
@@ -76,9 +76,9 @@ DistanceBetweenObstaclesLilyPad = {
 }
 
 # Distance Between Obstacles Vehicle
-DistanceBetweenObstaclesVehicleEasy = DiscreteDistribution(values=[-1, 3, 4], probabilities=[0.3, 0.4, 0.3])
-DistanceBetweenObstaclesVehicleNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.2, 0.5, 0.3])
-DistanceBetweenObstaclesVehicleHard = DiscreteDistribution(values=[1, 2], probabilities=[0.5, 0.5])
+DistanceBetweenObstaclesVehicleEasy = DiscreteDistribution(values=[-1, 2, 3, 4], probabilities=[0.15, 0.35, 0.4, 0.1])
+DistanceBetweenObstaclesVehicleNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.05, 0.65, 0.3])
+DistanceBetweenObstaclesVehicleHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.8, 0.1])
 DistanceBetweenObstaclesVehicle = {
     GameDifficulty.EASY: DistanceBetweenObstaclesVehicleEasy,
     GameDifficulty.NORMAL: DistanceBetweenObstaclesVehicleNormal,
@@ -105,18 +105,18 @@ DistanceBetweenObstaclesVehicle = {
 #     GameDifficulty.HARD: VehicleSpawnGapsHard
 # }
 
-LilyPadSpawnProbabilityEasy = 0.9
+LilyPadSpawnProbabilityEasy = 0.8
 LilyPadSpawnProbabilityNormal = 0.7
-LilyPadSpawnProbabilityHard = 0.5
+LilyPadSpawnProbabilityHard = 0.65
 LilyPadSpawnProbability = {
     GameDifficulty.EASY: LilyPadSpawnProbabilityEasy,
     GameDifficulty.NORMAL: LilyPadSpawnProbabilityNormal,
     GameDifficulty.HARD: LilyPadSpawnProbabilityHard
 }
 
-VehicleSpawnProbabilityEasy = 0.5
-VehicleSpawnProbabilityNormal = 0.7
-VehicleSpawnProbabilityHard = 0.9
+VehicleSpawnProbabilityEasy = 0.6
+VehicleSpawnProbabilityNormal = 0.65
+VehicleSpawnProbabilityHard = 0.75
 VehicleSpawnProbability = {
     GameDifficulty.EASY: VehicleSpawnProbabilityEasy,
     GameDifficulty.NORMAL: VehicleSpawnProbabilityNormal,

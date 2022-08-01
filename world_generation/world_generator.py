@@ -29,7 +29,8 @@ class WorldGenerator:
         """
         parameter_distribution = ParameterDistributions[parameter][self.difficulty]
         values, probs = parameter_distribution.values, parameter_distribution.probabilities
-        return int(np.random.choice(values, p=probs))
+        drawn_value = np.random.choice(values, p=probs)
+        return int(drawn_value) if drawn_value.dtype == np.dtype('int32') else float(drawn_value)
 
     def _generate_starting_lane(self, row):
         """Generates a dict with all starting lane information"""
