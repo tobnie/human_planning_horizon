@@ -54,6 +54,7 @@ SCORE_DIR = LOG_DIR + "scores/"
 FROG_SOUND_FILEPATH = "./sounds/frog.mp3"
 
 # sprite files
-LILYPAD_FILE = 'lilypad.jpg'
+LILYPAD_FILE = 'lilypad.png'
 LOG_FILE = 'plank.jpg'
 CAR_FILE = 'car.png'
+STAR_FILE = 'star.png'

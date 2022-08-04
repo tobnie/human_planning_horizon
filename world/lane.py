@@ -60,12 +60,12 @@ class FinishLane(Lane):
         target_field = self.fields[self.target_position]
 
         # draw star on target field
-        img_path = config.SPRITES_DIR + 'star.jpg'
+        img_path = config.SPRITES_DIR + config.STAR_FILE
 
         img = pygame.image.load(img_path)
+        img = pygame.transform.scale(img, [config.FIELD_WIDTH, config.FIELD_HEIGHT])
         img.set_colorkey(colors.WHITE)
         img.convert_alpha()
-        img = pygame.transform.scale(img, [config.FIELD_WIDTH, config.FIELD_HEIGHT])
         screen.blit(img, (target_field.rect.x, target_field.rect.y))
 
 
