@@ -33,9 +33,9 @@ class Experiment:
                 print("Connection to eye tracker established successfully")
 
             calibration_successful = self.eye_tracker.calibrate()
-            while not calibration_successful:
+            if not calibration_successful:
                 print("Calibration failed. Trying again.")
-                calibration_successful = self.eye_tracker.calibrate()
+                # calibration_successful = self.eye_tracker.calibrate()
 
         else:
             self.eye_tracker = None
