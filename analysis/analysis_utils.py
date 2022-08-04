@@ -50,4 +50,10 @@ def get_states(subject, difficulty, world_name):
         state = np.load(states_path + f)['arr_0']
         times_states.append((time, state))
 
+    # make times to ints
+    times_states = [(int(time), state) for time, state in times_states]
+
+    # sort by time
+    times_states = sorted(times_states, key=lambda x: x[0])
+
     return times_states
