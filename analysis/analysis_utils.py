@@ -62,9 +62,31 @@ def get_times_states(subject, difficulty, world_name):
 def assign_position_to_fields(x, y, width):
     field_y = int(round(y / config.FIELD_HEIGHT))
     field_x_start = int(round(x / config.FIELD_WIDTH))
-    print('Width:', width)
-    print('Field width:', config.FIELD_WIDTH)
     field_width = int(width // config.FIELD_WIDTH)
-    print('Calculated field width:', field_width)
     return field_x_start, field_y, field_width
+
+
+def create_feature_map_from_state(state, target_position):
+    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 4))
+    for obj_type, x, y, width in state:
+        x_start, y, width = assign_position_to_fields(x, y, width)
+
+        # correct player width
+        if obj_type == 0:
+            width = 1
+
+        # correct for partially visible obstacles
+        if x_start < 0:
+            width = width + x_start
+            x_start = 0
+
+        if x_start + width > config.N_FIELDS_PER_LANE:
+            width = config.N_FIELDS_PER_LANE - x_start
+
+        feature_map[x_start:x_start + width, y, obj_type] = 1
+
+    # add target position
+    feature_map[target_position, config.N_LANES - 1, 3] = 1
+    feature_map = np.rot90(feature_map)
+    return feature_map
 
