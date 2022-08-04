@@ -91,12 +91,12 @@ def plot_line_between_points(ax, x1, y1, x2, y2, color='black'):
     ax.plot([x1, x2], [y1, y2], color=color)
 
 
-def get_transformed_center_of_entity(x, y, width, height):
+def get_center_of_entity(x, y, width, height):
+    return x + width / 2, y + height / 2
 
-    print('### get center')
-    print(x, y, width, height)
-    print(x + width / 2, config.DISPLAY_HEIGHT_PX - y + height / 2)
-    return x + width / 2, config.DISPLAY_HEIGHT_PX - y + height / 2
+
+def get_center_of_player(x, y):
+    return get_center_of_entity(x, y, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
 
 
 def plot_player_path(ax, states, target_position):
@@ -104,15 +104,16 @@ def plot_player_path(ax, states, target_position):
     plot_world_background(ax, target_position)
 
     player_pos = states[0][1][0][1:]
-    player_pos = player_pos[0], config.DISPLAY_HEIGHT_PX - player_pos[1]
+    player_pos = player_pos[0], config.DISPLAY_HEIGHT_PX - player_pos[1] - config.PLAYER_HEIGHT
+    player_pos = get_center_of_player(*player_pos)
 
     for time_state in states[1:]:
         time = time_state[0]
         state = time_state[1]
         player_state = state[0]
-        print(f'STATE at t={time}:', player_state)
         player_pos_next = player_state[1:]
-        player_pos_next = player_pos_next[0], config.DISPLAY_HEIGHT_PX - player_pos_next[1]
+        player_pos_next = player_pos_next[0], config.DISPLAY_HEIGHT_PX - player_pos_next[1] - config.PLAYER_HEIGHT
+        player_pos_next = get_center_of_player(*player_pos_next)
 
         if player_pos[0] != player_pos_next[0] or player_pos[1] != player_pos_next[1]:
             # print(f'Line from {player_pos} to {player_pos_next}')
