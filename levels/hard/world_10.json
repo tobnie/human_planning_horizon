@@ -8,7 +8,7 @@
         9,
         14
     ],
-    "target_position": 9,
+    "target_position": 16,
     "lanes": [
         {
             "row": 0,
@@ -20,7 +20,7 @@
             "direction": -1,
             "lane_velocity": 1.0,
             "obstacle_size": 2,
-            "distance_between_obstacles": 3,
+            "distance_between_obstacles": 2,
             "spawn_probability": 0.65
         },
         {
@@ -37,7 +37,7 @@
             "type": "WaterLane",
             "direction": -1,
             "lane_velocity": 1.3,
-            "obstacle_size": 1,
+            "obstacle_size": 2,
             "distance_between_obstacles": 3,
             "spawn_probability": 0.65
         },
@@ -54,7 +54,7 @@
             "row": 5,
             "type": "WaterLane",
             "direction": -1,
-            "lane_velocity": 1.0,
+            "lane_velocity": 1.3,
             "obstacle_size": 2,
             "distance_between_obstacles": 3,
             "spawn_probability": 0.65
@@ -64,7 +64,7 @@
             "type": "WaterLane",
             "direction": 1,
             "lane_velocity": 1.0,
-            "obstacle_size": 2,
+            "obstacle_size": 1,
             "distance_between_obstacles": 3,
             "spawn_probability": 0.65
         },
@@ -76,16 +76,16 @@
             "row": 8,
             "type": "StreetLane",
             "direction": -1,
-            "lane_velocity": 1.3,
+            "lane_velocity": 1.0,
             "obstacle_size": 3,
-            "distance_between_obstacles": 3,
+            "distance_between_obstacles": 2,
             "spawn_probability": 0.75
         },
         {
             "row": 9,
             "type": "StreetLane",
             "direction": 1,
-            "lane_velocity": 1.0,
+            "lane_velocity": 1.3,
             "obstacle_size": 2,
             "distance_between_obstacles": 2,
             "spawn_probability": 0.75
@@ -94,7 +94,7 @@
             "row": 10,
             "type": "StreetLane",
             "direction": -1,
-            "lane_velocity": 1.0,
+            "lane_velocity": 1.3,
             "obstacle_size": 2,
             "distance_between_obstacles": 2,
             "spawn_probability": 0.75
@@ -104,7 +104,7 @@
             "type": "StreetLane",
             "direction": 1,
             "lane_velocity": 1.0,
-            "obstacle_size": 3,
+            "obstacle_size": 2,
             "distance_between_obstacles": 2,
             "spawn_probability": 0.75
         },
@@ -113,16 +113,16 @@
             "type": "StreetLane",
             "direction": -1,
             "lane_velocity": 1.0,
-            "obstacle_size": 3,
-            "distance_between_obstacles": 2,
+            "obstacle_size": 2,
+            "distance_between_obstacles": 3,
             "spawn_probability": 0.75
         },
         {
             "row": 13,
             "type": "StreetLane",
             "direction": 1,
-            "lane_velocity": 1.0,
-            "obstacle_size": 2,
+            "lane_velocity": 1.3,
+            "obstacle_size": 1,
             "distance_between_obstacles": 2,
             "spawn_probability": 0.75
         },

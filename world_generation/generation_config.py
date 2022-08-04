@@ -68,7 +68,7 @@ TargetPositions = {
 # DistanceBetweenObstacles LilyPad
 DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.3, 0.55, 0.15])
 DistanceBetweenObstaclesLilyPadNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.5, 0.4])
-DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[2, 3, 4], probabilities=[0.1, 0.7, 0.2])
+DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[2, 3], probabilities=[0.15, 0.85])
 DistanceBetweenObstaclesLilyPad = {
     GameDifficulty.EASY: DistanceBetweenObstaclesLilyPadEasy,
     GameDifficulty.NORMAL: DistanceBetweenObstaclesLilyPadNormal,
