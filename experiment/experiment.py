@@ -27,22 +27,23 @@ class Experiment:
         # create pygaze Display object
 
         if eye_tracker:
-            eye_tracker_disp = libscreen.Display()
-            self.eye_tracker = MyEyeTracker(disp=eye_tracker_disp)
+            self.eye_tracker_disp = libscreen.Display()
+            self.eye_tracker = MyEyeTracker(disp=self.eye_tracker_disp)
             if self.eye_tracker.connected():
                 print("Connection to eye tracker established successfully")
 
             calibration_successful = self.eye_tracker.calibrate()
             if not calibration_successful:
-                print("Calibration failed. Trying again.")
+                print("Calibration failed.")
                 # calibration_successful = self.eye_tracker.calibrate()
 
         else:
             self.eye_tracker = None
 
-        pygame.init()
+
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
+        pygame.init()
 
         self.subject_id = None
         self.subject_score = 0
