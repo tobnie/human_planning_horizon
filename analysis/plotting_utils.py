@@ -3,6 +3,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.ticker import MultipleLocator
 
 import config
+from analysis.analysis_utils import get_states, get_world_properties
+from world_generation.generation_config import GameDifficulty
 
 
 def plot_rect(ax, x, y, width, height, color):
@@ -54,13 +56,17 @@ def draw_grid(ax):
     ax.grid(which='major', color='#444444', linestyle='--')
 
 
+def plot_world_background(ax, target_position):
+    plot_target_position(ax, target_position)
+    plot_water(ax)
+    plot_street(ax)
+
+
 def plot_state(ax, state, target_position, time=None):
     """ Plots a representation of the given state."""
 
     # plot background
-    plot_target_position(ax, target_position)
-    plot_water(ax)
-    plot_street(ax)
+    plot_world_background(ax, target_position)
 
     # plot entities
     for entry in reversed(state):  # reverse it so player will be drawn last and ON lilypads, not below them
@@ -79,3 +85,55 @@ def plot_state(ax, state, target_position, time=None):
     plt.xlim((0, config.DISPLAY_WIDTH_PX))
     plt.ylim((0, config.DISPLAY_HEIGHT_PX))
     draw_grid(ax)
+
+
+def plot_line_between_points(ax, x1, y1, x2, y2, color='black'):
+    ax.plot([x1, x2], [y1, y2], color=color)
+
+
+def get_transformed_center_of_entity(x, y, width, height):
+
+    print('### get center')
+    print(x, y, width, height)
+    print(x + width / 2, config.DISPLAY_HEIGHT_PX - y + height / 2)
+    return x + width / 2, config.DISPLAY_HEIGHT_PX - y + height / 2
+
+
+def plot_player_path(ax, states, target_position):
+    # plot background
+    plot_world_background(ax, target_position)
+
+    player_pos = states[0][1][0][1:]
+    player_pos = player_pos[0], config.DISPLAY_HEIGHT_PX - player_pos[1]
+
+    for time_state in states[1:]:
+        time = time_state[0]
+        state = time_state[1]
+        player_state = state[0]
+        print(f'STATE at t={time}:', player_state)
+        player_pos_next = player_state[1:]
+        player_pos_next = player_pos_next[0], config.DISPLAY_HEIGHT_PX - player_pos_next[1]
+
+        if player_pos[0] != player_pos_next[0] or player_pos[1] != player_pos_next[1]:
+            # print(f'Line from {player_pos} to {player_pos_next}')
+            plot_line_between_points(ax, player_pos[0], player_pos[1], player_pos_next[0], player_pos_next[1], color='k')
+
+        player_pos = player_pos_next
+
+    plt.title('Player Path')
+    plt.xlim((0, config.DISPLAY_WIDTH_PX))
+    plt.ylim((0, config.DISPLAY_HEIGHT_PX))
+    draw_grid(ax)
+
+
+subject = 'TEST01'
+difficulty = GameDifficulty.EASY.value
+world_name = 'world_0'
+
+states = get_states(subject, difficulty, world_name)
+world_props = get_world_properties(subject, difficulty, world_name)
+target_position = int(world_props['target_position'])
+
+fig, ax = plt.subplots()
+plot_player_path(ax, states, target_position)
+plt.show()
