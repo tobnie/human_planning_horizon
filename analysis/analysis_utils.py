@@ -35,7 +35,7 @@ def get_time_from_state_file(state_file):
     return int(state_file.split('.')[0].split('_')[1])
 
 
-def get_states(subject, difficulty, world_name):
+def get_times_states(subject, difficulty, world_name):
     """ Loads all world states as np array representation for given subject, difficulty and world_name."""
     # get all state array
     # TODO why only working with absolute path?
@@ -57,3 +57,14 @@ def get_states(subject, difficulty, world_name):
     times_states = sorted(times_states, key=lambda x: x[0])
 
     return times_states
+
+
+def assign_position_to_fields(x, y, width):
+    field_y = int(round(y / config.FIELD_HEIGHT))
+    field_x_start = int(round(x / config.FIELD_WIDTH))
+    print('Width:', width)
+    print('Field width:', config.FIELD_WIDTH)
+    field_width = int(width // config.FIELD_WIDTH)
+    print('Calculated field width:', field_width)
+    return field_x_start, field_y, field_width
+
