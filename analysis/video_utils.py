@@ -3,7 +3,7 @@ import os
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from analysis.plotting_utils import plot_state
+from analysis.plotting_utils.world_coordinates import plot_state
 
 
 def generate_plots(time_states, target_position, path=f'./test/'):
