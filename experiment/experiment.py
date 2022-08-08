@@ -31,10 +31,7 @@ class Experiment:
             if self.eye_tracker.connected():
                 print("Connection to eye tracker established successfully")
 
-            calibration_successful = self.eye_tracker.calibrate()
-            if not calibration_successful:
-                print("Calibration failed.")
-                raise RuntimeError("Calibration Failed")
+            self.eye_tracker.calibrate()
 
         else:
             self.eye_tracker = None
