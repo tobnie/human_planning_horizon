@@ -1,5 +1,6 @@
 from pygaze import libtime
 
+import constants
 import config
 from pylink import *
 from pygaze.eyetracker import EyeTracker
@@ -15,8 +16,7 @@ class MyEyeTracker:
     def __init__(self, disp, edf_path='./edf_files/test.edf'):
         self.disp = disp  # TODO maybe this can even be declared and initialized here instead of an actual parameter
         print('Creating eyetracker instance...')
-        self.tracker = EyeTracker(self.disp, data_file=edf_path,
-                                  resolution=(config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX))
+        self.tracker = EyeTracker(self.disp, data_file=edf_path)
         print('EyeTracker created.')
         self.t_start = None  # start time of tracking
         self.eyetracker_events = None  # accumulator for events during recording
