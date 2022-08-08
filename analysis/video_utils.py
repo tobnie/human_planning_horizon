@@ -1,7 +1,9 @@
+import os
+
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from analysis.plotting_utils import plot_state
+from analysis.plotting_utils.world_coordinates import plot_state
 
 
 def generate_plots(time_states, target_position, path=f'./test/'):
@@ -14,15 +16,16 @@ def generate_plots(time_states, target_position, path=f'./test/'):
         plt.savefig(path + f'{i}.png')
         plt.close()
 
+
 def animate_plots(path):
-    imgs = [plt.imread(path+img) for img in os.listdir(path) if img.endswith('.png')]
+    imgs = [plt.imread(path + img) for img in os.listdir(path) if img.endswith('.png')]
     fig = plt.figure()
     viewer = fig.add_subplot(111)
-    plt.ion() # Turns interactive mode on (probably unnecessary)
+    plt.ion()  # Turns interactive mode on (probably unnecessary)
 
     for i in range(len(imgs)):
-        viewer.clear() # Clears the previous image
-        viewer.imshow(imgs[i]) # Loads the new image
-        plt.pause(.1) # Delay in seconds
-        fig.canvas.draw() # Draws the image to the screen
+        viewer.clear()  # Clears the previous image
+        viewer.imshow(imgs[i])  # Loads the new image
+        plt.pause(.1)  # Delay in seconds
+        fig.canvas.draw()  # Draws the image to the screen
     plt.close()
