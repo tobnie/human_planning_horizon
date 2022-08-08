@@ -9,8 +9,6 @@ EVENTS = [STARTFIX, STARTBLINK, STARTSACC, ENDFIX, ENDSACC, ENDBLINK]
 
 class MyEyeTracker:
 
-    # TODO only track dominant eye
-
     def __init__(self, edf_path='./edf_files/test.edf'):
         self.disp = self.eye_tracker_disp = libscreen.Display()
         print('Creating eyetracker instance...')
@@ -46,6 +44,7 @@ class MyEyeTracker:
         """ Shows a status message on the experimenter's screen. """
         self.tracker.status_msg(msg)
 
+    # TODO implement safety hook to check if eye tracker is connected?
     def connected(self):
         """ Returns True, if the eye tracker is currently connected. False, otherwise."""
         return self.tracker.connected()
