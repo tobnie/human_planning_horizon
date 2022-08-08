@@ -1,0 +1,14 @@
+subject_id, TEST01
+world_name, world_0
+difficulty, easy
+time_limit, 75000
+target_position, 3
+n_lanes, 15
+n_water_lanes, 6
+n_street_lanes, 6
+field_width, 96.0
+field_height, 72.0
+player_width, 62.400000000000006
+player_height, 46.800000000000004
+display_x, 1920
+display_y, 1080
