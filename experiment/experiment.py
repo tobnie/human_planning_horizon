@@ -49,13 +49,13 @@ class Experiment:
         """ Shows the welcome screen template. """
         self.screen.fill(colors.WHITE)
         self.show_message("Welcome to the experiment! You will now play multiple levels of frogger with different difficulty.")
-        self.show_message("Please enter your subject ID first. It consists of the following parts:", y_offset=200, alignment="left")
-        self.show_message("1) The first two letters of the first name of your first parent", y_offset=250, alignment="left")
-        self.show_message("2) The number of your birth month (with leading zeroes)", y_offset=300, alignment="left")
-        self.show_message("3) The first two letters of the first name of your second parent", y_offset=350, alignment="left")
-        self.show_message("For example, the son of Claudia and Ralf, born on the 25.03.1998, will yield the code \'CL03RA\'.", y_offset=400,
+        self.show_message("Please enter your subject ID first. It consists of the following parts:", y_offset=250, alignment="left")
+        self.show_message("1) The first two letters of the first name of your first parent", y_offset=300, alignment="left")
+        self.show_message("2) The number of your birth month (with leading zeroes)", y_offset=350, alignment="left")
+        self.show_message("3) The first two letters of the first name of your second parent", y_offset=400, alignment="left")
+        self.show_message("For example, the son of Claudia and Ralf, born on the 25.03.1998, will yield the code \'CL03RA\'.", y_offset=450,
                           alignment="left")
-        self.show_message("Press enter to continue.", y_offset=600)
+        self.show_message("Press enter to continue.", y_offset=650)
 
     def show_screen(self):
         pygame.display.update()
@@ -90,7 +90,7 @@ class Experiment:
 
             text = text.upper()
 
-            self.show_message(text, y_offset=450)
+            self.show_message(text, y_offset=550)
             self.show_screen()
             self.subject_id = check_if_subject_id_exists(text)
 
@@ -131,7 +131,7 @@ class Experiment:
                     else:
                         text_rows[text_row_ptr] += event.unicode
 
-            y_offset_base = 100
+            y_offset_base = 300
             for i, row_text in enumerate(text_rows):
                 self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9 * config.DISPLAY_WIDTH_PX, alignment='left')
             self.show_screen()
@@ -147,17 +147,18 @@ class Experiment:
         self.screen.blit(example_level_img, (config.DISPLAY_WIDTH_PX / 6, 50))
 
         self.show_message("You start as the frog at the bottom of the screen and your goal is to get to the star at the top.",
-                          y_offset=600)
+                          y_offset=900)
         self.show_message("You can move in any direction with the arrow keys.",
-                          y_offset=640)
+                          y_offset=940)
+        self.show_message("You can only enter the star from below.", y_offset=980)
         self.show_message(
             "You need to avoid cars and water to get to the star, while staying inside the level borders.",
-            y_offset=680)
-        self.show_message("Also, pay attention to the timer indicated by the circle on the frog. If it runs out, you lose.", y_offset=720)
+            y_offset=1020)
+        self.show_message("Also, pay attention to the timer indicated by the circle on the frog. If it runs out, you lose.", y_offset=1060)
         self.show_message("You get points for remaining time, finishing the level and moving closer to the star.",
-                          y_offset=760)
+                          y_offset=1100)
         self.show_message("We will start with some example levels to get you started. Press any key to continue.",
-                          y_offset=800)
+                          y_offset=1140)
 
         self.show_screen()
         wait_keys()
@@ -166,7 +167,7 @@ class Experiment:
         self.screen.fill(colors.WHITE)
 
         self.show_message("Press SPACE to start!",
-                          y_offset=300, font_size=100)
+                          y_offset=500, font_size=100)
 
         self.show_screen()
 
@@ -181,27 +182,18 @@ class Experiment:
         for i in reversed(range(1, 4)):
             self.screen.fill(colors.WHITE)
             self.show_message(str(i),
-                              y_offset=300, font_size=100)
+                              y_offset=500, font_size=100)
             self.show_screen()
             pygame.time.wait(1000)
-
-    def training_explanation_screen(self):
-        """ Explains that we will start with some training examples"""
-        self.screen.fill(colors.WHITE)
-        self.show_message("We will start with some training examples. Please press any key to continue.",
-                          y_offset=300)
-
-        self.show_screen()
-        wait_keys()
 
     def experiment_start_screen(self):
         """ Explains that the real experiment will start now."""
         self.screen.fill(colors.WHITE)
         self.show_message("We will start with the real experiment now. Do not hesitate do ask any questions.",
-                          y_offset=300)
+                          y_offset=450)
 
         self.show_message("Please press any button to continue, when you are ready.",
-                          y_offset=400)
+                          y_offset=600)
 
         self.show_screen()
         wait_keys()
@@ -228,7 +220,6 @@ class Experiment:
         self.rules_screen()
 
         # -------- TRAINING ----------
-        self.training_explanation_screen()
         easy_training_games = [(GameDifficulty.EASY, 'world_{}'.format(i)) for i in range(N_EASY_TRAINING_GAMES)]
         normal_training_games = [(GameDifficulty.NORMAL, 'world_{}'.format(i)) for i in range(N_NORMAL_TRAINING_GAMES)]
         self.level_num = -(N_EASY_TRAINING_GAMES + N_NORMAL_TRAINING_GAMES)
@@ -265,14 +256,14 @@ class Experiment:
     def loading_screen(self):
         self.screen.fill(colors.WHITE)
         self.show_message('LOADING...',
-                          y_offset=300, font_size=100)
+                          y_offset=500, font_size=100)
         self.show_screen()
 
     def end_screen(self):
         self.screen.fill(colors.WHITE)
         self.show_message('That\'s it, thank you very much for participating!',
-                          y_offset=300, font_size=60)
-        self.show_message('Please press any key to exit now.', y_offset=500)
+                          y_offset=500, font_size=60)
+        self.show_message('Please press any key to exit now.', y_offset=700)
         self.show_screen()
         wait_keys()
 
@@ -303,7 +294,7 @@ class Experiment:
 
     def show_screen_between_levels_training(self):
         self.screen.fill(colors.WHITE)
-        self.show_message("Press any key to continue to the next level.", y_offset=300)
+        self.show_message("Press any key to continue to the next level.", y_offset=600)
         self.show_screen()
         wait_keys()
 
