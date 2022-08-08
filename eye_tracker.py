@@ -1,7 +1,5 @@
-from pygaze import libtime
+from pygaze import libtime, libscreen
 
-import constants
-import config
 from pylink import *
 from pygaze.eyetracker import EyeTracker
 
@@ -13,8 +11,8 @@ class MyEyeTracker:
 
     # TODO only track dominant eye
 
-    def __init__(self, disp, edf_path='./edf_files/test.edf'):
-        self.disp = disp  # TODO maybe this can even be declared and initialized here instead of an actual parameter
+    def __init__(self, edf_path='./edf_files/test.edf'):
+        self.disp = self.eye_tracker_disp = libscreen.Display()
         print('Creating eyetracker instance...')
         self.tracker = EyeTracker(self.disp, data_file=edf_path)
         print('EyeTracker created.')

@@ -116,9 +116,6 @@ class Logger:
         # concatenate time and state
         gaze_with_time = np.vstack((times, gaze_x, gaze_y, pupil_size)).T
 
-        # TODO remove print
-        # print("Full array EyeTracking:\n", gaze_with_time)
-
         # save as .npz-file
         log_directory = self.log_directory if not training else self.training_log_directory
         np.savez_compressed(log_directory + 'eyetracker_samples.npz', gaze_with_time)

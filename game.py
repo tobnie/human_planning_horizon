@@ -83,7 +83,10 @@ class Game:
     def run_normal(self):
         """ Runs the game normally. """
         if self.eye_tracker:
-            time = self.eye_tracker.get_time()
+            sample = self.eye_tracker.get_sample()
+            time = sample[0]
+            self.logger.log_eyetracker_samples(time, sample[1:])
+            self.eye_tracker.extract_events()  # TODO check this
         else:
             time = self.game_time
 
@@ -96,19 +99,12 @@ class Game:
         self.world.update()
         self.render()
 
-        # TODO save world state and eye tracking data with every sample of eyetracker
-        # logging
-        if self.eye_tracker:
-            sample = self.eye_tracker.get_sample()
-            self.eye_tracker.extract_events()  # TODO check this
-            self.logger.log_eyetracker_samples(time, sample)
-
-        # log world state
-        self.logger.log_state(time)
-
         # update game_time
         dt = self.clock.tick_busy_loop(self.fps)
         self.game_time += dt
+
+        # log world state
+        self.logger.log_state(time)
 
         # check world status
         self.world.player.check_status()

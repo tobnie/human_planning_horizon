@@ -82,8 +82,7 @@ class EyeLinkListener(EyeLinkCBind):
 		EyeLinkCBind.__init__(self)
 		self._trackerInfo = ILinkData()
 		constants.EYELINK= self
-		#TODO: should now remove all methods that are not available to the listener in EyeLinkCBind
-	
+
 	## Returns the current tracker information.
 	# 
 	#  @return 

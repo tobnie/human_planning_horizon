@@ -5,7 +5,6 @@ import sys
 
 import numpy as np
 import pygame
-from pygaze import libscreen
 
 import colors
 from experiment.experiment_config import *
@@ -27,19 +26,18 @@ class Experiment:
         # create pygaze Display object
 
         if eye_tracker:
-            self.eye_tracker_disp = libscreen.Display()
-            self.eye_tracker = MyEyeTracker(disp=self.eye_tracker_disp)
+
+            self.eye_tracker = MyEyeTracker()
             if self.eye_tracker.connected():
                 print("Connection to eye tracker established successfully")
 
             calibration_successful = self.eye_tracker.calibrate()
             if not calibration_successful:
                 print("Calibration failed.")
-                # calibration_successful = self.eye_tracker.calibrate()
+                raise RuntimeError("Calibration Failed")
 
         else:
             self.eye_tracker = None
-
 
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
