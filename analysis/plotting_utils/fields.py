@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator
 
 import config
 from analysis.analysis_utils import assign_position_to_fields

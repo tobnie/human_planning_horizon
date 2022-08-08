@@ -58,7 +58,8 @@ LilyPadWidths = {
 }
 
 # Target Positions
-TargetPositionsEasy = TargetPositionsMedium = TargetPositionsHard = DiscreteDistribution(values=TARGET_POSITIONS, probabilities=[1 / len(TARGET_POSITIONS)] * len(TARGET_POSITIONS))
+TargetPositionsEasy = TargetPositionsMedium = TargetPositionsHard = \
+    DiscreteDistribution(values=TARGET_POSITIONS, probabilities=[1 / len(TARGET_POSITIONS)] * len(TARGET_POSITIONS))
 TargetPositions = {
     GameDifficulty.EASY: TargetPositionsEasy,
     GameDifficulty.NORMAL: TargetPositionsMedium,

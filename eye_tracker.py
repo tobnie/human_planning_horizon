@@ -104,4 +104,3 @@ class MyEyeTracker:
             tc = float_data.getTime() - self.t_start
             return tc, d
         return None, None
-

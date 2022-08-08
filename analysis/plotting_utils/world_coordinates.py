@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator
 
 import config
 from analysis.plotting_utils import plotting_utils
