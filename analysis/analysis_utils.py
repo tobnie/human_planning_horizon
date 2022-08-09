@@ -23,7 +23,7 @@ def get_world_properties_path(subject, difficulty, world_name, training=False):
 
 def get_world_properties(subject, difficulty, world_name, training=False):
     path = get_world_properties_path(subject, difficulty, world_name, training)  # TODO remove absolute path
-    path = 'D:/source/human_planning_horizon/data/level_data/TEST01/training/easy/world_0/world_properties.csv'
+    path = '/data/test_data/TEST01/training/easy/world_0/world_properties.csv'
     return read_csv(path)
 
 
@@ -40,7 +40,7 @@ def get_times_states(subject, difficulty, world_name):
     # get all state array
     # TODO why only working with absolute path?
     states_path = get_state_data_path(subject, difficulty, world_name)
-    states_path = 'D:/source/human_planning_horizon/data/level_data/TEST01/training/easy/world_0/states/'
+    states_path = '/data/test_data/TEST01/training/easy/world_0/states/'
     state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
 
     # load array for each
