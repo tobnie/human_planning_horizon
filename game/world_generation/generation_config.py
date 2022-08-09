@@ -48,8 +48,8 @@ VehicleWidths = {
 }
 
 # Lily Pad Widths
-LilyPadWidthEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[.25, .55, .2])
-LilyPadWidthNormal = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[.1, .4, .4, .1])
+LilyPadWidthEasy = DiscreteDistribution(values=[2, 3, 4], probabilities=[.3, .6, .1])
+LilyPadWidthNormal = DiscreteDistribution(values=[1, 2, 3, 4], probabilities=[.15, .4, .4, .05])
 LilyPadWidthHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[.2, .65, .15])
 LilyPadWidths = {
     GameDifficulty.EASY: LilyPadWidthEasy,
@@ -67,7 +67,7 @@ TargetPositions = {
 }
 
 # DistanceBetweenObstacles LilyPad
-DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.3, 0.55, 0.15])
+DistanceBetweenObstaclesLilyPadEasy = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.15, 0.65, 0.2])
 DistanceBetweenObstaclesLilyPadNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.5, 0.4])
 DistanceBetweenObstaclesLilyPadHard = DiscreteDistribution(values=[2, 3], probabilities=[0.15, 0.85])
 DistanceBetweenObstaclesLilyPad = {
@@ -77,7 +77,7 @@ DistanceBetweenObstaclesLilyPad = {
 }
 
 # Distance Between Obstacles Vehicle
-DistanceBetweenObstaclesVehicleEasy = DiscreteDistribution(values=[-1, 2, 3, 4], probabilities=[0.15, 0.35, 0.4, 0.1])
+DistanceBetweenObstaclesVehicleEasy = DiscreteDistribution(values=[-1, 2, 3], probabilities=[0.15, 0.4, 0.45])
 DistanceBetweenObstaclesVehicleNormal = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.05, 0.65, 0.3])
 DistanceBetweenObstaclesVehicleHard = DiscreteDistribution(values=[1, 2, 3], probabilities=[0.1, 0.8, 0.1])
 DistanceBetweenObstaclesVehicle = {
