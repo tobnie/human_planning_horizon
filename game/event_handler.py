@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from world.player import PlayerAction
+from game.world.player import PlayerAction
 
 blocked = False
 

@@ -5,9 +5,9 @@ import pygame
 
 import colors
 import config
-from world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
-from world.player import Player
-from world.world_state import WorldState
+from game.world.lane import StartLane, StreetLane, WaterLane, FinishLane, Lane, LaneDirection, DirectedLane
+from game.world.player import Player
+from game.world.world_state import WorldState
 
 
 class WorldStatus(Enum):

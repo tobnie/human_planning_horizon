@@ -6,8 +6,8 @@ import pygame.sprite
 
 import colors
 import config
-from world.game_object import Vehicle, LilyPad, Obstacle
-from world.field import Field
+from game.world.game_object import Vehicle, LilyPad, Obstacle
+from game.world.field import Field
 
 
 class LaneType(Enum):

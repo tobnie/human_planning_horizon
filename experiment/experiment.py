@@ -13,8 +13,8 @@ from text_utils import drawText
 
 import config
 
-from game import Game
-from world_generation.generation_config import GameDifficulty
+from game.game import Game
+from game.world_generation.generation_config import GameDifficulty
 from eye_tracker import MyEyeTracker
 
 
@@ -142,7 +142,7 @@ class Experiment:
     def rules_screen(self):
         """ Shows the rules of the game. """
         self.screen.fill(colors.WHITE)
-        example_level_img = pygame.image.load(r'./images/example_level.png')
+        example_level_img = pygame.image.load(r'./game/images/example_level.png')
         example_level_img = pygame.transform.scale(example_level_img, (config.DISPLAY_WIDTH_PX * 2 / 3, config.DISPLAY_HEIGHT_PX * 2 / 3))
         self.screen.blit(example_level_img, (config.DISPLAY_WIDTH_PX / 6, 50))
 

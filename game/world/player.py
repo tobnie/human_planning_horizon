@@ -3,11 +3,11 @@ from enum import Enum
 
 import pygame
 
-import collision_handler
+from game import collision_handler
 import colors
 import config
-from world.game_object import DynamicObject
-from world.lane import WaterLane, DirectedLane
+from game.world.game_object import DynamicObject
+from game.world.lane import WaterLane, DirectedLane
 
 
 class PlayerAction(Enum):
@@ -28,7 +28,7 @@ class Player(DynamicObject):
         super().__init__(world, start_position[0], start_position[1], 0, config.PLAYER_WIDTH_TO_FIELD_WIDTH_RATIO,
                          config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO,
                          movement_bounds_x=config.PLAYER_MOVEMENT_BOUNDS_X, movement_bounds_y=config.PLAYER_MOVEMENT_BOUNDS_Y,
-                         img_path=os.path.join(config.SPRITES_DIR, 'player.png'))
+                         img_path=os.path.join(config.SPRITES_DIR, '../sprites/player.png'))
 
         self.delta_x = 0
         self.delta_y = 0

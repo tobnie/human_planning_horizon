@@ -4,8 +4,8 @@ import pygame
 
 import colors
 import config
-from world.lane import DirectedLane, FinishLane
-from world.world import WorldStatus
+from game.world.lane import DirectedLane, FinishLane
+from game.world.world import WorldStatus
 
 
 class TextDisplayer:

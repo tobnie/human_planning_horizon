@@ -1,9 +1,12 @@
 import pygame
+
+from game.game import Game
+
 pygame.init()
 
 import config
-from world_generation.generation_config import GameDifficulty
-from game import Game
+from game.world_generation.generation_config import GameDifficulty
+
 
 difficulty = GameDifficulty.HARD
 world_number = 0

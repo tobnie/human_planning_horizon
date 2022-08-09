@@ -7,7 +7,7 @@ from generation_config import GameDifficulty, ParameterDistributions, GameParame
 
 pygame.init()
 
-from world.lane import LaneDirection, StartLane, FinishLane, Lane, StreetLane, WaterLane
+from game.world.lane import LaneDirection, StartLane, FinishLane, Lane, StreetLane, WaterLane
 import world_generation_utils
 import config
 

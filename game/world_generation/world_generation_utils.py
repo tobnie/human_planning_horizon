@@ -1,7 +1,7 @@
 import json
 
 from config import LEVELS_DIR
-from world.world import World
+from game.world.world import World
 
 
 def save_world(world: World, filename, path=LEVELS_DIR,):

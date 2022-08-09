@@ -50,8 +50,8 @@ HARD_MULTIPLIER = 3
 
 ################################################ FILES ################################################
 # directory
-SPRITES_DIR = "./sprites/"
-LEVELS_DIR = "./levels/"
+SPRITES_DIR = "game/sprites/"
+LEVELS_DIR = "game/levels/"
 LOG_DIR = "./data/"
 LEVEL_DATA_DIR = LOG_DIR + "level_data/"
 SCORE_DIR = LOG_DIR + "scores/"

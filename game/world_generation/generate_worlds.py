@@ -1,5 +1,5 @@
 from generation_config import GameDifficulty
-from world_generation.world_generator import WorldGenerator
+from game.world_generation.world_generator import WorldGenerator
 
 from tqdm import tqdm
 

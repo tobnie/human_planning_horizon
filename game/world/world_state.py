@@ -1,8 +1,8 @@
 import numpy as np
 
-from world.game_object import Vehicle, LilyPad
-from world.lane import DirectedLane
-from world.player import Player
+from game.world.game_object import Vehicle, LilyPad
+from game.world.lane import DirectedLane
+from game.world.player import Player
 
 
 class WorldState:

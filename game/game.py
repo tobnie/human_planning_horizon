@@ -2,16 +2,16 @@ import pygame
 import pygame.gfxdraw
 from pygaze import libtime
 
-from display_debug_information import TextDisplayer
-
 import colors
 import config
-import event_handler
 from eye_tracker import MyEyeTracker
+from game import event_handler
+from game.display_debug_information import TextDisplayer
+from game.logging_game.logger import Logger
+from game.world.world import World, WorldStatus
+from game.world_generation.generation_config import GameDifficulty
 from text_utils import drawText
-from logging_game.logger import Logger
-from world.world import World, WorldStatus
-from world_generation.generation_config import GameDifficulty
+
 
 INPUT_EVENT = pygame.USEREVENT + 0
 UPDATE_PLAYER_EVENT = pygame.USEREVENT + 1
