@@ -26,9 +26,9 @@ class GameParameter(Enum):
 
 
 # Lane Velocities
-LaneVelocityEasy = DiscreteDistribution(values=[0.7, 1], probabilities=[.2, .8])
-LaneVelocityNormal = DiscreteDistribution(values=[0.7, 1, 1.3], probabilities=[.2, .75, .05])
-LaneVelocityHard = DiscreteDistribution(values=[1, 1.3], probabilities=[.8, .2])
+LaneVelocityEasy = DiscreteDistribution(values=[0.6, 0.9], probabilities=[.2, .8])
+LaneVelocityNormal = DiscreteDistribution(values=[0.6, 0.9, 1.2], probabilities=[.2, .75, .05])
+LaneVelocityHard = DiscreteDistribution(values=[0.9, 1.2], probabilities=[.8, .2])
 
 LaneVelocities = {
     GameDifficulty.EASY: LaneVelocityEasy,
