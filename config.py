@@ -34,7 +34,7 @@ DELAY_AFTER_LEVEL_FINISH = 1_000  # in ms (time until game is closed after level
 PRE_RUN_ITERATIONS = 2000
 
 # obstacles
-PLAYER_UPDATE_INTERVAL = 200
+PLAYER_UPDATE_INTERVAL = 350
 
 ################################################ SCORE ################################################
 # points
