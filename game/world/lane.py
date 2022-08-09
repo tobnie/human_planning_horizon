@@ -92,9 +92,6 @@ class DirectedLane(Lane, ABC):
         self.spawn_probability = spawn_probability  # probability of spawning an obstacle in a lane
         self.missed_spawns = 0  # how many times no obstacle was spawned even though the distance threshold was reached
 
-        # counts the calls of the update method and only updates the sprites if the update count is a multiple of the velocity
-        self.update_cnt = config.OBSTACLE_MAX_VELOCITY
-
     def calc_distance_of_new_to_last_sprite(self) -> int:
         """
         Calculates distance to the last sprite in the lane if a new sprite was spawned now.
