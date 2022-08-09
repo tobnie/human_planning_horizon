@@ -311,7 +311,11 @@ class Experiment:
 
         y_offset = 100
         for name, score in scores:
-            self._draw_score_row(name, score, y_offset=y_offset)
+            # draw colored row for the own score
+            if name == self.subject_id:
+                self._draw_score_row(name, score, y_offset=y_offset, color=colors.GREEN)
+            else:
+                self._draw_score_row(name, score, y_offset=y_offset)
             y_offset += 50
 
     def load_scores(self):
@@ -322,7 +326,8 @@ class Experiment:
             reader = csv.reader(f, delimiter=';')
             scores = list(reader)
 
-        scores.sort(key=lambda x: int(x[1]), reverse=True)  # sort in place by points
+        print(scores)
+        scores.sort(key=lambda x: int(float(x[1])), reverse=True)  # sort in place by points
         scores = np.array(scores[:N_SCORES_DISPLAYED])
 
         return scores
@@ -386,12 +391,12 @@ class Experiment:
 
         self._draw_score_row('Your Total Score is now:', str(self.subject_score), y_offset)
 
-    def _draw_score_row(self, row_name, points, y_offset=0, font_size=30):
+    def _draw_score_row(self, row_name, points, y_offset=0, font_size=30, color=colors.BLACK):
         """ Draws a row with the given name (aligned left) and points (aligned right). """
-        drawText(self.screen, row_name, colors.BLACK,
+        drawText(self.screen, row_name, color,
                  pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font_size=font_size, alignment='left')
-        drawText(self.screen, points, colors.BLACK,
+        drawText(self.screen, points.split('.')[0], color,
                  pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font_size=font_size, alignment='right')
 
