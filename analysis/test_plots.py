@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 
 from analysis.analysis_utils import get_times_states, get_world_properties, create_feature_map_from_state, get_eyetracker_samples
 import analysis.plotting_utils.fields as discrete_plotting
-from analysis.plotting_utils.gaze_plot import plot_gaze
+from analysis.plotting_utils.gaze_plot import plot_gaze, plot_pupil_size_over_time
 from game.world_generation.generation_config import GameDifficulty
 
 # subject = 'TEST01'
@@ -26,12 +26,12 @@ difficulty = GameDifficulty.EASY.value
 world_name = 'world_0'
 
 samples = get_eyetracker_samples(subject, difficulty, world_name, training=True)
-time = samples.T[0]
-coords = samples.T[1:3]
-
-print(time)
-print(coords)
 
 fig, ax = plt.subplots()
-plot_gaze(ax, samples, coords)
+plot_gaze(ax, samples)
 plt.show()
+
+fig, ax = plt.subplots()
+plot_pupil_size_over_time(ax, samples)
+plt.show()
+

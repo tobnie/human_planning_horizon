@@ -34,7 +34,7 @@ def get_world_properties_path(subject, difficulty, world_name, training=False):
 
 
 def get_world_properties(subject, difficulty, world_name, training=False):
-    path = get_world_properties_path(subject, difficulty, world_name, training) 
+    path = get_world_properties_path(subject, difficulty, world_name, training)
     return read_csv(path)
 
 
