@@ -7,7 +7,7 @@ from analysis.plotting.plotting_utils import plot_rect
 
 def plot_target_position(ax, target_position):
     plot_rect(ax, target_position * config.FIELD_WIDTH, (config.N_LANES - 1) * config.ROW_HEIGHT, config.FIELD_WIDTH,
-              config.ROW_HEIGHT, 'yellow')
+              config.ROW_HEIGHT, 'pink')
 
 
 def plot_water(ax):

@@ -91,7 +91,7 @@ class Logger:
         if not self.player_actions:
             warnings.warn("No player actions to save.", RuntimeWarning)
             return
-        
+
         times, actions = zip(*self.player_actions)
 
         # concatenate time and state
