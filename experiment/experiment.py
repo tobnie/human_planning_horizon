@@ -241,6 +241,8 @@ class Experiment:
         possible_games = [(difficulty, 'world_{}'.format(i)) for difficulty in GameDifficulty for i in range(N_WORLDS_PER_DIFFICULTY)]
         random.shuffle(possible_games)
 
+        self.log_trial_order(possible_games)
+
         # run each level
         for difficulty, world_name in possible_games:
             self.run_trial(difficulty, world_name)
@@ -415,6 +417,13 @@ class Experiment:
         drawText(self.screen, msg, colors.BLACK,
                  pygame.rect.Rect(x, 200 + y_offset, width, config.DISPLAY_HEIGHT_PX / 2),
                  font_size=font_size, alignment=alignment)
+
+    def log_trial_order(self, game_list):
+        """ Saves the trial order as a .csv-file. """
+        log_directory = config.LEVEL_DATA_DIR + '/' + self.subject_id + '/'
+        with open(log_directory + 'trial_order.csv', 'w+') as f:
+            for i, (difficulty, world_name) in enumerate(game_list):
+                f.write("%s; %s; %s\n" % (i, difficulty.value, world_name))
 
 
 def check_if_subject_id_exists(subject_id):
