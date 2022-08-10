@@ -1,8 +1,7 @@
 from matplotlib import pyplot as plt
 
-from analysis.analysis_utils import get_times_states, get_world_properties, create_feature_map_from_state, get_eyetracker_samples
-import analysis.plotting_utils.fields as discrete_plotting
-from analysis.plotting_utils.gaze_plot import plot_gaze, plot_pupil_size_over_time
+from analysis.analysis_utils import get_eyetracker_samples
+from analysis.plotting.gaze_plot import plot_gaze, plot_pupil_size_over_time
 from game.world_generation.generation_config import GameDifficulty
 
 # subject = 'TEST01'

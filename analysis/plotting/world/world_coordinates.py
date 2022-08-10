@@ -1,8 +1,8 @@
 from matplotlib import pyplot as plt
 
 import config
-from analysis.plotting_utils import plotting_utils
-from analysis.plotting_utils.plotting_utils import plot_rect
+from analysis.plotting import plotting_utils
+from analysis.plotting.plotting_utils import plot_rect
 
 
 def plot_target_position(ax, target_position):

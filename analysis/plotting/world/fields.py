@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 
 import config
 from analysis.analysis_utils import assign_position_to_fields
-from analysis.plotting_utils import plotting_utils
-from analysis.plotting_utils.plotting_utils import plot_rect
+from analysis.plotting import plotting_utils
+from analysis.plotting.plotting_utils import plot_rect
 
 
 def plot_field(ax, x, y, width, color='k'):

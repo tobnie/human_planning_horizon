@@ -145,22 +145,3 @@ class Logger:
         if not os.path.exists(self.training_log_directory):
             # Create a new directory if it does not exist
             os.makedirs(self.training_log_directory)
-
-
-# TODO translation from event codes to actual event in analysis (or even change here, dont know yet)
-from pylink import *
-
-
-def get_event_string(event):
-    if event == STARTFIX:
-        return ["fixation", "start"]
-    if event == STARTSACC:
-        return ["saccade", "start"]
-    if event == STARTBLINK:
-        return ["blink", "start"]
-    if event == ENDFIX:
-        return ["fixation", "end"]
-    if event == ENDSACC:
-        return ["saccade", "end"]
-    if event == ENDBLINK:
-        return ["blink", "end"]
