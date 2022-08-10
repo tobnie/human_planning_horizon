@@ -13,8 +13,20 @@ def read_csv(path):
         return csv_dict
 
 
+def read_npz(path):
+    return np.load(path)['arr_0']
+
+
 def get_level_data_path(subject, difficulty, world_name, training=False):
-    return config.LEVEL_DATA_DIR + f'{subject}/' + ('training/' if training else '') + f'{difficulty}/{world_name}/'
+    return '../data/test_data/' + f'{subject}/' + ('training/' if training else '') + f'{difficulty}/{world_name}/'
+
+
+def get_samples_data_path(subject, difficulty, world_name, training=False):
+    return get_level_data_path(subject, difficulty, world_name, training) + 'eyetracker_samples.npz'
+
+
+def get_eyetracker_events_data_path(subject, difficulty, world_name, training=False):
+    return get_level_data_path(subject, difficulty, world_name, training) + 'eyetracker_events.npz'
 
 
 def get_world_properties_path(subject, difficulty, world_name, training=False):
@@ -22,25 +34,27 @@ def get_world_properties_path(subject, difficulty, world_name, training=False):
 
 
 def get_world_properties(subject, difficulty, world_name, training=False):
-    path = get_world_properties_path(subject, difficulty, world_name, training)  # TODO remove absolute path
-    path = '/data/test_data/TEST01/training/easy/world_0/world_properties.csv'
+    path = get_world_properties_path(subject, difficulty, world_name, training) 
     return read_csv(path)
 
 
-def get_state_data_path(subject, difficulty, world_name):
-    return get_level_data_path(subject, difficulty, world_name) + 'states/'
+def get_state_data_path(subject, difficulty, world_name, training=False):
+    return get_level_data_path(subject, difficulty, world_name, training) + 'states/'
 
 
 def get_time_from_state_file(state_file):
     return int(state_file.split('.')[0].split('_')[1])
 
 
+def get_eyetracker_samples(subject, difficulty, world_name, training=False):
+    path = get_samples_data_path(subject, difficulty, world_name, training)
+    return read_npz(path)
+
+
 def get_times_states(subject, difficulty, world_name):
     """ Loads all world states as np array representation for given subject, difficulty and world_name."""
     # get all state array
-    # TODO why only working with absolute path?
     states_path = get_state_data_path(subject, difficulty, world_name)
-    states_path = '/data/test_data/TEST01/training/easy/world_0/states/'
     state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
 
     # load array for each
@@ -89,4 +103,3 @@ def create_feature_map_from_state(state, target_position):
     feature_map[target_position, config.N_LANES - 1, 3] = 1
     feature_map = np.rot90(feature_map)
     return feature_map
-
