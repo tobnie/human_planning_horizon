@@ -1,32 +1,83 @@
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 from analysis.analysis_utils import get_eyetracker_samples, get_eyetracker_events, get_times_states, get_world_properties
 from analysis.plotting.gaze.event_plot import plot_blinks
 from analysis.plotting.gaze.gaze_event_utils import get_blinks
 from analysis.plotting.gaze.gaze_plot import plot_gaze, plot_pupil_size_over_time, filter_off_samples
-from analysis.plotting.world.world_coordinates import plot_player_path
+from analysis.plotting.world.world_coordinates import plot_player_path, plot_state
 from game.world_generation.generation_config import GameDifficulty
 
-subject = 'KR07HA'
+subject = 'AAAAAA'
 difficulty = GameDifficulty.EASY.value
-world_name = 'world_2'
+world_name = 'world_0'
 
-samples = get_eyetracker_samples(subject, difficulty, world_name)
-filtered_samples = filter_off_samples(samples)
-
-times_states = get_times_states(subject, difficulty, world_name)
-world_props = get_world_properties(subject, difficulty, world_name)
+# samples = get_eyetracker_samples(subject, difficulty, world_name, training=True)
+# filtered_samples = filter_off_samples(samples)
+times_states = get_times_states(subject, difficulty, world_name, training=True)
+world_props = get_world_properties(subject, difficulty, world_name, training=True)
 target_position = int(world_props['target_position'])
 
-times, states = zip(*times_states)
-
 fig, ax = plt.subplots()
-
-plot_player_path(ax, times_states, target_position)
-plot_gaze(ax, filtered_samples)
-
+plot_state(ax, times_states[10][1], target_position)
+# plot_player_path(ax, times_states, target_position)
 plt.savefig('test.png')
+
 plt.show()
+
+# subject = 'TI01NI'
+# difficulty = GameDifficulty.NORMAL.value
+# world_name = 'world_1'
+#
+# samples = get_eyetracker_samples(subject, difficulty, world_name, training=True)
+# filtered_samples = filter_off_samples(samples)
+# times_states = get_times_states(subject, difficulty, world_name, training=True)
+# world_props = get_world_properties(subject, difficulty, world_name, training=True)
+# target_position = int(world_props['target_position'])
+# times, states = zip(*times_states)
+#
+# fig, ax = plt.subplots()
+#
+# plot_player_path(ax, times_states, target_position)
+# plot_gaze(ax, filtered_samples)
+#
+# plt.savefig('test.png')
+# plt.show()
+
+#
+# def create_plots_for_subject_ids(subject_ids):
+#     for subject_id in subject_ids:
+#         print("Creating plots for subject:", subject_id)
+#         for y_subplot, difficulty_enum in enumerate(GameDifficulty):
+#             print('Difficulty:', difficulty_enum.value)
+#             for i in tqdm(range(20)):
+#                 # meta properties
+#                 subject = subject_id
+#                 difficulty = difficulty_enum.value
+#                 world_name = 'world_{}'.format(i)
+#
+#                 # get game data
+#                 try:
+#                     samples = get_eyetracker_samples(subject, difficulty, world_name)
+#                     filtered_samples = filter_off_samples(samples)
+#                     times_states = get_times_states(subject, difficulty, world_name)
+#                     world_props = get_world_properties(subject, difficulty, world_name)
+#                     target_position = int(world_props['target_position'])
+#                     times, states = zip(*times_states)
+#                 except FileNotFoundError:
+#                     continue
+#
+#                 # plot data
+#                 fig, ax = plt.subplots()
+#                 plt.suptitle('{} - World {}, {}'.format(subject_id, i, difficulty))
+#                 plot_player_path(ax, times_states, target_position)
+#                 plot_gaze(ax, filtered_samples)
+#                 plt.tight_layout()
+#                 plt.savefig('imgs/gaze/{}_{}_world_{}.png'.format(subject_id, difficulty, i))
+#         print('Done!')
+#
+# create_plots_for_subject_ids(['TI01NI'])
+
 
 # fig, ax = plt.subplots()
 # plot_pupil_size_over_time(ax, samples)
