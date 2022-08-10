@@ -88,6 +88,10 @@ class Logger:
     def _save_actions_as_npz(self, training=False):
         """ Saves the player actions as a .npz-file. """
 
+        if not self.player_actions:
+            warnings.warn("No player actions to save.", RuntimeWarning)
+            return
+        
         times, actions = zip(*self.player_actions)
 
         # concatenate time and state
