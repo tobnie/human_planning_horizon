@@ -56,10 +56,10 @@ def get_eyetracker_events(subject, difficulty, world_name, training=False):
     return read_npz(path)
 
 
-def get_times_states(subject, difficulty, world_name):
+def get_times_states(subject, difficulty, world_name, training=False):
     """ Loads all world states as np array representation for given subject, difficulty and world_name."""
     # get all state array
-    states_path = get_state_data_path(subject, difficulty, world_name)
+    states_path = get_state_data_path(subject, difficulty, world_name, training=training)
     state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
 
     # load array for each
