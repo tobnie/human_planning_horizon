@@ -206,7 +206,7 @@ class Game:
             score['death_penalty'] = 0
 
         # points for remaining time
-        if not self.world_status.TIMED_OUT:
+        if self.world_status != WorldStatus.TIMED_OUT:
             score['remaining_time'] = self.game_time
         else:
             score['remaining_time'] = 0
