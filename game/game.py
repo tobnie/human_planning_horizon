@@ -207,7 +207,7 @@ class Game:
 
         # points for remaining time
         if self.world_status != WorldStatus.TIMED_OUT:
-            score['remaining_time'] = self.game_time
+            score['remaining_time'] = (config.LEVEL_TIME - self.game_time) / 1_000
         else:
             score['remaining_time'] = 0
 

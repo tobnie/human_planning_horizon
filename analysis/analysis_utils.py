@@ -18,7 +18,7 @@ def read_npz(path):
 
 
 def get_level_data_path(subject, difficulty, world_name, training=False):
-    return '../data/test_data/' + f'{subject}/' + ('training/' if training else '') + f'{difficulty}/{world_name}/'
+    return f'../data/level_data/{subject}/' + ('training/' if training else '') + f'{difficulty}/{world_name}/'
 
 
 def get_samples_data_path(subject, difficulty, world_name, training=False):
@@ -48,6 +48,11 @@ def get_time_from_state_file(state_file):
 
 def get_eyetracker_samples(subject, difficulty, world_name, training=False):
     path = get_samples_data_path(subject, difficulty, world_name, training)
+    return read_npz(path)
+
+
+def get_eyetracker_events(subject, difficulty, world_name, training=False):
+    path = get_eyetracker_events_data_path(subject, difficulty, world_name, training)
     return read_npz(path)
 
 
