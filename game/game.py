@@ -141,7 +141,6 @@ class Game:
                 self.flip_display()
 
                 # game won
-                pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
                 self.running = False
 
         # stop eye tracker recording and flush event buffer
@@ -149,6 +148,8 @@ class Game:
             self.eye_tracker.stop_recording()
             self.logger.log_eyetracker_events(self.eye_tracker.eyetracker_events)
             print(self.eye_tracker.eyetracker_events)
+
+        pygame.time.wait(config.DELAY_AFTER_LEVEL_FINISH)
         pygame.event.clear()
 
     def save_logging_data(self, training=False):
