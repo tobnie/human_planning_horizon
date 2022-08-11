@@ -105,12 +105,29 @@ class Logger:
         """ Saves the world states as a .npz-file. """
         log_directory = self.log_directory if not training else self.training_log_directory
 
-        state_directory = log_directory + 'states/'
-        if not os.path.exists(state_directory):
-            os.makedirs(state_directory)
+        # state_directory = log_directory + 'states/'
+        # if not os.path.exists(state_directory):
+        #     os.makedirs(state_directory)
 
-        for time, state in self.world_states:
-            np.savez_compressed(state_directory + f'state_{time}.npz', state)
+        # state_array = self.world_states[0][1]
+        # time_column = self.world_states[0][0] * np.ones((state_array.shape[0], 1))
+        # state_array = np.hstack((state_array, time_column))
+        # # state_array[:, -1] = self.world_states[0][0] * np.ones((state_array.shape[0]))
+        #
+        # for time, state in self.world_states[1:]:
+        #     np.savez_compressed(state_directory + f'state_{time}.npz', state)
+        #
+        #     # # append to big state array
+        #     # time_column = time * np.ones((state.shape[0], 1))
+        #     # state_array_to_append = np.hstack((state, time_column))
+        #     # state_array = np.vstack((state_array, state_array_to_append))
+
+        times, states = list(zip(*self.world_states))
+        times = np.array(times)
+        states = np.array(states)
+
+        npz_dict = {'times': times, 'states': states}
+        np.savez_compressed(log_directory + f'world_states.npz', **npz_dict)
 
     def _save_eyetracker_samples_as_npz(self, training=False):
         """ Saves the eyetracker data as a .npz-file. """
