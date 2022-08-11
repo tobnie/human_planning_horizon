@@ -2,6 +2,7 @@ import csv
 import os
 
 import numpy as np
+import pandas as pd
 
 import config
 from game.world_generation.generation_config import GameDifficulty
@@ -66,7 +67,7 @@ def get_state_path_single_npz(subject, difficulty, world_name, training=False):
 
 
 def get_times_states_from_single_npz(subject, difficulty, world_name, training=False):
-    npz_file = np.load(get_state_path_single_npz(subject, difficulty, world_name, training))
+    npz_file = np.load(get_state_path_single_npz(subject, difficulty, world_name, training), allow_pickle=True)
     times = npz_file['times']
     states = npz_file['states']
     times_states = list(zip(times, states))
@@ -78,17 +79,21 @@ def get_times_states(subject, difficulty, world_name, training=False):
 
     try:
         times_states = get_times_states_from_single_npz(subject, difficulty, world_name, training=training)
-    except:
-        # get all state array
-        states_path = get_state_data_path(subject, difficulty, world_name, training=training)
-        state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
+    except FileNotFoundError:
 
-        # load array for each
-        times_states = []
-        for f in state_files:
-            time = get_time_from_state_file(f)
-            state = np.load(states_path + f)['arr_0']
-            times_states.append((time, state))
+        try:
+            # get all state array
+            states_path = get_state_data_path(subject, difficulty, world_name, training=training)
+            state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
+
+            # load array for each
+            times_states = []
+            for f in state_files:
+                time = get_time_from_state_file(f)
+                state = np.load(states_path + f)['arr_0']
+                times_states.append((time, state))
+        except FileNotFoundError:
+            return []
 
     # make times to ints
     times_states = [(int(time), state) for time, state in times_states]
@@ -133,15 +138,55 @@ def get_all_subjects():
     subjects = [f for f in os.listdir(data_dir) if os.path.isdir(data_dir + f)]
     return subjects
 
-def get_all_times_states():
-    subjects = get_all_subjects()
-    for subject in subjects:
-        for difficulty in GameDifficulty:
-            for i in range(20):
-                times_states = get_times_states(subject, difficulty.value, f'world_{i}')
-                actions = get_times_actions(subject, difficulty.value, f'world_{i}')
 
-                # TODO how to collect all states to pass them on?
+def get_all_levels_for_subject(subject):
+    all_difficulties = []
+    world = []
+    all_states = []
+    all_actions = []
+    all_times_s = []
+    all_times_a = []
+    for difficulty in GameDifficulty:
+        for i in range(20):
+            times_states = get_times_states(subject, difficulty.value, f'world_{i}')
+            times_actions = get_times_actions(subject, difficulty.value, f'world_{i}')
+
+            if not times_states:
+                continue
+
+            times_s, states = list(zip(*times_states))
+            times_a, actions = list(zip(*times_actions))
+
+            all_difficulties.append(difficulty.value)
+            world.append(i)
+            all_times_s.append(times_s)
+            all_times_a.append(times_a)
+            all_states.append(states)
+            all_actions.append(actions)
+    return all_difficulties, world, all_times_s, all_states, all_times_a, all_actions
+
+
+def get_all_levels_df():
+    subjects = []
+    all_difficulties = []
+    world = []
+    all_states = []
+    all_actions = []
+    times_state = []
+    times_action = []
+    for subject in get_all_subjects():
+        difficulties_s, world_s, times_s, states_s, times_a, actions_s = get_all_levels_for_subject(subject)
+        all_difficulties.extend(difficulties_s)
+        world.extend(world_s)
+        times_state.extend(times_s)
+        times_action.extend(times_a)
+        all_states.extend(states_s)
+        all_actions.extend(actions_s)
+        subjects.append(subject)
+
+    pd_dict = {'subject': subjects, 'difficulty': all_difficulties, 'world': world, 'times_states': times_state, 'states': all_states,
+               'times_action': times_action, 'actions': all_actions}
+    return pd.DataFrame.from_dict(pd_dict)
 
 
 def assign_position_to_fields(x, y, width):
