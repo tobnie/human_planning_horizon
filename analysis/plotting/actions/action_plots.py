@@ -33,4 +33,4 @@ for subject in get_all_subjects():
 
     fig, ax = plt.subplots()
     plot_action_distribution(ax, actions, title='Distribution of actions for {}'.format(subject))
-    plt.savefig('./imgs/{}_action_distribution.png'.format(subject))
+    plt.savefig('./imgs/ations/{}_action_distribution.png'.format(subject))
