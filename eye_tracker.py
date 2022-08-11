@@ -55,12 +55,6 @@ class MyEyeTracker:
         gaze = self.tracker.sample()
         pupil_size = self.tracker.pupil_size()
 
-        print("----------------------\n"
-              f"Time: {sample_time}\n"
-              f"Gaze: {gaze}\n"
-              f"Pupil Size: {pupil_size}\n"
-              "----------------------")
-
         return sample_time, gaze, pupil_size
 
     def log_var(self, varname, varvalue):

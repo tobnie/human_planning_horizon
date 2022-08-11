@@ -222,7 +222,7 @@ class Experiment:
         # -------- TRAINING ----------
         easy_training_games = [(GameDifficulty.EASY, 'world_{}'.format(i)) for i in range(N_EASY_TRAINING_GAMES)]
         normal_training_games = [(GameDifficulty.NORMAL, 'world_{}'.format(i)) for i in range(N_NORMAL_TRAINING_GAMES)]
-        self.level_num = -(N_EASY_TRAINING_GAMES + N_NORMAL_TRAINING_GAMES)
+        self.level_num = -5
         for difficulty, world_name in easy_training_games + normal_training_games:
             self.run_trial(difficulty, world_name, training=True)
 
