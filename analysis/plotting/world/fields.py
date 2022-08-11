@@ -1,11 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 import config
 from analysis.analysis_utils import assign_position_to_fields
 from analysis.plotting import plotting_utils
 from analysis.plotting.plotting_utils import plot_rect
-
 
 def plot_field(ax, x, y, width, color='k'):
     plot_rect(ax, x, config.N_LANES - y - 1, width, 1,
@@ -71,3 +71,9 @@ def plot_state(ax, state, target_position, time=None):
     plt.ylim((0, config.N_LANES))
     plt.xticks(np.arange(0, config.N_FIELDS_PER_LANE, 1))
     plt.yticks(np.arange(0, config.N_LANES, 1))
+
+
+def plot_heatmap(ax, data, title='Heatmap'):
+    """ Plots a discrete heatmap over all fields of the world. """
+    sns.heatmap(data, ax=ax)
+    ax.set_title(title)

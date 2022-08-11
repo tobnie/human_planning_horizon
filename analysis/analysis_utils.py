@@ -7,6 +7,12 @@ import pandas as pd
 import config
 from game.world_generation.generation_config import GameDifficulty
 
+OBJECT_TO_INT = {
+    'player': 0,
+    'vehicle': 1,
+    'lilypad': 2
+}
+
 
 def read_csv(path):
     with open(path, mode='r') as infile:
@@ -72,6 +78,12 @@ def get_times_states_from_single_npz(subject, difficulty, world_name, training=F
     states = npz_file['states']
     times_states = list(zip(times, states))
     return times_states
+
+
+def get_states(subject, difficulty, world_name, training=False):
+    times_states = get_times_states(subject, difficulty, world_name, training)
+    times, states = list(zip(*times_states))
+    return states
 
 
 def get_times_states(subject, difficulty, world_name, training=False):
@@ -194,28 +206,3 @@ def assign_position_to_fields(x, y, width):
     field_x_start = int(round(x / config.FIELD_WIDTH))
     field_width = int(width // config.FIELD_WIDTH)
     return field_x_start, field_y, field_width
-
-
-def create_feature_map_from_state(state, target_position):
-    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 4))
-    for obj_type, x, y, width in state:
-        x_start, y, width = assign_position_to_fields(x, y, width)
-
-        # correct player width
-        if obj_type == 0:
-            width = 1
-
-        # correct for partially visible obstacles
-        if x_start < 0:
-            width = width + x_start
-            x_start = 0
-
-        if x_start + width > config.N_FIELDS_PER_LANE:
-            width = config.N_FIELDS_PER_LANE - x_start
-
-        feature_map[x_start:x_start + width, y, obj_type] = 1
-
-    # add target position
-    feature_map[target_position, config.N_LANES - 1, 3] = 1
-    feature_map = np.rot90(feature_map)
-    return feature_map
