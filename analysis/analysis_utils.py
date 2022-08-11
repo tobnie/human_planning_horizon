@@ -4,6 +4,7 @@ import os
 import numpy as np
 
 import config
+from game.world_generation.generation_config import GameDifficulty
 
 
 def read_csv(path):
@@ -40,6 +41,10 @@ def get_world_properties(subject, difficulty, world_name, training=False):
 
 def get_state_data_path(subject, difficulty, world_name, training=False):
     return get_level_data_path(subject, difficulty, world_name, training) + 'states/'
+
+
+def get_actions_path(subject, difficulty, world_name, training=False):
+    return get_level_data_path(subject, difficulty, world_name, training) + 'actions.npz'
 
 
 def get_time_from_state_file(state_file):
@@ -92,6 +97,51 @@ def get_times_states(subject, difficulty, world_name, training=False):
     times_states = sorted(times_states, key=lambda x: x[0])
 
     return times_states
+
+
+def get_times_actions(subject, difficulty, world_name, training=False):
+    """ Loads all world states as np array representation for given subject, difficulty and world_name."""
+
+    # get all state array
+    actions_path = get_actions_path(subject, difficulty, world_name, training=training)
+
+    try:
+        times_actions = np.load(actions_path)['arr_0']
+    except FileNotFoundError:
+        return []
+
+    # make times to ints
+    times_actions = [(int(time), action) for time, action in times_actions]
+
+    # sort by time
+    times_actions = sorted(times_actions, key=lambda x: x[0])
+
+    return times_actions
+
+
+def get_all_times_actions_of_player(subject_id):
+    all_actions = []
+    for difficulty in GameDifficulty:
+        for i in range(20):
+            actions = get_times_actions(subject_id, difficulty.value, f'world_{i}')
+            all_actions.extend(actions)
+    return all_actions
+
+
+def get_all_subjects():
+    data_dir = f'../data/level_data/'
+    subjects = [f for f in os.listdir(data_dir) if os.path.isdir(data_dir + f)]
+    return subjects
+
+def get_all_times_states():
+    subjects = get_all_subjects()
+    for subject in subjects:
+        for difficulty in GameDifficulty:
+            for i in range(20):
+                times_states = get_times_states(subject, difficulty.value, f'world_{i}')
+                actions = get_times_actions(subject, difficulty.value, f'world_{i}')
+
+                # TODO how to collect all states to pass them on?
 
 
 def assign_position_to_fields(x, y, width):
