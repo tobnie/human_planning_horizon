@@ -116,13 +116,14 @@ class Game:
         self.pre_run()
         pygame.event.clear()
         pygame.time.set_timer(UPDATE_PLAYER_EVENT, config.PLAYER_UPDATE_INTERVAL)
-        self.render()
 
         # reset times
         self.reset_clock()  # game time
         if self.eye_tracker:
             libtime.expstart()  # libtime
             self.eye_tracker.start_recording()  # eye tracker clock
+
+        self.render()
         while self.running:
 
             # run next game step
