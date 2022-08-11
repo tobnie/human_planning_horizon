@@ -1,29 +1,65 @@
+import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from analysis.analysis_utils import get_eyetracker_samples, get_eyetracker_events, get_times_states, get_world_properties
+from analysis.analysis_utils import get_eyetracker_samples, get_eyetracker_events, get_times_states, get_world_properties, \
+    get_all_levels_df, get_all_levels_for_subject, get_states
 from analysis.plotting.gaze.event_plot import plot_blinks
 from analysis.plotting.gaze.gaze_event_utils import get_blinks
 from analysis.plotting.gaze.gaze_plot import plot_gaze, plot_pupil_size_over_time, filter_off_samples
+from analysis.plotting.world.feature_maps import states_to_feature_maps, get_feature_map_distribution_for_avoidance, \
+    get_feature_map_distribution_for_player, get_area_around_player
+from analysis.plotting.world.fields import plot_heatmap
 from analysis.plotting.world.world_coordinates import plot_player_path, plot_state
 from game.world_generation.generation_config import GameDifficulty
 
-subject = 'AAAAAA'
+subject = 'KR07HA'
 difficulty = GameDifficulty.EASY.value
-world_name = 'world_0'
+world_name = 'world_12'
+world_props = get_world_properties(subject, difficulty, world_name)
 
-# samples = get_eyetracker_samples(subject, difficulty, world_name, training=True)
-# filtered_samples = filter_off_samples(samples)
-times_states = get_times_states(subject, difficulty, world_name, training=True)
-world_props = get_world_properties(subject, difficulty, world_name, training=True)
-target_position = int(world_props['target_position'])
+states = get_states(subject, difficulty, world_name)
+feature_maps = states_to_feature_maps(states)
+feature_maps_around_player = get_area_around_player(feature_maps)
+avoidance_fm_3x3 = get_feature_map_distribution_for_avoidance(feature_maps_around_player)
 
 fig, ax = plt.subplots()
-plot_state(ax, times_states[10][1], target_position)
-# plot_player_path(ax, times_states, target_position)
-plt.savefig('test.png')
-
+plot_heatmap(ax, avoidance_fm_3x3, title='Avoidance feature map 3x3 around player')
 plt.show()
+
+# only get player states
+summed_player_fm = get_feature_map_distribution_for_player(feature_maps)
+
+area_around_player = get_area_around_player(feature_maps[0])
+
+fig, ax = plt.subplots()
+plot_heatmap(ax, summed_player_fm)
+plt.show()
+
+# subject = 'KR07HA'
+# difficulty = GameDifficulty.EASY.value
+# world_name = 'world_0'
+#
+# all_difficulties, world, times_s, all_states, times_a, all_actions = get_all_levels_for_subject(subject)
+# print(len(all_difficulties))
+# print(len(world))
+# print(len(times_s))
+# print(len(all_states))
+# print(len(times_a))
+# print(len(all_actions))
+
+# # samples = get_eyetracker_samples(subject, difficulty, world_name, training=True)
+# # filtered_samples = filter_off_samples(samples)
+# times_states = get_times_states(subject, difficulty, world_name, training=True)
+# world_props = get_world_properties(subject, difficulty, world_name, training=True)
+# target_position = int(world_props['target_position'])
+#
+# fig, ax = plt.subplots()
+# plot_state(ax, times_states[10][1], target_position)
+# # plot_player_path(ax, times_states, target_position)
+# plt.savefig('test.png')
+#
+# plt.show()
 
 # subject = 'TI01NI'
 # difficulty = GameDifficulty.NORMAL.value
