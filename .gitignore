@@ -1,5 +1,6 @@
 snippets/
-data/level_data/
+data/
+**/states/
 
 # IDEA
 .idea/
