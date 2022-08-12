@@ -1,6 +1,8 @@
 snippets/
-data/
-**/states/
+**training/
+
+*.rar
+*.zip
 
 # IDEA
 .idea/
