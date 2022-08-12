@@ -86,26 +86,32 @@ def get_states(subject, difficulty, world_name, training=False):
     return states
 
 
+def get_times_states_from_folder(subject, difficulty, world_name, training=False):
+
+    try:
+        # get all state array
+        states_path = get_state_data_path(subject, difficulty, world_name, training=training)
+        state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
+
+        # load array for each
+        times_states = []
+        for f in state_files:
+            time = get_time_from_state_file(f)
+            state = np.load(states_path + f)['arr_0']
+            times_states.append((time, state))
+    except FileNotFoundError:
+        return []
+
+    return times_states
+
+
 def get_times_states(subject, difficulty, world_name, training=False):
     """ Loads all world states as np array representation for given subject, difficulty and world_name."""
 
     try:
         times_states = get_times_states_from_single_npz(subject, difficulty, world_name, training=training)
     except FileNotFoundError:
-
-        try:
-            # get all state array
-            states_path = get_state_data_path(subject, difficulty, world_name, training=training)
-            state_files = [f for f in os.listdir(states_path) if f.endswith(".npz")]
-
-            # load array for each
-            times_states = []
-            for f in state_files:
-                time = get_time_from_state_file(f)
-                state = np.load(states_path + f)['arr_0']
-                times_states.append((time, state))
-        except FileNotFoundError:
-            return []
+        times_states = get_times_states_from_folder(subject, difficulty, world_name, training=training)
 
     # make times to ints
     times_states = [(int(time), state) for time, state in times_states]
