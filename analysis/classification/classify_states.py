@@ -16,10 +16,5 @@ def generate_possible_states(n):
         state = np.insert(state, (n ** 2 - 1) // 2, -1)
         possible_states.append(np.reshape(state, (n, n)))
 
-    possible_states = sorted(possible_states)
+    possible_states = sorted(possible_states, key=lambda x: str(x))
     return possible_states
-
-
-print(generate_possible_states(3))
-print(generate_possible_states(4))
-print(generate_possible_states(5))
