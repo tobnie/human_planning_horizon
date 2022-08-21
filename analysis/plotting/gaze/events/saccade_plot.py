@@ -36,7 +36,7 @@ def plot_and_save_saccades():
                 plot_saccades(ax, samples, f'world {i}')
                 plt.suptitle('Saccades for subject {} in difficulty {}'.format(subject, difficulty))
                 plt.tight_layout()
-                plt.savefig(f'./imgs/saccades/{subject}_{difficulty}_fixation_times.png')
+                plt.savefig(f'./imgs/saccades/{subject}_{difficulty}_{i}_saccades.png')
                 plt.close(fig)
 
 
