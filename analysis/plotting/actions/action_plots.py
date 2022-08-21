@@ -26,11 +26,11 @@ def plot_action_distribution(ax, actions, title='Distribution of actions'):
     ax.set_ylabel('Count')
     ax.set_title(title)
 
-test = get_all_subjects()
+
 for subject in get_all_subjects():
     times_actions = get_all_times_actions_of_player(subject)
     times, actions = list(zip(*times_actions))
 
     fig, ax = plt.subplots()
     plot_action_distribution(ax, actions, title='Distribution of actions for {}'.format(subject))
-    plt.savefig('./imgs/ations/{}_action_distribution.png'.format(subject))
+    plt.savefig('./imgs/actions/{}_action_distribution.png'.format(subject))

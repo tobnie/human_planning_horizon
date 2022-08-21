@@ -79,7 +79,7 @@ class MyEyeTracker:
         self.tracker.close()
 
     def extract_events(self):
-        """ Extracts events from the eye tracker and returns them as a DataFrame. """
+        """ Extracts events from the eye tracker and saves them in a list. """
 
         for i in range(3):  # TODO why for i in range(3)? --> because it only looks at the next 3 events?
             tc, d = self.get_event()

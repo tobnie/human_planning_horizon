@@ -1,16 +1,7 @@
-import numpy as np
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 
-from analysis.analysis_utils import get_eyetracker_samples, get_eyetracker_events, get_times_states, get_world_properties, \
-    get_all_levels_df, get_all_levels_for_subject, get_states
-from analysis.plotting.gaze.event_plot import plot_blinks
-from analysis.plotting.gaze.gaze_event_utils import get_blinks
-from analysis.plotting.gaze.gaze_plot import plot_gaze, plot_pupil_size_over_time, filter_off_samples
-from analysis.plotting.world.feature_maps import states_to_feature_maps, get_feature_map_distribution_for_avoidance, \
-    get_feature_map_distribution_for_player, get_area_around_player
-from analysis.plotting.world.fields import plot_heatmap
-from analysis.plotting.world.world_coordinates import plot_player_path, plot_state
+from analysis.analysis_utils import get_world_properties
+from analysis.plotting.world.avoidance_plots import plot_avoidance_maps_by_actions_for_subject
 from game.world_generation.generation_config import GameDifficulty
 
 subject = 'KR07HA'
@@ -18,23 +9,25 @@ difficulty = GameDifficulty.EASY.value
 world_name = 'world_12'
 world_props = get_world_properties(subject, difficulty, world_name)
 
-states = get_states(subject, difficulty, world_name)
-feature_maps = states_to_feature_maps(states)
-feature_maps_around_player = get_area_around_player(feature_maps)
-avoidance_fm_3x3 = get_feature_map_distribution_for_avoidance(feature_maps_around_player)
-
-fig, ax = plt.subplots()
-plot_heatmap(ax, avoidance_fm_3x3, title='Avoidance feature map 3x3 around player')
+plot_avoidance_maps_by_actions_for_subject(subject)
 plt.show()
-
-# only get player states
-summed_player_fm = get_feature_map_distribution_for_player(feature_maps)
-
-area_around_player = get_area_around_player(feature_maps[0])
-
-fig, ax = plt.subplots()
-plot_heatmap(ax, summed_player_fm)
-plt.show()
+# states = get_states(subject, difficulty, world_name)
+# feature_maps = states_to_feature_maps(states)
+# feature_maps_around_player = get_area_around_player(feature_maps)
+# avoidance_fm_3x3 = get_feature_map_distribution_for_avoidance(feature_maps_around_player)
+#
+# fig, ax = plt.subplots()
+# plot_heatmap(ax, avoidance_fm_3x3, title='Avoidance feature map 3x3 around player')
+# plt.show()
+#
+# # only get player states
+# summed_player_fm = get_feature_map_distribution_for_player(feature_maps)
+#
+# area_around_player = get_area_around_player(feature_maps[0])
+#
+# fig, ax = plt.subplots()
+# plot_heatmap(ax, summed_player_fm)
+# plt.show()
 
 # subject = 'KR07HA'
 # difficulty = GameDifficulty.EASY.value

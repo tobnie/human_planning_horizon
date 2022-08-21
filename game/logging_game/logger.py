@@ -105,10 +105,10 @@ class Logger:
         """ Saves the world states as a .npz-file. """
         log_directory = self.log_directory if not training else self.training_log_directory
 
-   #     state_directory = log_directory + 'states/'
-  #      if not os.path.exists(state_directory):
- #           os.makedirs(state_directory)
-#
+        # state_directory = log_directory + 'states/'
+        # if not os.path.exists(state_directory):
+        #     os.makedirs(state_directory)
+
         # for time, state in self.world_states:
         #   np.savez_compressed(state_directory + f'state_{time}.npz', state)
 

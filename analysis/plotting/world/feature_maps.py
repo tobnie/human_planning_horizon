@@ -28,6 +28,10 @@ def create_feature_map_from_state(state):
         feature_map[x_start:x_start + width, y, obj_type] = 1
 
     feature_map = np.rot90(feature_map)
+
+    # invert y axis
+    feature_map = np.flip(feature_map, axis=1)
+
     return feature_map
 
 
@@ -94,6 +98,16 @@ def get_feature_map_distribution_for_avoidance(feature_maps):
     """ Returns the distribution of the objects that should be avoided in the feature map."""
     avoidance_fm = get_feature_map_for_avoidance(feature_maps)
     return avoidance_fm
+
+
+def get_avoidance_distribution_around_player_from_state_dict(state_dict, radius=1):
+    return {key: get_avoidance_distribution_around_player_from_state_list(states, radius=radius) for key, states in state_dict.items()}
+
+
+def get_avoidance_distribution_around_player_from_state_list(states, radius=1):
+    fms = states_to_feature_maps(states)
+    fms_around_player = get_area_around_player(fms, radius=radius)
+    return get_feature_map_distribution_for_avoidance(fms_around_player)
 
 
 def get_player_position_in_map(feature_map):

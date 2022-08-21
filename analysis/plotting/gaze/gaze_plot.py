@@ -1,8 +1,11 @@
+import numpy as np
+
 import config
 from analysis.plotting.plotting_utils import color_fader
 
 
 def filter_off_samples(samples):
+    samples = np.array(samples)
     return samples[(samples[:, 1] > -1000) & (samples[:, 2] > -1000) & (samples[:, 3] > 0)]
 
 
@@ -21,13 +24,13 @@ def get_pupil_size_from_samples(samples):
 
 def plot_gaze(ax, samples, color='orange'):
     coords = get_gaze_coords_from_samples(samples)
-    coords = (coords[0], config.DISPLAY_HEIGHT_PX - coords[1])     # TODO need for offset in x / y direction?
+    coords = (coords[0], config.DISPLAY_HEIGHT_PX - coords[1])
 
     start_color = 'yellow'
     end_color = 'red'
     for i, coord in enumerate(zip(*coords)):
         # ax.plot(coord[0], coord[1], color=color_fader(start_color, end_color, i / len(coords[0])))
-        ax.scatter(coord[0], coord[1],  color=color_fader(start_color, end_color, i / len(coords[0])))
+        ax.scatter(coord[0], coord[1], color=color_fader(start_color, end_color, i / len(coords[0])))
 
     ax.set_xlabel('x')
     ax.set_ylabel('y')

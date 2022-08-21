@@ -6,9 +6,6 @@ def get_blinks(events):
     blink_starts = []
     blink_ends = []
 
-    print('STARTBLINK', STARTBLINK)
-    print('ENDBLINK', ENDBLINK)
-
     for e in events:
         print(e[1])
         if e[1] == STARTBLINK:
@@ -31,6 +28,20 @@ def get_fixations(events):
             fix_ends.append(e[0])
 
     return fix_starts, fix_ends
+
+
+def get_saccades(events):
+    """ Returns two lists of saccades in the form [start_time, end_time] """
+    sacc_starts = []
+    sacc_ends = []
+
+    for e in events:
+        if e[1] == STARTSACC:
+            sacc_starts.append(e[0])
+        if e[1] == ENDSACC:
+            sacc_ends.append(e[0])
+
+    return sacc_starts, sacc_ends
 
 
 def get_event_string(event):

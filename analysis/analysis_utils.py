@@ -5,12 +5,21 @@ import numpy as np
 import pandas as pd
 
 import config
+from analysis.plotting.world.world_coordinates import get_center_of_entity
 from game.world_generation.generation_config import GameDifficulty
 
 OBJECT_TO_INT = {
     'player': 0,
     'vehicle': 1,
     'lilypad': 2
+}
+
+ACTION_TO_STRING = {
+    0: 'right',
+    1: 'left',
+    2: 'up',
+    3: 'down',
+    4: 'nop'
 }
 
 
@@ -22,7 +31,10 @@ def read_csv(path):
 
 
 def read_npz(path):
-    return np.load(path)['arr_0']
+    try:
+        return np.load(path)['arr_0']
+    except FileNotFoundError:
+        return []
 
 
 def get_level_data_path(subject, difficulty, world_name, training=False):
@@ -31,6 +43,19 @@ def get_level_data_path(subject, difficulty, world_name, training=False):
 
 def get_samples_data_path(subject, difficulty, world_name, training=False):
     return get_level_data_path(subject, difficulty, world_name, training) + 'eyetracker_samples.npz'
+
+
+def do_something_for_all_worlds(subject_id, func):
+    result_acc = []
+    for difficulty in GameDifficulty:
+        for i in range(20):
+            single_result = func(subject_id, difficulty.value, f'world_{i}')
+            result_acc.extend(single_result)
+    return result_acc
+
+
+def get_all_samples_for_subject(subject):
+    return do_something_for_all_worlds(subject, get_eyetracker_samples)
 
 
 def get_eyetracker_events_data_path(subject, difficulty, world_name, training=False):
@@ -87,7 +112,6 @@ def get_states(subject, difficulty, world_name, training=False):
 
 
 def get_times_states_from_folder(subject, difficulty, world_name, training=False):
-
     try:
         # get all state array
         states_path = get_state_data_path(subject, difficulty, world_name, training=training)
@@ -134,7 +158,7 @@ def get_times_actions(subject, difficulty, world_name, training=False):
         return []
 
     # make times to ints
-    times_actions = [(int(time), action) for time, action in times_actions]
+    times_actions = [(int(time), int(action)) for time, action in times_actions]
 
     # sort by time
     times_actions = sorted(times_actions, key=lambda x: x[0])
@@ -142,13 +166,39 @@ def get_times_actions(subject, difficulty, world_name, training=False):
     return times_actions
 
 
+def get_all_times_states_of_player(subject_id):
+    return do_something_for_all_worlds(subject_id, get_times_states)
+
+
 def get_all_times_actions_of_player(subject_id):
-    all_actions = []
-    for difficulty in GameDifficulty:
-        for i in range(20):
-            actions = get_times_actions(subject_id, difficulty.value, f'world_{i}')
-            all_actions.extend(actions)
-    return all_actions
+    return do_something_for_all_worlds(subject_id, get_times_actions)
+
+
+def get_times_actions_states(subject_id):
+    times_actions = get_all_times_actions_of_player(subject_id)
+    times_states = get_all_times_states_of_player(subject_id)
+
+    t_actions = list(zip(*times_actions))[0]
+
+    times_actions_states = [(time, action, state) if time in t_actions else () for (time, action), (_, state) in
+                            zip(times_actions, times_states)]
+    return times_actions_states
+
+
+def filter_times_actions_states_by_action(times_action_states):
+    """ Filters a given collection of time-action-state-tuples by action.
+    Returns a dict containing all states in which the respective action was taken."""
+    states_dict = {
+        'up': [],
+        'down': [],
+        'left': [],
+        'right': [],
+        'nop': []
+    }
+    for t, a, s in times_action_states:
+        states_dict[ACTION_TO_STRING[a]].append(s)
+
+    return states_dict
 
 
 def get_all_subjects():
@@ -212,3 +262,4 @@ def assign_position_to_fields(x, y, width):
     field_x_start = int(round(x / config.FIELD_WIDTH))
     field_width = int(width // config.FIELD_WIDTH)
     return field_x_start, field_y, field_width
+

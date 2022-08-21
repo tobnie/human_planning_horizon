@@ -39,8 +39,9 @@ def plot_player(ax, x, y):
               color='purple')
 
 
-def plot_world_background(ax, target_position):
-    plot_target_position(ax, target_position)
+def plot_world_background(ax, target_position=None):
+    if target_position:
+        plot_target_position(ax, target_position)
     plot_water(ax)
     plot_street(ax)
 
@@ -82,10 +83,6 @@ def get_center_of_entity(x, y, width, height):
     return x + width / 2, y + height / 2
 
 
-def get_center_of_player(x, y):
-    return get_center_of_entity(x, y, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
-
-
 def plot_player_path(ax, states, target_position):
     # plot background
     plot_world_background(ax, target_position)
@@ -112,3 +109,6 @@ def plot_player_path(ax, states, target_position):
     plt.xlim((0, config.DISPLAY_WIDTH_PX))
     plt.ylim((0, config.DISPLAY_HEIGHT_PX))
     draw_grid(ax)
+
+def get_center_of_player(x, y):
+    return get_center_of_entity(x, y, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
