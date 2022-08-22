@@ -48,5 +48,5 @@ def remove_old_data():
                             os.removedirs(states_directory)
 
 
-transform_subject_data(['KR07HA'])
+transform_subject_data(['ED06RA'])
 remove_old_data()
