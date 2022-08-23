@@ -27,10 +27,12 @@ def plot_action_distribution(ax, actions, title='Distribution of actions'):
     ax.set_title(title)
 
 
-for subject in get_all_subjects():
-    times_actions = get_all_times_actions_of_player(subject)
-    times, actions = list(zip(*times_actions))
+def plot_and_save_action_distributions():
+    for subject in get_all_subjects():
+        times_actions = get_all_times_actions_of_player(subject)
+        times, actions = list(zip(*times_actions))
 
-    fig, ax = plt.subplots()
-    plot_action_distribution(ax, actions, title='Distribution of actions for {}'.format(subject))
-    plt.savefig('./imgs/actions/{}_action_distribution.png'.format(subject))
+        fig, ax = plt.subplots()
+        plot_action_distribution(ax, actions, title='Distribution of actions for {}'.format(subject))
+        plt.savefig('./imgs/actions/{}_action_distribution.png'.format(subject))
+        plt.close(fig)

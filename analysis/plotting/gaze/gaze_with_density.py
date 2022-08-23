@@ -3,11 +3,12 @@ import numpy as np
 import seaborn as sns
 
 import config
-from analysis.analysis_utils import get_all_samples_for_subject
+from analysis.analysis_utils import get_all_samples_for_subject, get_samples_for_all_players_in_row, \
+    get_times_actions_states_samples_for_all, get_samples_from_time_state_action_samples, get_worlds_by_target_position
 from analysis.plotting.gaze.gaze_plot import filter_off_samples
 
 
-def joint_gaze_plot(gaze_points, xlim=(0, config.N_FIELDS_PER_LANE), ylim=(0, config.N_LANES)):
+def joint_gaze_plot(gaze_points, xlim=(0, config.DISPLAY_WIDTH_PX), ylim=(0, config.DISPLAY_HEIGHT_PX)):
     x, y = zip(*gaze_points)
     g = sns.JointGrid(x=x, y=y, xlim=xlim, ylim=ylim)
 
@@ -34,18 +35,56 @@ def joint_gaze_plot(gaze_points, xlim=(0, config.N_FIELDS_PER_LANE), ylim=(0, co
     # g.fig.colorbar(g.ax_joint.collections[0], ax=[g.ax_joint, g.ax_marg_y, g.ax_marg_x], use_gridspec=True, orientation='horizontal')
 
 
-# TODO plot for all subjects and all gaze points
-subject = 'KR07HA'
-samples = get_all_samples_for_subject(subject)
-filtered_samples = filter_off_samples(samples)
+def create_and_save_gaze_densities_per_row():
+    for row in range(config.N_LANES):
+        samples_row = get_samples_for_all_players_in_row(row=row)
+        filtered_samples = filter_off_samples(samples_row)
 
-# remove time_stamps
-samples_coords_only = np.array([sample[1:-1] for sample in samples])
+        samples_coords_only = np.array([sample[1:-1] for sample in samples_row])
 
-# transform coordinates y
-samples_coords_only[:, 1] = config.DISPLAY_HEIGHT_PX - samples_coords_only[:, 1]
+        # transform coordinates y
+        samples_coords_only[:, 1] = config.DISPLAY_HEIGHT_PX - samples_coords_only[:, 1]
 
-random_samples = np.random.uniform(5, 10, size=(100, 2))
+        joint_gaze_plot(samples_coords_only)
+        plt.title('Row ' + str(row))
+        plt.savefig(f'./imgs/gaze_per_row/gaze_density_row_{row}.png')
+        plt.close(plt.gcf())
 
-joint_gaze_plot(random_samples)
-plt.show()
+
+def create_and_save_gaze_density_for_all():
+    t_a_a_s = get_times_actions_states_samples_for_all()
+    samples = get_samples_from_time_state_action_samples(t_a_a_s)
+    filtered_samples = filter_off_samples(samples)
+
+    samples_coords_only = np.array(filtered_samples)[:, 1:-1]
+
+    # transform coordinates y
+    samples_coords_only[:, 1] = config.DISPLAY_HEIGHT_PX - samples_coords_only[:, 1]
+
+    joint_gaze_plot(samples_coords_only)
+    plt.savefig(f'./imgs/gaze_per_row/gaze_density.png')
+    plt.close(plt.gcf())
+
+
+def create_and_save_gaze_density_for_all_per_target():
+    worlds_by_target_pos = get_worlds_by_target_position()
+    tass = {'left': get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['left']),
+            'center': get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['center']),
+            'right': get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['right'])}
+
+    for target_pos, t_a_a_s in tass.items():
+        samples = get_samples_from_time_state_action_samples(t_a_a_s)
+        filtered_samples = filter_off_samples(samples)
+
+        samples_coords_only = np.array(filtered_samples)[:, 1:-1]
+
+        # transform coordinates y
+        samples_coords_only[:, 1] = config.DISPLAY_HEIGHT_PX - samples_coords_only[:, 1]
+
+        joint_gaze_plot(samples_coords_only)
+        plt.title('Target ' + target_pos)
+        plt.savefig(f'./imgs/gaze_per_row/gaze_density_target_{target_pos}.png')
+        plt.close(plt.gcf())
+
+
+create_and_save_gaze_density_for_all_per_target()

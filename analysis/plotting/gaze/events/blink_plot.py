@@ -40,6 +40,4 @@ def plot_and_save_blinks():
             plt.suptitle('Blinks for subject {} in difficulty {}'.format(subject, difficulty))
             plt.tight_layout()
             plt.savefig(f'./imgs/blinks/{subject}_{difficulty}_blinks.png')
-
-
-plot_and_save_blinks()
+            plt.close(fig)

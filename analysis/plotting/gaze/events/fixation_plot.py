@@ -56,6 +56,7 @@ def plot_and_save_fixation_times():
             plt.suptitle('Fixations for subject {} in difficulty {}'.format(subject, difficulty))
             plt.tight_layout()
             plt.savefig(f'./imgs/fixations/{subject}_{difficulty}_fixation_times.png')
+            plt.close(fig)
 
 
 def plot_and_save_fixations():
@@ -76,6 +77,3 @@ def plot_and_save_fixations():
                 plt.savefig(f'./imgs/fixations/{subject}_{difficulty}_{i}_fixations.png')
                 plt.close(fig)
 
-
-plot_and_save_fixations()
-plot_and_save_fixation_times()

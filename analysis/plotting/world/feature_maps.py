@@ -1,45 +1,6 @@
 import numpy as np
 
-import config
-from analysis.analysis_utils import assign_position_to_fields, OBJECT_TO_INT
-
-
-def create_feature_map_from_state(state):
-    # TODO not working correctly yet, it seems?
-
-    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 3))
-
-    # object types are Player: 0, Vehicle: 1, LilyPad: 2
-    for obj_type, x, y, width in state:
-        x_start, y, width = assign_position_to_fields(x, y, width)
-
-        # correct player width
-        if obj_type == 0:
-            width = 1
-
-        # correct for partially visible obstacles
-        if x_start < 0:
-            width = width + x_start
-            x_start = 0
-
-        if x_start + width > config.N_FIELDS_PER_LANE:
-            width = config.N_FIELDS_PER_LANE - x_start
-
-        feature_map[x_start:x_start + width, y, obj_type] = 1
-
-    feature_map = np.rot90(feature_map)
-
-    # invert y axis
-    feature_map = np.flip(feature_map, axis=1)
-
-    return feature_map
-
-
-def states_to_feature_maps(list_of_states):
-    """ Transforms a list of states into an array of feature maps. States are distributed along axis 0.
-     Feature Maps have the following form: ['state', 'x', 'y', 'type']
-     Types are Player: 0, Vehicle: 1, LilyPad: 2"""
-    return np.array([create_feature_map_from_state(state) for state in list_of_states])
+from analysis.analysis_utils import OBJECT_TO_INT, states_to_feature_maps
 
 
 def invert_feature_map(feature_map):
@@ -151,3 +112,27 @@ def get_area_around_player_list(feature_maps, radius=1):
         fms_around_player[i] = get_area_around_player(fm, radius)
 
     return fms_around_player
+
+
+def filter_times_actions_fms_for_player_position(times_actions_fms, row):
+    """ Returns only time-action-fm-pairs where the player is in the given row"""
+    filtered_indices = []
+    for i, (time, action, fm) in enumerate(times_actions_fms):
+        if fm[row, :, 0].sum() > 0:
+            filtered_indices.append(i)
+
+    filtered_array = [times_actions_fms[i] for i in filtered_indices]
+    return filtered_array
+
+
+def filter_fms_for_player_position(fms, row):
+    """ Returns only feature maps where the player is in the given row"""
+    filter_array = np.zeros(fms.shape[0])
+    for i, fm in enumerate(fms):
+        if fm[row, :, 0].sum() > 0:
+            filter_array[i] = 1
+
+    filtered_fms = fms[filter_array == 1]
+    return filtered_fms
+
+

@@ -1,11 +1,12 @@
 import csv
 import os
+from itertools import product
 
 import numpy as np
 import pandas as pd
 
 import config
-from analysis.plotting.world.world_coordinates import get_center_of_entity
+
 from game.world_generation.generation_config import GameDifficulty
 
 OBJECT_TO_INT = {
@@ -45,17 +46,24 @@ def get_samples_data_path(subject, difficulty, world_name, training=False):
     return get_level_data_path(subject, difficulty, world_name, training) + 'eyetracker_samples.npz'
 
 
-def do_something_for_all_worlds(subject_id, func):
+def do_something_for_all_worlds(subject_id, func, diffs_and_worlds=None):
     result_acc = []
-    for difficulty in GameDifficulty:
-        for i in range(20):
-            single_result = func(subject_id, difficulty.value, f'world_{i}')
-            result_acc.extend(single_result)
+
+    if subject_id == 'dummy':
+        subject_id = get_all_subjects()[0]
+
+    if not diffs_and_worlds:
+        diffs_and_worlds = list(product(GameDifficulty, [f'world_{i}' for i in range(20)]))
+
+    for diff, world in diffs_and_worlds:
+        diff = diff if isinstance(diff, str) else diff.value
+        single_result = func(subject_id, diff, world)
+        result_acc.extend(single_result)
     return result_acc
 
 
-def get_all_samples_for_subject(subject):
-    return do_something_for_all_worlds(subject, get_eyetracker_samples)
+def get_all_samples_for_subject(subject, worlds=None):
+    return do_something_for_all_worlds(subject, get_eyetracker_samples, worlds)
 
 
 def get_eyetracker_events_data_path(subject, difficulty, world_name, training=False):
@@ -166,17 +174,17 @@ def get_times_actions(subject, difficulty, world_name, training=False):
     return times_actions
 
 
-def get_all_times_states_of_player(subject_id):
-    return do_something_for_all_worlds(subject_id, get_times_states)
+def get_all_times_states_of_player(subject_id, diffs_and_worlds=None):
+    return do_something_for_all_worlds(subject_id, get_times_states, diffs_and_worlds)
 
 
-def get_all_times_actions_of_player(subject_id):
-    return do_something_for_all_worlds(subject_id, get_times_actions)
+def get_all_times_actions_of_player(subject_id, diffs_and_worlds=None):
+    return do_something_for_all_worlds(subject_id, get_times_actions, diffs_and_worlds)
 
 
-def get_times_actions_states(subject_id):
-    times_actions = get_all_times_actions_of_player(subject_id)
-    times_states = get_all_times_states_of_player(subject_id)
+def get_times_actions_states(subject_id, diffs_and_worlds=None):
+    times_actions = get_all_times_actions_of_player(subject_id, diffs_and_worlds)
+    times_states = get_all_times_states_of_player(subject_id, diffs_and_worlds)
 
     t_actions = list(zip(*times_actions))[0]
 
@@ -257,9 +265,203 @@ def get_all_levels_df():
     return pd.DataFrame.from_dict(pd_dict)
 
 
+def get_times_actions_states_samples_for_all(subjects=None, worlds=None):
+    all_t_a_s_s = []
+
+    subject_range = get_all_subjects() if subjects is None else subjects
+
+    for subject in subject_range:
+        t_a_s_s = get_times_actions_states_samples(subject, worlds)
+        all_t_a_s_s.extend(t_a_s_s)
+    return all_t_a_s_s
+
+
+def get_target_position_for_world(diff, world):
+    dummy_subject = get_all_subjects()[0]
+    world_properties = get_world_properties(dummy_subject, diff, world)
+    return int(world_properties['target_position'])
+
+
+def return_world_if_target_position_left(subject_id, difficulty, world):
+    target_position = get_target_position_for_world(difficulty, world)
+
+    if target_position == 3:
+        return [(difficulty, world)]
+    else:
+        return []
+
+
+def return_world_if_target_position_center(subject_id, difficulty, world):
+    target_position = get_target_position_for_world(difficulty, world)
+
+    if target_position == 9:
+        return [(difficulty, world)]
+    else:
+        return []
+
+
+def return_world_if_target_position_right(subject_id, difficulty, world):
+    target_position = get_target_position_for_world(difficulty, world)
+
+    if target_position == 16:
+        return [(difficulty, world)]
+    else:
+        return []
+
+
+def get_worlds_by_target_position():
+    target_left = list(filter(None, do_something_for_all_worlds('dummy', return_world_if_target_position_left, None)))
+    target_center = list(filter(None, do_something_for_all_worlds('dummy', return_world_if_target_position_center, None)))
+    target_right = list(filter(None, do_something_for_all_worlds('dummy', return_world_if_target_position_right, None)))
+    return {'left': target_left, 'center': target_center, 'right': target_right}
+
+
+def get_times_actions_states_samples_per_target_position_for_all():
+    # get world for target positions
+    worlds_per_target_position = get_worlds_by_target_position()
+
+    t_a_s_s_per_target = {
+        'left': [],
+        'center': [],
+        'right': []
+    }
+    for position_string, worlds in worlds_per_target_position.items():
+        all_t_a_s_s = []
+        for subject in get_all_subjects():
+            t_a_s_s = get_times_actions_states_samples(subject, worlds)
+            all_t_a_s_s.extend(t_a_s_s)
+        t_a_s_s_per_target[position_string] = all_t_a_s_s
+    return t_a_s_s_per_target
+
+
+def get_times_actions_states_samples(subject_id, diffs_and_worlds=None):
+    """ Returns all samples for each state as list of [(time, state, [samples])]."""
+    times_action_states = get_times_actions_states(subject_id, diffs_and_worlds)
+    samples = get_all_samples_for_subject(subject_id, diffs_and_worlds)
+
+    # times actions states samples
+    t_a_s_s = []
+    samples_idx = 0
+    for i in range(len(times_action_states) - 1):
+        samples_for_state = []
+        time, action, state = times_action_states[i]
+        next_time = times_action_states[i + 1][0]
+
+        # collect all samples with time bigger than current state time and smaller than next state time
+        if samples_idx < len(samples):
+            if next_time > time:
+                while samples[samples_idx][0] < next_time:
+                    samples_for_state.append(samples[samples_idx])
+                    samples_idx += 1
+            else:
+                while samples[samples_idx][0] > next_time:
+                    samples_for_state.append(samples[samples_idx])
+                    samples_idx += 1
+
+        t_a_s_s.append((time, action, state, samples_for_state))
+    return t_a_s_s
+
+
+def filter_times_actions_states_and_samples_for_row(time_action_state_samples, row, return_fms=True):
+    """ Returns only time-action-fm-pairs and samples where the player is in the given row"""
+    filtered_indices = []
+    time_action_fms_samples = transform_times_actions_states_samples_to_fm(time_action_state_samples)
+    times, actions, fms, samples = zip(*time_action_fms_samples)
+    for i, fm in enumerate(fms):
+        if fm[row, :, 0].sum() > 0:
+            filtered_indices.append(i)
+
+    if return_fms:
+        return [time_action_fms_samples[i] for i in filtered_indices]
+    else:
+        return [time_action_state_samples[i] for i in filtered_indices]
+
+
+def get_samples_from_time_state_action_samples(time_action_state_samples):
+    """ Returns all samples from the given time-action-state-samples"""
+    all_samples = []
+
+    for time_action_state_sample in time_action_state_samples:
+        sample = time_action_state_sample[-1]
+        all_samples.extend(sample)
+    return all_samples
+
+
+def get_times_actions_states_samples_for_row(subject_id, row, worlds=None):
+    """ Returns all time-action-state-samples when the player is in a specific row"""
+    time_action_state_samples = get_times_actions_states_samples(subject_id, worlds)
+    filtered_time_action_state_samples = filter_times_actions_states_and_samples_for_row(time_action_state_samples, row=row)
+    return filtered_time_action_state_samples
+
+
+def get_samples_for_player_in_row(subject_id, row):
+    """ Returns all samples when the player is in a specific row"""
+    # TODO filter samples here already?
+    filtered_time_action_state_samples = get_times_actions_states_samples_for_row(subject_id, row)
+    all_filtered_samples = get_samples_from_time_state_action_samples(filtered_time_action_state_samples)
+    return all_filtered_samples
+
+
+def get_samples_for_all_players_in_row(row):
+    """ Returns all samples when the player is in a specific row"""
+    all_samples = []
+    for subject in get_all_subjects():
+        subject_samples = get_samples_for_player_in_row(subject, row)
+        all_samples.extend(subject_samples)
+    return all_samples
+
+
+def transform_times_actions_states_samples_to_fm(time_action_state_samples):
+    """ Returns only time-action-fm-pairs and samples where the player is in the given row"""
+    times, actions, states, samples = zip(*time_action_state_samples)
+    fms = states_to_feature_maps(states)
+    return list(zip(times, actions, fms, samples))
+
+
 def assign_position_to_fields(x, y, width):
     field_y = int(round(y / config.FIELD_HEIGHT))
     field_x_start = int(round(x / config.FIELD_WIDTH))
     field_width = int(width // config.FIELD_WIDTH)
     return field_x_start, field_y, field_width
 
+
+def states_to_feature_maps(list_of_states):
+    """ Transforms a list of states into an array of feature maps. States are distributed along axis 0.
+     Feature Maps have the following form: ['state', 'x', 'y', 'type']
+     Types are Player: 0, Vehicle: 1, LilyPad: 2"""
+    return np.array([create_feature_map_from_state(state) for state in list_of_states])
+
+
+def create_feature_map_from_state(state):
+    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 3))
+
+    # object types are Player: 0, Vehicle: 1, LilyPad: 2
+    for obj_type, x, y, width in state:
+        x_start, y, width = assign_position_to_fields(x, y, width)
+
+        # correct player width
+        if obj_type == 0:
+            width = 1
+
+        # correct for partially visible obstacles
+        if x_start < 0:
+            width = width + x_start
+            x_start = 0
+
+        if x_start + width > config.N_FIELDS_PER_LANE:
+            width = config.N_FIELDS_PER_LANE - x_start
+
+        feature_map[x_start:x_start + width, y, obj_type] = 1
+
+    feature_map = np.rot90(feature_map)
+
+    # invert y axis
+    feature_map = np.flip(feature_map, axis=1)
+
+    return feature_map
+
+
+# worlds_by_target_pos = get_worlds_by_target_position()
+# tass_left = get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['left'])
+# tass_center = get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['center'])
+# tass_right = get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['right'])
