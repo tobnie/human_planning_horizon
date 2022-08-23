@@ -1,0 +1,14 @@
+subject_id, PI10MA
+world_name, world_18
+difficulty, normal
+time_limit, 75000
+target_position, 9
+n_lanes, 15
+n_water_lanes, 6
+n_street_lanes, 6
+field_width, 128.0
+field_height, 96.0
+player_width, 83.2
+player_height, 62.400000000000006
+display_x, 2560
+display_y, 1440
