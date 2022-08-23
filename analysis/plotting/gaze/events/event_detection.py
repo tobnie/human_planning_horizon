@@ -102,6 +102,10 @@ def blink_detection(x, y, time, missing=-32768):
 
 
 def get_blinks_from_samples(samples):
+
+    if len(samples) == 0:
+        return [], []
+
     time, x, y, _ = list(zip(*samples))
     return blink_detection(np.array(x), np.array(y), np.array(time))
 

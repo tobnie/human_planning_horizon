@@ -39,5 +39,3 @@ def plot_and_save_saccades():
                 plt.savefig(f'./imgs/saccades/{subject}_{difficulty}_{i}_saccades.png')
                 plt.close(fig)
 
-
-plot_and_save_saccades()

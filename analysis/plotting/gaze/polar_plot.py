@@ -10,6 +10,7 @@ from analysis.plotting.world.world_coordinates import get_center_of_player
 
 def calc_angles_between_player_and_gaze(player_positions, gaze_positions):
     """Calculates the angle between the player and the gaze position"""
+    # TODO maybe need to transform player and gaze y coordinates by HEIGHT - y?
     return np.arctan2(player_positions[:, 0] - gaze_positions[:, 0], player_positions[:, 1] - gaze_positions[:, 1])
     # return np.arctan2(gaze_positions[:, 1] - player_positions[:, 1], gaze_positions[:, 0] - player_positions[:, 0])
 
@@ -57,6 +58,8 @@ def plot_polar_gaze_angles(subject, difficulty, world_number):
 
     samples = get_eyetracker_samples(subject, difficulty, world_name)
     samples = filter_off_samples(samples)
+    if (isinstance(samples, np.ndarray) and samples.size == 0) or (isinstance(samples, list) and len(samples) == 0):
+        return
     gaze_pos = samples[:, 1:3]
 
     # remove player positions where time does not match gaze position
@@ -72,10 +75,12 @@ def plot_polar_gaze_angles(subject, difficulty, world_number):
     polar_histogram(data, with_kde=False)
 
     plt.savefig('./imgs/gaze_polar/{}_{}_{}_polar_gaze.png'.format(subject, difficulty, world_number))
+    plt.close(plt.gcf())
 
 
-# TODO check if angles are calculated correctly?
-for subject in get_all_subjects():
-    for difficulty in ['easy', 'normal', 'hard']:
-        for i in range(20):
-            plot_polar_gaze_angles(subject, difficulty, i)
+def plot_gaze_angles_for_all_subjects():
+    # TODO check if angles are calculated correctly?
+    for subject in get_all_subjects():
+        for difficulty in ['easy', 'normal', 'hard']:
+            for i in range(20):
+                plot_polar_gaze_angles(subject, difficulty, i)

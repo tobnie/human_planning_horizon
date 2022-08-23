@@ -30,8 +30,11 @@ def plot_avoidance_maps_by_actions(action_avoidance_map_dict):
     plt.tight_layout()
 
 
-for radius in [1, 2, 3]:
-    for subject in get_all_subjects():
-        plot_avoidance_maps_by_actions_for_subject(subject, radius=radius)
-        side_length = 2 * radius + 1
-        plt.savefig('./imgs/avoidance_plots/{}_{}x{}_avoidance_map.png'.format(subject, side_length, side_length))
+def plot_and_save_avoidance_maps():
+    for radius in [1, 2, 3]:
+        for subject in get_all_subjects():
+            plot_avoidance_maps_by_actions_for_subject(subject, radius=radius)
+            side_length = 2 * radius + 1
+            plt.savefig('./imgs/avoidance_plots/{}_{}x{}_avoidance_map.png'.format(subject, side_length, side_length))
+            plt.close(plt.gcf())
+
