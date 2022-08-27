@@ -6,6 +6,11 @@ def read_data():
     return df
 
 
+def read_subject_data_example():
+    df = pd.read_csv('../data/AL09OL_compressed.gzip', compression='gzip')
+    return df
+
+
 def drop_missing_samples(df):
     df = df.drop(df[df.gaze_x == -32768].index)
     return df

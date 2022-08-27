@@ -329,6 +329,7 @@ def run_preprocessing():
     # sub_diff_worlds = list(product(['KR07HA'], difficulties, world_range))
     sub_diff_worlds = list(product(get_all_subjects(), difficulties, world_range))
 
+    saved_first_subject = False
     print('Starting preprocessing...')
     for subject_id, diff, world_nr in tqdm(sub_diff_worlds):
         target_position = get_target_position_for_world(diff, f'world_{world_nr}')
@@ -388,6 +389,27 @@ def run_preprocessing():
                     player_y = config.DISPLAY_HEIGHT_PX - player_pos[1] - player_height / 2
                     player_xs.append(player_x)
                     player_ys.append(player_y)
+
+        if not saved_first_subject:
+            subject_dict = {
+                'subject_id': subject_ids,
+                'game_difficulty': game_difficulties,
+                'world_number': world_numbers,
+                'target_position': target_positions,
+                'time': times,
+                'gaze_x': gaze_xs,
+                'gaze_y': gaze_ys,
+                'pupil_size': pupil_sizes,
+                'player_x': player_xs,
+                'player_y': player_ys,
+                'action': actions,
+                'state': states
+            }
+
+            subject_df = pd.DataFrame(subject_dict)
+
+            subject_df.to_csv(f'../data/{subject_id}_compressed.gzip', compression='gzip')
+            saved_first_subject = True
 
     dict_to_save['subject_id'] = subject_ids
     dict_to_save['game_difficulty'] = game_difficulties
