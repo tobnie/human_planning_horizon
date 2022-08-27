@@ -1,6 +1,8 @@
 import os
 
+import numpy as np
 import pandas as pd
+from bleach.html5lib_shim import convert_entity
 
 import config
 
@@ -24,9 +26,15 @@ def read_data():
     return pd.concat(subject_dfs)
 
 
+def state_converter(instr):
+    instr = instr.replace("[", "").replace("]", "")  # .split(",")
+    return np.fromstring(instr, sep=', ', dtype=int).reshape((-1, 4))
+
+
 def read_subject_data(subject_id):
-    # TODO converters
-    df = pd.read_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
+    # TODO convert when loading or rather convert states only when needed?
+    df = pd.read_csv(f'../data/compressed_data/{subject_id}_compressed.gzip',
+                     compression='gzip')  # , converters={'state': state_converter})
     df.drop(df.columns[0], axis=1, inplace=True)
     df.dropna(inplace=True)
     return df
