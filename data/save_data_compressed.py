@@ -388,9 +388,13 @@ def run_preprocessing():
 
         subject_df = pd.DataFrame(subject_dict)
 
+        # missing y samples get transformed as well, so replace them again to be classified as missing correctly.
+        subject_df = subject_df.replace([34208], -32768.0)
+
         subject_df = add_game_status_to_df(subject_df)
         subject_df = add_player_position_in_field_coordinates(subject_df)
         subject_df = add_experience_to_df(subject_df)
+        # TODO add trial number to df
         # TODO method for loading or even adding current score to df?
 
         subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
