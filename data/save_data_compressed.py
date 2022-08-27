@@ -299,6 +299,7 @@ def run_preprocessing():
 
     print('Starting preprocessing...')
     for subject_id in get_all_subjects():
+        print(f'Subject {subject_id} next.')
 
         subject_ids_i = []
         game_difficulties_i = []
@@ -313,7 +314,7 @@ def run_preprocessing():
         target_positions_i = []
         states_i = []
 
-        for diff, world_nr in tqdm(product(difficulties, world_range)):
+        for diff, world_nr in tqdm(list(product(difficulties, world_range))):
             target_position = get_target_position_for_world(diff, f'world_{world_nr}')
 
             tass = get_times_actions_states_samples(subject_id, [(diff, f'world_{world_nr}')])
