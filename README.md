@@ -50,3 +50,7 @@ The SoSci Survey Data is located in ``data/sosci_data.csv``. Column 'SD_05' corr
 | 3   | sometimes |
 | 4   | often |
 | 5   | daily |
+
+# Processing of Eye Data
+
+Eye Data can be processed via ``analysis/plotting/gaze/events/event_detection.py`` for saccades, blinks and fixations.
