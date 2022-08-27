@@ -17,7 +17,10 @@ The data can be loaded via ``read_subject_data(subject_id)`` or ``read_data()`` 
 | pupil_size      | pupil size in mm^2                                                                           |
 | player_x        | x coordinate of player                                                                       |
 | player_y        | y coordinate of player                                                                       |
+| player_x_field  | x coordinate of player in field coordinates                                                  |
+| player_y_field  | y coordinate of player in field coordinates                                                  |
 | action          | action int                                                                                   |
+| game_status     | whether the game the current row belongs to was 'won', 'lost' or 'timed_out'                 |
 | state           | array representing the state. see below for explanation                                      |
 
 ## Representation of State:
@@ -35,6 +38,15 @@ where the object type is encoded as
 | 2   | lilypad |
 
 # Score Data
+
+To load a dataframe containing all score information, call ``read_score_data()`` in ``analysis/score_utils.py``. The resulting dataframe is structured like this:
+
+| entry name      | description                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------|
+| subject_id      | id of the subject                                                                            |
+| after_levels    | number of levels after which this score was achieved                                         |
+| score           | score reached after a certain number of levels (cf. 'after_levels')                          |
+
 
 Score data is located in  ``data/scores``. The score is saved after the first and after each five levels. Please keep in mind that the files also contain dummy data that is shown during the experiment, besides the actual data.
 There does not exist a score for every subject since there were errors in the calculcation of the score in the first few experiments.
