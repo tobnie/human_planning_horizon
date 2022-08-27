@@ -11,6 +11,7 @@ import pandas as pd
 from analysis.data_utils import get_all_subjects
 from analysis.plotting.performance.performances import add_game_status_to_df
 from analysis.plotting.player.player_position_heatmap import add_player_position_in_field_coordinates
+from analysis.plotting.sosci_utils import add_experience_to_df
 from game.world_generation.generation_config import GameDifficulty
 
 OBJECT_TO_INT = {
@@ -389,6 +390,7 @@ def run_preprocessing():
 
         subject_df = add_game_status_to_df(subject_df)
         subject_df = add_player_position_in_field_coordinates(subject_df)
+        subject_df = add_experience_to_df(subject_df)
         # TODO method for loading or even adding current score to df?
 
         subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
