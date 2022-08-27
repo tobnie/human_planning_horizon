@@ -25,16 +25,27 @@ def plot_performance_per_difficulty(df=None):
 
     counts = all_combinations.merge(counts, on=['subject_id', 'game_difficulty', 'game_status'], how='left').fillna(0)
 
-    print(counts)
+    # normalized_counts
+    games_per_difficulty = 20
+    counts['percentage'] = counts['count'].div(games_per_difficulty)
+
     # plot number of game outcomes
-    g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='count', col_wrap=4, kind='bar', data=counts, height=4,
+    g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
                     aspect=.7)
+    g.set(ylim=(0.0, 1.0))
+    plt.savefig('./imgs/performance/game_endings_per_subject_per_difficulty.png')
+    plt.show()
+
+    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
+                    aspect=.7)
+    g.set(ylim=(0.0, 1.0))
     plt.savefig('./imgs/performance/game_endings_per_subject.png')
     plt.show()
 
     # plot number of game outcomes per difficulty
-    g = sns.catplot(x="game_difficulty", hue="game_status", y='count', kind='bar', data=counts, height=4,
+    g = sns.catplot(x="game_difficulty", hue="game_status", y='percentage', kind='bar', data=counts, height=4,
                     aspect=.7)
+    g.set(ylim=(0.0, 1.0))
     plt.savefig('./imgs/performance/game_endings.png')
     plt.show()
 
@@ -49,4 +60,5 @@ def plot_performance_per_difficulty(df=None):
     plt.savefig('./imgs/performance/game_times.png')
     plt.show()
 
-# plot_performance_per_difficulty()
+
+plot_performance_per_difficulty()
