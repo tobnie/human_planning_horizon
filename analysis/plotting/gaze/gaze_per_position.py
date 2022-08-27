@@ -1,0 +1,126 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from analysis.data_utils import read_data, read_subject_data
+
+
+def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidean'):
+    if metric == 'euclidean':
+        return np.sqrt((gaze_x - player_x) ** 2 + (gaze_y - player_y) ** 2)
+    elif metric == 'manhattan':
+        return np.abs(gaze_x - player_x) + np.abs(gaze_y - player_y)
+    else:
+        raise RuntimeError("Please specify a valid metric other than {}. Valid metrics are: \n 'euclidean', 'manhattan'".format(metric))
+
+
+def calculate_gaze_angle_relative_to_player(gaze_x, gaze_y, player_x, player_y):
+    return np.arctan2(gaze_y - player_y, gaze_x - player_x)
+
+
+def calculate_avg_gaze_distance_per_field(df):
+    df = df[['gaze_x', 'gaze_y', 'player_x', 'player_y', 'player_x_field', 'player_y_field', 'target_position']].copy()
+
+    # drop invalid samples
+    df = df[df['gaze_x'] != -32768]
+
+    # add gaze_distances to df
+    df['gaze_distance'] = df[['gaze_x', 'gaze_y', 'player_x', 'player_y']].apply(lambda x: calculate_gaze_distance(*x), axis=1)
+    df['gaze_angle'] = df[['gaze_x', 'gaze_y', 'player_x', 'player_y']].apply(lambda x: calculate_gaze_angle_relative_to_player(*x), axis=1)
+
+    # TODO also do for manhattan distance?: then we would also need to assign a field to the gaze
+    # df['gaze_distance_manhattan'] = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].apply(lambda x: calculate_gaze_distance(*x, metric='manhattan'), axis=1)
+
+    # group by field
+    # TODO divide by sample count
+    avg_gaze_per_field = df.groupby(['player_x_field', 'player_y_field'])['gaze_distance'].mean()
+    avg_angle_per_field = df.groupby(['player_x_field', 'player_y_field'])['gaze_angle'].mean()
+
+    return df
+
+
+def plot_heatmap(*args, **kwargs):
+    data = kwargs.pop('data')
+    data_pivot = pd.pivot_table(data, values=args[0], index='player_y_field', columns='player_x_field', aggfunc=np.mean,
+                                fill_value=0)
+
+    if args[0] == 'gaze_angle':
+        ax = sns.heatmap(data_pivot, vmin=-np.pi, vmax=np.pi, center=0),   # , annot=True, annot_kws={"fontsize": 8})
+        # set color bar ticks
+        # cbar = ax.collections[0].colorbar
+        # cbar.set_ticks([-np.pi, 0, np.pi])
+        # cbar.set_ticklabels([r'$-\pi$', r'$0$', r'$\pi$'])
+    else:
+        ax = sns.heatmap(data_pivot)  # , annot=True, annot_kws={"fontsize": 8})
+
+    plt.gca().invert_yaxis()
+
+
+def plot_gaze_heatmap_per_position_of_player(df):
+    pos2str = {448: 'left', 1216: 'center', 2112: 'right'}
+    df['target_position'] = df['target_position'].apply(lambda x: pos2str[x])
+
+    print('min max distance: {} --- {}'.format(df['gaze_distance'].min(), df['gaze_distance'].max()))
+    print('min max angle: {} --- {}'.format(df['gaze_angle'].min(), df['gaze_angle'].max()))
+
+    gaze_pivot = pd.pivot_table(df, values='gaze_distance', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
+    angle_pivot = pd.pivot_table(df, values='gaze_angle', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
+
+    # plot heatmap distance
+    sns.heatmap(gaze_pivot)  # , annot=True, annot_kws={"fontsize": 8})
+    plt.gca().invert_yaxis()
+    plt.suptitle('Average Distance from Player to Gaze Sample')
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/distance_per_position.png')
+    plt.show()
+
+    # ---plot per target
+    g = sns.FacetGrid(df, col='target_position')
+    g.map_dataframe(plot_heatmap, 'gaze_distance')
+    plt.suptitle('Average Distance from Player to Gaze Sample')
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/distance_per_position_by_target.png')
+    plt.show()
+
+    # plot heatmap angle
+    ax = sns.heatmap(angle_pivot, vmin=-np.pi, vmax=np.pi, center=0)  # , annot=True, annot_kws={"fontsize": 8})
+    # cbar = ax.collections[0].colorbar
+    # cbar.set_ticks([-np.pi, 0, np.pi])
+    # cbar.set_ticklabels([r'$-\pi$', r'$0$', r'$\pi$'])
+    plt.gca().invert_yaxis()
+    plt.suptitle('Average Angle Of Gaze')
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/angle_per_position.png')
+    plt.show()
+
+    # ---plot per target
+    g = sns.FacetGrid(df, col='target_position')
+    g.map_dataframe(plot_heatmap, 'gaze_angle')
+    plt.suptitle('Average Angle Of Gaze')
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/angle_per_position_by_target.png')
+    plt.show()
+
+
+def plot_gaze_kde_per_player_position(df):
+    g = sns.FacetGrid(df, col="player_x_field", row="player_y_field")
+    g.map_dataframe(sns.kdeplot, x='gaze_x', y='gaze_y', shade=True, cmap="viridis")
+
+    for ax in g.axes[0]:
+        ax.invert_yaxis()
+
+    plt.suptitle('Gaze Density in the Level per Position')
+    plt.savefig('./imgs/gaze/gaze_density_per_position.png')
+    plt.show()
+    # for player_x, player_y in df[['player_x', 'player_y']].unique():
+    #     df_mask = (df['player_x'] == player_x) & (df['player_y'] == player_y)
+    #     pos_df = df[]
+    #     sns.kdeplot(x=x, y=y, shade=True, cmap="viridis", ax=g.ax_joint)
+
+
+df = read_subject_data('AN06AN')
+df = calculate_avg_gaze_distance_per_field(df)
+plot_gaze_heatmap_per_position_of_player(df)
+plot_gaze_kde_per_player_position(df)
