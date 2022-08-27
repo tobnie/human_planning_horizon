@@ -23,7 +23,9 @@ def read_data():
 
 
 def read_subject_data(subject_id):
-    df = pd.read_csv(f'../data/{subject_id}_compressed.gzip', compression='gzip')
+    df = pd.read_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
+    df.drop(df.columns[0], axis=1, inplace=True)
+    df.dropna(inplace=True)
     return df
 
 
