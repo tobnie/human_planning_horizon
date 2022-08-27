@@ -59,7 +59,7 @@ The trial order can be loaded as a dataframe with ``load_trial_orders()`` in ``a
 |-----------------|----------------------------------------------------------------------------------------------|
 | subject_id      | id of the subject                                                                            |
 | trial           | number of trial (maximum is 60)                                                              |    
-| difficulty      | difficulty of the trial                                                                      |
+| game_difficulty      | difficulty of the trial                                                                      |
 | world_number    | world number of the trial                                                                    |
 
 The trial order for each subject is saved in ``data/level_data/<subject_id>/trial_order.csv``. The csv has the following structure (separated by ';'):
@@ -91,3 +91,7 @@ Eye Data can be processed via ``analysis/plotting/gaze/events/event_detection.py
 ## Plots
 
 Plots are located in ``analysis/imgs/``. **Since I have made a lot of changes to the way data is saved or loaded, not every method for creating plots may work as expected and might need some fixes or tweaks**.
+
+# Remarks to Subject Data
+
+The data of subject ``NI07LU`` is not complete, since the experiment crashed.
