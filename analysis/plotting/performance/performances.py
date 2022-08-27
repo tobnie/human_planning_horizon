@@ -4,26 +4,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from analysis.analysis_utils import get_all_subjects
-from analysis.data_utils import read_data
-from analysis.performance.games_won import get_won_games, get_last_time_steps_of_games, WIN_THRESHOLD_Y, TIME_OUT_THRESHOLD
+from analysis.data_utils import read_data, add_game_status_to_df
+from analysis.performance.games_won import get_last_time_steps_of_games
 import seaborn as sns
-
-
-def return_status(time, player_y):
-    if player_y >= WIN_THRESHOLD_Y:
-        return 'won'
-    elif time >= TIME_OUT_THRESHOLD:
-        return 'timed_out'
-    else:
-        return 'lost'
-
-
-def add_game_status_to_df(df):
-    last_time_steps = get_last_time_steps_of_games(df).copy()
-    last_time_steps['game_status'] = last_time_steps.apply(lambda x: return_status(x['time'], x['player_y']), axis=1)
-    df_filtered = last_time_steps[['subject_id', 'game_difficulty', 'game_status']]
-    df = df.merge(df_filtered, on=['subject_id', 'game_difficulty'])
-    return df
 
 
 def plot_performance_per_difficulty(df=None):
@@ -32,7 +15,7 @@ def plot_performance_per_difficulty(df=None):
 
     last_time_steps = get_last_time_steps_of_games(df).copy()
 
-    last_time_steps['game_status'] = last_time_steps.apply(lambda x: return_status(x['time'], x['player_y']), axis=1)
+    last_time_steps = add_game_status_to_df(last_time_steps)
 
     # counts = df.groupby(['subject_id', 'game_difficulty', 'game_status']).tails(1).size()
     counts = last_time_steps.groupby(['subject_id', 'game_difficulty', 'game_status']).size().reset_index().rename(columns={0: 'count'})
@@ -57,7 +40,7 @@ def plot_performance_per_difficulty(df=None):
 
     # outcomes as stacked bar plot
     last_time_steps.groupby(['game_difficulty', 'game_status'])['game_difficulty'].count().unstack('game_status').fillna(0).plot(kind='bar',
-                                                                                                         stacked=True)
+                                                                                                                                 stacked=True)
     plt.savefig('./imgs/performance/game_endings_stacked.png')
 
     # plot average time
@@ -65,6 +48,5 @@ def plot_performance_per_difficulty(df=None):
                     aspect=.7)
     plt.savefig('./imgs/performance/game_times.png')
     plt.show()
-
 
 # plot_performance_per_difficulty()

@@ -15,12 +15,18 @@ def coords2fieldsy(y):
     return y // config.FIELD_HEIGHT
 
 
+def add_player_position_in_field_coordinates(df):
+    df['player_x_field'] = df['player_x'].apply(coords2fieldsx)
+    df['player_y_field'] = df['player_y'].apply(coords2fieldsy)
+    return df
+
+
 def plot_player_position_heatmap(df=None):
     if df is None:
         df = read_data()
 
     df = add_game_status_to_df(df)
-    df_copy = df.copy()
+    df = add_player_position_in_field_coordinates(df)
     df['player_x'] = df['player_x'].apply(coords2fieldsx)
     df['player_y'] = df['player_y'].apply(coords2fieldsy)
     position_df = df[['player_x', 'player_y']].copy()
@@ -81,7 +87,7 @@ def plot_position_heatmap_per_player(df=None):
         ax.set_title(id)
     plt.show()
 
-
-df = read_data()
-plot_player_position_heatmap(df)
-plot_position_heatmap_per_player(df)
+#
+# df = read_data()
+# plot_player_position_heatmap(df)
+# plot_position_heatmap_per_player(df)
