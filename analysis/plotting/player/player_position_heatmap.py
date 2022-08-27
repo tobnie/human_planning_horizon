@@ -8,7 +8,7 @@ from analysis.plotting.performance.performances import add_game_status_to_df
 
 
 def coords2fieldsx(x):
-    return x // config.FIELD_WIDTH
+    return max(config.N_FIELDS_PER_LANE - 1, min(x // config.FIELD_WIDTH, 0))
 
 
 def coords2fieldsy(y):
