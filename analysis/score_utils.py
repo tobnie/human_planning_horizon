@@ -28,7 +28,3 @@ def read_score_data():
         score_dfs.append(filtered)
 
     return pd.concat(score_dfs)
-
-
-scores_df = read_score_data()
-print(scores_df)
