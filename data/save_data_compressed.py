@@ -8,6 +8,7 @@ import config
 from itertools import product
 import pandas as pd
 
+from analysis.data_utils import get_all_subjects
 from analysis.plotting.performance.performances import add_game_status_to_df
 from analysis.plotting.player.player_position_heatmap import add_player_position_in_field_coordinates
 from game.world_generation.generation_config import GameDifficulty
@@ -201,12 +202,6 @@ def get_times_actions_states(subject_id, diffs_and_worlds=None):
             times_actions_states.append((t_s, action, state))
 
     return times_actions_states
-
-
-def get_all_subjects():
-    data_dir = f'../data/level_data/'
-    subjects = [f for f in os.listdir(data_dir) if os.path.isdir(data_dir + f)]
-    return subjects
 
 
 def get_target_position_for_world(diff, world):

@@ -1,10 +1,18 @@
+import csv
+import os
+
 import pandas as pd
 
 import config
-from data.save_data_compressed import get_all_subjects
 
 WIN_THRESHOLD_Y = (config.N_LANES - 2) * config.FIELD_HEIGHT
 TIME_OUT_THRESHOLD = config.LEVEL_TIME - 100
+
+
+def get_all_subjects():
+    data_dir = f'../data/level_data/'
+    subjects = [f for f in os.listdir(data_dir) if os.path.isdir(data_dir + f)]
+    return subjects
 
 
 def read_data():
