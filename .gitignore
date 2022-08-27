@@ -1,8 +1,10 @@
 snippets/
 **training/
+**states/
 
 *.rar
 *.zip
+*.gzip
 
 # IDEA
 .idea/

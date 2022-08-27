@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 import config
-from analysis.analysis_utils import get_times_states, get_eyetracker_samples, get_world_properties, get_all_subjects
+from analysis.analysis_utils import get_times_states, get_eyetracker_samples_only, get_world_properties, get_all_subjects
 from analysis.plotting.gaze.gaze_plot import filter_off_samples
 from analysis.plotting.world.world_coordinates import get_center_of_player
 
@@ -56,7 +56,7 @@ def plot_polar_gaze_angles(subject, difficulty, world_number):
     player_pos[:, 1] = config.DISPLAY_HEIGHT_PX - player_pos[:, 1] - config.PLAYER_HEIGHT
     player_pos = [get_center_of_player(x, y) for x, y in player_pos]
 
-    samples = get_eyetracker_samples(subject, difficulty, world_name)
+    samples = get_eyetracker_samples_only(subject, difficulty, world_name)
     samples = filter_off_samples(samples)
     if (isinstance(samples, np.ndarray) and samples.size == 0) or (isinstance(samples, list) and len(samples) == 0):
         return

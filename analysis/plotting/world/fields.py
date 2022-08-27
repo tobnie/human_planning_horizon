@@ -7,6 +7,7 @@ from analysis.analysis_utils import assign_position_to_fields
 from analysis.plotting import plotting_utils
 from analysis.plotting.plotting_utils import plot_rect
 
+
 def plot_field(ax, x, y, width, color='k'):
     plot_rect(ax, x, config.N_LANES - y - 1, width, 1,
               color=color)

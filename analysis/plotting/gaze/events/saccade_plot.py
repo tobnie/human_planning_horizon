@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 
 import config
-from analysis.analysis_utils import get_eyetracker_samples, get_all_subjects
+from analysis.analysis_utils import get_eyetracker_samples_only, get_all_subjects
 from analysis.plotting.gaze.events.event_detection import get_saccades_from_samples
 from analysis.plotting.world.world_coordinates import plot_world_background
 
@@ -29,7 +29,7 @@ def plot_and_save_saccades():
                 world_name = f'world_{i}'
 
                 # get blinks
-                samples = get_eyetracker_samples(subject, difficulty, world_name)
+                samples = get_eyetracker_samples_only(subject, difficulty, world_name)
 
                 # plotting
                 plot_world_background(ax)
