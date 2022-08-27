@@ -98,4 +98,4 @@ The data of subject ``NI07LU`` is not complete, since the experiment crashed.
 
 Some data of subject ``ZI01SU`` is missing because of errors in the code during the experiment.
 
-For subject ``MA02CA`` no eyetracker samples were recorded. Only god knows why
+For subjects ``MA02CA`` and ``PE10MI`` no eyetracker samples were recorded. Only god knows why
