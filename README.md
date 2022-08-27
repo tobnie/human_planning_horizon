@@ -53,6 +53,15 @@ There does not exist a score for every subject since there were errors in the ca
 
 # Trial Order
 
+The trial order can be loaded as a dataframe with ``load_trial_orders()`` in ``analysis/trial_order_utils.py``. It returns a dataframe of the following structure:
+
+| entry name      | description                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------|
+| subject_id      | id of the subject                                                                            |
+| trial           | number of trial (maximum is 60)                                                              |    
+| difficulty      | difficulty of the trial                                                                      |
+| world_number    | world number of the trial                                                                    |
+
 The trial order for each subject is saved in ``data/level_data/<subject_id>/trial_order.csv``. The csv has the following structure (separated by ';'):
 
 | csv[:, 0] | csv[:, 1] | csv[:, 2] |
@@ -60,6 +69,8 @@ The trial order for each subject is saved in ``data/level_data/<subject_id>/tria
 | trial_nr | difficulty | world_name |
 
 The ``world_name`` is a string of form 'world_<world_nr>'.
+
+**Not every subject has a ``trial_order.csv`` since this was accidentally not saved for the first few experiments.
 
 # SoSci Survey Data
 
