@@ -95,3 +95,4 @@ Plots are located in ``analysis/imgs/``. **Since I have made a lot of changes to
 # Remarks to Subject Data
 
 The data of subject ``NI07LU`` is not complete, since the experiment crashed.
+Some data of subject ``ZI01SU`` is missing because of errors in the code during the experiment.
