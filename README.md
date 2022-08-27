@@ -57,4 +57,4 @@ Eye Data can be processed via ``analysis/plotting/gaze/events/event_detection.py
 
 ## Plots
 
-Plots are located in ``analysis/imgs/``. **Since I have made a lot of changes to the way data is saved or loaded, not every method for creating plots may work as expected and might need some fixes and tweaks**.
+Plots are located in ``analysis/imgs/``. **Since I have made a lot of changes to the way data is saved or loaded, not every method for creating plots may work as expected and might need some fixes or tweaks**.
