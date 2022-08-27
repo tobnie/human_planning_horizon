@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def read_data():
-    df = pd.read_csv('./data_compressed_test.gzip', compression='gzip')
+    df = pd.read_csv('../data/data_compressed.gzip', compression='gzip')
     return df
 
 

@@ -406,7 +406,7 @@ def run_preprocessing():
     # save dataframe
     df = pd.DataFrame(dict_to_save)
 
-    df.to_csv('data_compressed_test.gzip', compression='gzip')
+    df.to_csv('../data/data_compressed.gzip', compression='gzip')
     print('done')
 
 
