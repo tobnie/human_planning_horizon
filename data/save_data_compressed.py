@@ -293,142 +293,103 @@ def run_preprocessing():
 
     # TODO information on left / right moving lane?
 
-    dict_to_save = {
-        'subject_id': [],
-        'game_difficulty': [],
-        'world_number': [],
-        'target_position': [],
-        'time': [],
-        'gaze_x': [],
-        'gaze_y': [],
-        'pupil_size': [],
-        'player_x': [],
-        'player_y': [],
-        'action': [],
-        'state': [],
-        # 'state_fm': []
-    }
-
-    subject_ids = []
-    game_difficulties = []
-    world_numbers = []
-    times = []
-    gaze_xs = []
-    gaze_ys = []
-    pupil_sizes = []
-    player_xs = []
-    player_ys = []
-    actions = []
-    target_positions = []
-    states = []
-    # state_fms = []
-
     # do for all subjects
     difficulties = ['easy', 'normal', 'hard']
     world_range = range(20)
-    # sub_diff_worlds = list(product(['KR07HA'], difficulties, world_range))
-    sub_diff_worlds = list(product(get_all_subjects(), difficulties, world_range))
 
-    saved_first_subject = False
     print('Starting preprocessing...')
-    for subject_id, diff, world_nr in tqdm(sub_diff_worlds):
-        target_position = get_target_position_for_world(diff, f'world_{world_nr}')
+    for subject_id in get_all_subjects():
 
-        tass = get_times_actions_states_samples(subject_id, [(diff, f'world_{world_nr}')])
-        for time, action, state, samples in tass:
-            for sample in samples:
-                # id
-                subject_ids.append(subject_id)
+        subject_ids_i = []
+        game_difficulties_i = []
+        world_numbers_i = []
+        times_i = []
+        gaze_xs_i = []
+        gaze_ys_i = []
+        pupil_sizes_i = []
+        player_xs_i = []
+        player_ys_i = []
+        actions_i = []
+        target_positions_i = []
+        states_i = []
 
-                # difficulty
-                game_difficulties.append(diff)
+        for diff, world_nr in tqdm(product(difficulties, world_range)):
+            target_position = get_target_position_for_world(diff, f'world_{world_nr}')
 
-                # world number
-                world_numbers.append(world_nr)
+            tass = get_times_actions_states_samples(subject_id, [(diff, f'world_{world_nr}')])
+            for time, action, state, samples in tass:
+                for sample in samples:
+                    # id
+                    subject_ids_i.append(subject_id)
 
-                # time
-                times.append(sample[0])
+                    # difficulty
+                    game_difficulties_i.append(diff)
 
-                # eye samples
-                gaze_xs.append(sample[1])
-                # TODO gaze transformation correct?
-                gaze_y = config.DISPLAY_HEIGHT_PX - sample[2]
-                gaze_ys.append(gaze_y)
-                pupil_sizes.append(sample[3])
+                    # world number
+                    world_numbers_i.append(world_nr)
 
-                # target position
-                target_position_screen_coords = config.FIELD_WIDTH * target_position + config.FIELD_WIDTH / 2
-                target_positions.append(target_position_screen_coords)
+                    # time
+                    times_i.append(sample[0])
 
-                # action
-                if np.isnan(action):
-                    actions.append(np.nan)
-                else:
-                    actions.append(ACTION_TO_STRING[action])
+                    # eye samples
+                    gaze_xs_i.append(sample[1])
+                    # TODO gaze transformation correct?
+                    gaze_y = config.DISPLAY_HEIGHT_PX - sample[2]
+                    gaze_ys_i.append(gaze_y)
+                    pupil_sizes_i.append(sample[3])
 
-                # state
-                if (isinstance(state, np.ndarray) and state.size == 0) or (isinstance(state, list) and len(state) == 0) or (
-                        isinstance(state, float) and np.isnan(state)):
-                    states.append(np.nan)
-                    # state_fms.append(np.nan)
-                    player_xs.append(np.nan)
-                    player_ys.append(np.nan)
-                else:
-                    state_as_list = state.tolist()
-                    states.append(state_as_list)
+                    # target position
+                    target_position_screen_coords = config.FIELD_WIDTH * target_position + config.FIELD_WIDTH / 2
+                    target_positions_i.append(target_position_screen_coords)
 
-                    # fm
-                    # state_fm = create_feature_map_from_state(state)
-                    # state_fms.append(state_fm)
+                    # action
+                    if np.isnan(action):
+                        actions_i.append(np.nan)
+                    else:
+                        actions_i.append(ACTION_TO_STRING[action])
 
-                    # player position
-                    player_pos = state[0, 1:3]
-                    player_width = state[0, 3]
-                    player_height = config.PLAYER_HEIGHT
-                    player_x = player_pos[0] + player_width / 2
-                    player_y = config.DISPLAY_HEIGHT_PX - player_pos[1] - player_height / 2
-                    player_xs.append(player_x)
-                    player_ys.append(player_y)
+                    # state
+                    if (isinstance(state, np.ndarray) and state.size == 0) or (isinstance(state, list) and len(state) == 0) or (
+                            isinstance(state, float) and np.isnan(state)):
+                        states_i.append(np.nan)
+                        # state_fms.append(np.nan)
+                        player_xs_i.append(np.nan)
+                        player_ys_i.append(np.nan)
+                    else:
+                        state_as_list = state.tolist()
+                        states_i.append(state_as_list)
 
-        if not saved_first_subject:
-            subject_dict = {
-                'subject_id': subject_ids,
-                'game_difficulty': game_difficulties,
-                'world_number': world_numbers,
-                'target_position': target_positions,
-                'time': times,
-                'gaze_x': gaze_xs,
-                'gaze_y': gaze_ys,
-                'pupil_size': pupil_sizes,
-                'player_x': player_xs,
-                'player_y': player_ys,
-                'action': actions,
-                'state': states
-            }
+                        # fm
+                        # state_fm = create_feature_map_from_state(state)
+                        # state_fms.append(state_fm)
 
-            subject_df = pd.DataFrame(subject_dict)
+                        # player position
+                        player_pos = state[0, 1:3]
+                        player_width = state[0, 3]
+                        player_height = config.PLAYER_HEIGHT
+                        player_x = player_pos[0] + player_width / 2
+                        player_y = config.DISPLAY_HEIGHT_PX - player_pos[1] - player_height / 2
+                        player_xs_i.append(player_x)
+                        player_ys_i.append(player_y)
 
-            subject_df.to_csv(f'../data/{subject_id}_compressed.gzip', compression='gzip')
-            saved_first_subject = True
+        subject_dict = {
+            'subject_id': subject_ids_i,
+            'game_difficulty': game_difficulties_i,
+            'world_number': world_numbers_i,
+            'target_position': target_positions_i,
+            'time': times_i,
+            'gaze_x': gaze_xs_i,
+            'gaze_y': gaze_ys_i,
+            'pupil_size': pupil_sizes_i,
+            'player_x': player_xs_i,
+            'player_y': player_ys_i,
+            'action': actions_i,
+            'state': states_i
+        }
 
-    dict_to_save['subject_id'] = subject_ids
-    dict_to_save['game_difficulty'] = game_difficulties
-    dict_to_save['world_number'] = world_numbers
-    dict_to_save['target_position'] = target_positions
-    dict_to_save['time'] = times
-    dict_to_save['gaze_x'] = gaze_xs
-    dict_to_save['gaze_y'] = gaze_ys
-    dict_to_save['pupil_size'] = pupil_sizes
-    dict_to_save['player_x'] = player_xs
-    dict_to_save['player_y'] = player_ys
-    dict_to_save['action'] = actions
-    dict_to_save['state'] = states
-    # dict_to_save['state_fm'] = state_fms
+        subject_df = pd.DataFrame(subject_dict)
+        subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
 
-    # save dataframe
-    df = pd.DataFrame(dict_to_save)
-
-    df.to_csv('../data/data_compressed.gzip', compression='gzip')
     print('done')
 
 

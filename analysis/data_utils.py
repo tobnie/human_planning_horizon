@@ -6,8 +6,8 @@ def read_data():
     return df
 
 
-def read_subject_data_example():
-    df = pd.read_csv('../data/AL09OL_compressed.gzip', compression='gzip')
+def read_subject_data(subject_id):
+    df = pd.read_csv(f'../data/{subject_id}_compressed.gzip', compression='gzip')
     return df
 
 
