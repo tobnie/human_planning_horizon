@@ -59,7 +59,7 @@ The trial order can be loaded as a dataframe with ``load_trial_orders()`` in ``a
 |-----------------|----------------------------------------------------------------------------------------------|
 | subject_id      | id of the subject                                                                            |
 | trial           | number of trial (maximum is 60)                                                              |    
-| difficulty      | difficulty of the trial                                                                      |
+| game_difficulty      | difficulty of the trial                                                                      |
 | world_number    | world number of the trial                                                                    |
 
 The trial order for each subject is saved in ``data/level_data/<subject_id>/trial_order.csv``. The csv has the following structure (separated by ';'):
