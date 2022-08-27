@@ -23,8 +23,8 @@ def get_all_gazes(df=None):
 
 
 def get_eyetracker_samples(subject, difficulty, world_number):
-    df = read_data()
-    df = df[(df['subject_id'] == subject) & (df['game_difficulty'] == difficulty) & (df['world_number'] == world_number)]
+    df = read_subject_data(subject)
+    df = df[(df['game_difficulty'] == difficulty) & (df['world_number'] == world_number)]
     samples = df[['time', 'gaze_x', 'gaze_y', 'pupil_size']]
     samples = samples.to_numpy()
     return samples
