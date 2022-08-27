@@ -396,6 +396,6 @@ def run_preprocessing():
         subject_df = add_experience_to_df(subject_df)
         # TODO add trial number to df
 
-        subject_df.to_pickle(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
+        subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
 
     print('done')
