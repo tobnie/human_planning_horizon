@@ -33,7 +33,6 @@ def read_score_data():
 def add_max_score_to_df(df):
     """ Adds the highest score of each subject to the given dataframe """
 
-    # TODO test
     scores = read_score_data()
 
     # only for last level
