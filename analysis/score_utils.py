@@ -28,3 +28,19 @@ def read_score_data():
         score_dfs.append(filtered)
 
     return pd.concat(score_dfs)
+
+
+def add_max_score_to_df(df):
+    """ Adds the highest score of each subject to the given dataframe """
+
+    # TODO test
+    scores = read_score_data()
+
+    # only for last level
+    highest_level = scores['after_levels'].max()
+    highest_level_mask = scores['after_levels'] == highest_level
+
+    highest_level_scores = scores[highest_level_mask]
+
+    # merge with df
+    return df.merge(highest_level_scores[['subject_id', 'score']], on='subject_id', how='left')

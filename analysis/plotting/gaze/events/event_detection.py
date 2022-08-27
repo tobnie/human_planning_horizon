@@ -102,7 +102,6 @@ def blink_detection(x, y, time, missing=-32768):
 
 
 def get_blinks_from_samples(samples):
-
     if len(samples) == 0:
         return [], []
 
@@ -285,6 +284,14 @@ def saccade_detection(x, y, time, missing=-32768, minlen=5, maxvel=40, maxacc=34
             stop = True
 
     return Ssac, Esac
+
+
+def try_saccade_detection(x, y, time):
+    try:
+        results = saccade_detection(np.array(x), np.array(y), np.array(time))
+        return results
+    except ValueError:
+        return [], []
 
 
 def get_saccades_from_samples(samples):

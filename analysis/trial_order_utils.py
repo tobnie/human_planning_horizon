@@ -2,11 +2,11 @@ import os
 
 import pandas as pd
 
-from analysis.data_utils import get_all_subjects
+from analysis.data_utils import get_all_subjects, read_subject_data
 
 
 def load_trial_order_csv(path):
-    return pd.read_csv(path, sep=';', names=['trial', 'difficulty', 'world_name'])
+    return pd.read_csv(path, sep=';', names=['trial', 'game_difficulty', 'world_name'])
 
 
 def load_trial_orders():
@@ -24,7 +24,7 @@ def load_trial_orders():
         trial_order_df = load_trial_order_csv(TRIAL_ORDER_PATH_SUBJECT)
 
         # get world number from world name and delete world_name column
-        trial_order_df['world_number'] = trial_order_df['world_name'].apply(lambda x: x.split('_')[-1])
+        trial_order_df['world_number'] = trial_order_df['world_name'].apply(lambda x: int(x.split('_')[-1]))
         trial_order_df.drop('world_name', axis=1, inplace=True)
 
         # add subject_id
@@ -35,4 +35,16 @@ def load_trial_orders():
     return pd.concat(trial_order_dfs)
 
 
+def add_trial_numbers_to_df(df):
+    trial_order_df = load_trial_orders()
 
+    # add trial information
+    # TODO somehow merge is not working
+    df_filtered = trial_order_df[['subject_id', 'game_difficulty', 'world_number', 'trial']]
+    result_df = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
+    return result_df
+
+
+test = read_subject_data('AN06AN')
+df = add_trial_numbers_to_df(test)
+print(test)

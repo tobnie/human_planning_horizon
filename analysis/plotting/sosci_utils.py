@@ -23,8 +23,8 @@ def add_experience_to_df(df):
     return df
 
 
-df = read_data()
-modified_df = add_experience_to_df(df)
-test = modified_df.groupby(['subject_id']).head(1)
-test2 = modified_df[modified_df['subject_id'] == 'ZI01SU']
-print(test2)
+# df = read_data()
+# modified_df = add_experience_to_df(df)
+# test = modified_df.groupby(['subject_id']).head(1)
+# test2 = modified_df[modified_df['subject_id'] == 'ZI01SU']
+# print(test2)
