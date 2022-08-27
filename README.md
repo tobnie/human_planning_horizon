@@ -1,6 +1,6 @@
 # human_planning_horizon
 
-For saving the data in central files to load as a single dataframe from, run ``save_compressed_data.py`` in ``/data`` first (run from inside ``/data`` please). This will generate compressed files for each subject in ``data/compressed_data/``.
+For saving the data in central files to load as a single dataframe from, run ``save_compressed_data.py`` in ``/data`` first (run from inside ``/data`` please). This will generate compressed files for each subject in ``data/compressed_data/``. This might take a while.
 
 The data can be loaded via ``read_subject_data(subject_id)`` or ``read_data()`` for all subjects in ``analysis/data_utils.py`` (also run within subdirectory please).
 
