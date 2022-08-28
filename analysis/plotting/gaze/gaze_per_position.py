@@ -74,31 +74,39 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
     gaze_pivot = pd.pivot_table(df, values='gaze_distance', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
     angle_pivot = pd.pivot_table(df, values='gaze_angle', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
 
-    directory_path = './imgs/gaze/gaze_per_position/{}/'
+    if subject_id:
+        directory_path = './imgs/gaze/gaze_per_position/{}/'.format(subject_id)
+    else:
+        directory_path = './imgs/gaze/gaze_per_position/'
+
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
     # plot heatmap distance
     sns.heatmap(gaze_pivot)  # , annot=True, annot_kws={"fontsize": 8})
     plt.gca().invert_yaxis()
-    plt.suptitle('Average Distance from Player to Gaze Sample')
-    plt.tight_layout()
+
     if subject_id:
         plt.savefig(directory_path + 'distance_per_position.png')
+        plt.suptitle('Average Distance from Player to Gaze Sample - {}'.format(subject_id))
     else:
-        plt.savefig('./imgs/gaze/distance_per_position.png')
+        plt.savefig('./imgs/gaze/gaze_per_position/distance_per_position.png')
+        plt.suptitle('Average Distance from Player to Gaze Sample')
+    plt.tight_layout()
     plt.show()
 
     # ---plot per target
     g = sns.FacetGrid(df, col='target_position')
     g.map_dataframe(plot_heatmap, 'gaze_distance')
-    plt.suptitle('Average Distance from Player to Gaze Sample')
-    plt.tight_layout()
+
     if subject_id:
+        plt.suptitle('Average Distance from Player to Gaze Sample - {}'.format(subject_id))
         plt.savefig(directory_path + 'distance_per_position_by_target.png')
     else:
-        plt.savefig('./imgs/gaze/distance_per_position_by_target.png')
+        plt.suptitle('Average Distance from Player to Gaze Sample')
+        plt.savefig('./imgs/gaze/gaze_per_position/distance_per_position_by_target.png')
 
+    plt.tight_layout()
     plt.show()
 
     # plot heatmap angle
@@ -113,20 +121,22 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
     if subject_id:
         plt.savefig(directory_path + 'angle_per_position.png')
     else:
-        plt.savefig('./imgs/gaze/angle_per_position.png')
+        plt.savefig('./imgs/gaze/gaze_per_position/angle_per_position.png')
 
     plt.show()
 
     # ---plot per target
     g = sns.FacetGrid(df, col='target_position')
     g.map_dataframe(plot_heatmap, 'gaze_angle')
-    plt.suptitle('Average Angle Of Gaze')
-    plt.tight_layout()
+
     if subject_id:
         plt.savefig(directory_path + 'angle_per_position_by_target.png')
+        plt.suptitle('Average Angle Of Gaze - {}'.format(subject_id))
     else:
-        plt.savefig('./imgs/gaze/angle_per_position_by_target.png')
+        plt.savefig('./imgs/gaze/gaze_per_position/angle_per_position_by_target.png')
+        plt.suptitle('Average Angle Of Gaze')
 
+    plt.tight_layout()
     plt.show()
 
 
@@ -170,11 +180,20 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
     # important to add this before setting titles
     g.set_titles(row_template='{row_name}', col_template='{col_name}')
 
-    plt.suptitle('Gaze Density in the Level per Position')
     if subject_id:
-        plt.savefig('./imgs/gaze/gaze_density_per_position_{}.png'.format(subject_id))
+        directory_path = './imgs/gaze/gaze_per_position/{}/'.format(subject_id)
     else:
-        plt.savefig('./imgs/gaze/gaze_density_per_position.png')
+        directory_path = './imgs/gaze/gaze_per_position/'
+
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
+    if subject_id:
+        plt.suptitle('Gaze Density in the Level per Position - {}'.format(subject_id))
+        plt.savefig(directory_path + 'gaze_density_per_position.png'.format(subject_id))
+    else:
+        plt.suptitle('Gaze Density in the Level per Position')
+        plt.savefig('./imgs/gaze/gaze_per_position/gaze_density_per_position.png')
     plt.close(plt.gcf())
 
 
