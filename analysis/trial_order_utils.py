@@ -48,8 +48,3 @@ def add_trial_numbers_to_df(df):
     result_df = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
 
     return result_df
-
-
-test = read_subject_data('AN06AN')
-df = add_trial_numbers_to_df(test)
-print(test)
