@@ -2,8 +2,8 @@ import numpy as np
 from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, create_state_from_string
-from data.save_data_compressed import create_feature_map_from_state, assign_position_to_fields
+from analysis.data_utils import read_data, read_subject_data, create_state_from_string, get_only_onscreen_data
+from data.save_data_compressed import assign_position_to_fields
 
 
 def create_state_from_str(string):
@@ -59,6 +59,8 @@ def create_single_layer_feature_map_from_state(state):
 def get_inputs_outputs_for_nn(df):
     df = df[['gaze_x', 'gaze_y', 'state']]
 
+    df = get_only_onscreen_data(df)
+
     # creating states from df
     print('Creating States from df...')
     states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
@@ -85,7 +87,6 @@ def save_inputs_output_for_training_of_nn(inputs, outputs):
 
 
 def run_create_IO_data_for_NN():
-    # TODO run for all subjects
     df = read_data()
     inputs, outputs = get_inputs_outputs_for_nn(df)
     save_inputs_output_for_training_of_nn(inputs, outputs)
