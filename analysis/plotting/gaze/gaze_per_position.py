@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data
+from analysis.data_utils import read_data, read_subject_data, get_all_subjects
 
 
 def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidean'):
@@ -21,7 +22,7 @@ def calculate_gaze_angle_relative_to_player(gaze_x, gaze_y, player_x, player_y):
 
 
 def calculate_avg_gaze_distance_per_field(df):
-    df = df[['gaze_x', 'gaze_y', 'player_x', 'player_y', 'player_x_field', 'player_y_field', 'target_position']].copy()
+    df = df[['subject_id', 'gaze_x', 'gaze_y', 'player_x', 'player_y', 'player_x_field', 'player_y_field', 'target_position']].copy()
 
     # drop invalid samples
     df = df[df['gaze_x'] != -32768]
@@ -118,7 +119,10 @@ def plot_kde_with_player_position(*args, **kwargs):
     # ax.add_patch(player_circle)
 
 
-def plot_gaze_kde_per_player_position(df):
+def plot_gaze_kde_per_player_position(df, subject_id=None):
+    if subject_id:
+        df = df[df['subject_id'] == subject_id]
+
     # only use gaze samples within screen:
     gaze_on_screen_mask = (0.0 <= df['gaze_x']) & (df['gaze_x'] <= config.DISPLAY_WIDTH_PX) & (0.0 <= df['gaze_y']) & (
             df['gaze_y'] <= config.DISPLAY_HEIGHT_PX)
@@ -134,21 +138,24 @@ def plot_gaze_kde_per_player_position(df):
     # important to add this before setting titles
     g.set_titles(row_template='{row_name}', col_template='{col_name}')
 
-    # TODO needed? I think no, rather on a FacetGrid Level
-    # for ax in g.axes[0]:
-    #     ax.invert_yaxis()
-
     plt.suptitle('Gaze Density in the Level per Position')
-    plt.savefig('./imgs/gaze/gaze_density_per_position.png')
-    plt.show()
-    # for player_x, player_y in df[['player_x', 'player_y']].unique():
-    #     df_mask = (df['player_x'] == player_x) & (df['player_y'] == player_y)
-    #     pos_df = df[]
-    #     sns.kdeplot(x=x, y=y, shade=True, cmap="viridis", ax=g.ax_joint)
+    if subject_id:
+        plt.savefig('./imgs/gaze/gaze_density_per_position_{}.png'.format(subject_id))
+    else:
+        plt.savefig('./imgs/gaze/gaze_density_per_position.png')
+    plt.close(plt.gcf())
 
 
-# TODO run for all subjects
-df = read_subject_data('AN06AN')
-df = calculate_avg_gaze_distance_per_field(df)
-# plot_gaze_heatmap_per_position_of_player(df)
-plot_gaze_kde_per_player_position(df)
+def run_gaze_per_position_plots():
+    # TODO run for all subjects
+    print('Creating gaze per position plots for all data...')
+    df = read_data()
+    df = calculate_avg_gaze_distance_per_field(df)
+    # plot_gaze_heatmap_per_position_of_player(df)
+    plot_gaze_kde_per_player_position(df)
+
+    print('Creating gaze per position plots for each subject separately...')
+    for subject in tqdm(get_all_subjects()):
+        df = read_subject_data(subject)
+        df = calculate_avg_gaze_distance_per_field(df)
+        plot_gaze_kde_per_player_position(df)

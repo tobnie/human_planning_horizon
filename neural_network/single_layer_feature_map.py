@@ -78,16 +78,18 @@ def save_inputs_output_for_training_of_nn(inputs, outputs):
     flattened_states = [np.ravel(state) for state in inputs]
 
     # save inputs and outputs as .npz
-    np.savez_compressed(flattened_states, '../neural_network/input.npz')
-    np.savez_compressed(outputs, '../neural_network/output.npz')
+    np.savez_compressed('../neural_network/input.npz', flattened_states)
+    np.savez_compressed('../neural_network/output.npz', outputs)
 
     print("Done!")
 
 
-# TODO run for all subjects
-df = read_subject_data('AN06AN')
-inputs, outputs = get_inputs_outputs_for_nn(df)
+def run_create_IO_data_for_NN():
+    # TODO run for all subjects
+    df = read_data()
+    inputs, outputs = get_inputs_outputs_for_nn(df)
+    save_inputs_output_for_training_of_nn(inputs, outputs)
 
-# example_state = np.array(df['state'][0])
-# fm_test = create_single_layer_feature_map_from_state(example_state)
-# print(fm_test)
+    # example_state = np.array(df['state'][0])
+    # fm_test = create_single_layer_feature_map_from_state(example_state)
+    # print(fm_test)

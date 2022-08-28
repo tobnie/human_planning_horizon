@@ -1,10 +1,9 @@
-import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from analysis.data_utils import read_subject_data, read_data, get_all_subjects
+from analysis.data_utils import read_data
 from analysis.plotting.gaze.events.event_detection import try_saccade_detection
 from analysis.plotting.gaze.events.saccade_utils import calc_sacc_amplitude, calc_sacc_angle
 from analysis.score_utils import add_max_score_to_df
@@ -26,7 +25,7 @@ def get_saccade_dataframe(df):
     sacc_df = sacc_df.explode('sacc')
     sacc_df.drop(['gaze_x', 'gaze_y', 'time'], axis=1, inplace=True)
 
-    sacc_info_df = pd.DataFrame(sacc_df['sacc'].to_list(), columns=['t_start', 't_end', 'duration', 'x_start', 'y_start', 'x_end', 'y_end'])
+    sacc_info_df = pd.DataFrame(sacc_df['sacc'].to_list(), columns=['time', 't_end', 'duration', 'x_start', 'y_start', 'x_end', 'y_end'])
 
     sacc_df.reset_index(inplace=True)
     sacc_df.drop(['index', 'sacc'], inplace=True, axis=1)
@@ -38,7 +37,6 @@ def get_saccade_dataframe(df):
 
 
 def plot_sacc_per_subject_experience(df):
-
     fig, ax = plt.subplots()
     sns.barplot(data=df, x='experience', y='amplitude', ax=ax)
 
@@ -51,7 +49,6 @@ def plot_sacc_per_subject_experience(df):
 
 
 def plot_sacc_per_subject_score(df):
-
     sns.barplot(data=df, y='amplitude', x='score', hue='experience')
     plt.title('the more red, the more experienced the player')
     plt.savefig('./imgs/saccades/amplitudes_per_score.png')
@@ -63,10 +60,16 @@ def plot_sacc_per_subject_score(df):
     plt.show()
 
 
+def join_sacc_df_and_normal_df(normal_df, sacc_df):
+    # TODO join saccade target coords or amplitude and angel over start_time and player_position on general_df. Then do something cool with that.
+    return normal_df.merge(sacc_df, on=['subject_id', 'game_difficulty', 'world_number', 'time'], how='left')
+
 
 df = read_data()
-# df = read_subject_data('JO03SA')
+
 sacc_df = get_saccade_dataframe(df)
+
+joined_df = join_sacc_df_and_normal_df(df, sacc_df)
 
 # add max score to sacc_df
 sacc_df = add_max_score_to_df(sacc_df)
