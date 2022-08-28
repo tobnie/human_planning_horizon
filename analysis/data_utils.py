@@ -40,6 +40,13 @@ def read_subject_data(subject_id):
     return df
 
 
+def get_only_onscreen_data(df):
+    """ Returns the df, but only rows where the gaze was on screen"""
+    gaze_on_screen_mask = (0.0 <= df['gaze_x']) & (df['gaze_x'] <= config.DISPLAY_WIDTH_PX) & (0.0 <= df['gaze_y']) & (
+            df['gaze_y'] <= config.DISPLAY_HEIGHT_PX)
+    return df[gaze_on_screen_mask]
+
+
 def drop_missing_samples(df):
     df = df.drop(df[df.gaze_x == -32768].index)
     return df
