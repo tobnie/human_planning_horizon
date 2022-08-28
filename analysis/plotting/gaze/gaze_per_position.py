@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,7 +7,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, get_all_subjects
+from analysis.data_utils import read_data, read_subject_data, get_all_subjects, get_only_onscreen_data
 
 
 def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidean'):
@@ -59,7 +61,10 @@ def plot_heatmap(*args, **kwargs):
     plt.gca().invert_yaxis()
 
 
-def plot_gaze_heatmap_per_position_of_player(df):
+def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
+    if subject_id:
+        df = df[df['subject_id'] == subject_id]
+
     pos2str = {448: 'left', 1216: 'center', 2112: 'right'}
     df['target_position'] = df['target_position'].apply(lambda x: pos2str[x])
 
@@ -69,12 +74,19 @@ def plot_gaze_heatmap_per_position_of_player(df):
     gaze_pivot = pd.pivot_table(df, values='gaze_distance', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
     angle_pivot = pd.pivot_table(df, values='gaze_angle', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
 
+    directory_path = './imgs/gaze/gaze_per_position/{}/'
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
     # plot heatmap distance
     sns.heatmap(gaze_pivot)  # , annot=True, annot_kws={"fontsize": 8})
     plt.gca().invert_yaxis()
     plt.suptitle('Average Distance from Player to Gaze Sample')
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/distance_per_position.png')
+    if subject_id:
+        plt.savefig(directory_path + 'distance_per_position.png')
+    else:
+        plt.savefig('./imgs/gaze/distance_per_position.png')
     plt.show()
 
     # ---plot per target
@@ -82,7 +94,11 @@ def plot_gaze_heatmap_per_position_of_player(df):
     g.map_dataframe(plot_heatmap, 'gaze_distance')
     plt.suptitle('Average Distance from Player to Gaze Sample')
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/distance_per_position_by_target.png')
+    if subject_id:
+        plt.savefig(directory_path + 'distance_per_position_by_target.png')
+    else:
+        plt.savefig('./imgs/gaze/distance_per_position_by_target.png')
+
     plt.show()
 
     # plot heatmap angle
@@ -94,7 +110,11 @@ def plot_gaze_heatmap_per_position_of_player(df):
     plt.suptitle('Average Angle Of Gaze')
     plt.gca().invert_yaxis()
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/angle_per_position.png')
+    if subject_id:
+        plt.savefig(directory_path + 'angle_per_position.png')
+    else:
+        plt.savefig('./imgs/gaze/angle_per_position.png')
+
     plt.show()
 
     # ---plot per target
@@ -102,7 +122,11 @@ def plot_gaze_heatmap_per_position_of_player(df):
     g.map_dataframe(plot_heatmap, 'gaze_angle')
     plt.suptitle('Average Angle Of Gaze')
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/angle_per_position_by_target.png')
+    if subject_id:
+        plt.savefig(directory_path + 'angle_per_position_by_target.png')
+    else:
+        plt.savefig('./imgs/gaze/angle_per_position_by_target.png')
+
     plt.show()
 
 
@@ -115,8 +139,6 @@ def plot_kde_with_player_position(*args, **kwargs):
     # TODO also plot player position. The below code always plotted the same position
     # player_x = data['player_x_field'].iloc[0]
     # player_y = data['player_y_field'].iloc[0]
-    # player_circle = plt.Circle((player_x, player_y), 50, color='red')
-    # ax.add_patch(player_circle)
 
 
 def plot_gaze_kde_per_player_position(df, subject_id=None):
@@ -124,15 +146,25 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
         df = df[df['subject_id'] == subject_id]
 
     # only use gaze samples within screen:
-    gaze_on_screen_mask = (0.0 <= df['gaze_x']) & (df['gaze_x'] <= config.DISPLAY_WIDTH_PX) & (0.0 <= df['gaze_y']) & (
-            df['gaze_y'] <= config.DISPLAY_HEIGHT_PX)
-    df = df[gaze_on_screen_mask]
+    df = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].copy()
+    # df = get_only_onscreen_data(df).copy()
+    df = df.reset_index()
 
     with sns.plotting_context('paper', font_scale=1.3):
         g = sns.FacetGrid(df, col="player_x_field", row="player_y_field", margin_titles=True,
                           row_order=reversed(range(int(df['player_y_field'].max()))))
 
     g.map_dataframe(plot_kde_with_player_position)
+    g.set(xlim=(0, config.DISPLAY_WIDTH_PX), ylim=(0, config.DISPLAY_HEIGHT_PX))
+
+    # plot player positions
+    ax = g.axes
+    for i in range(ax.shape[0]):
+        for j in range(ax.shape[1]):
+            player_x = j * config.FIELD_WIDTH + config.PLAYER_WIDTH / 2
+            player_y = i * config.FIELD_HEIGHT + config.PLAYER_HEIGHT / 2
+            player_circle = plt.Circle((player_x, player_y), 50, color='red')
+            ax[i, j].add_patch(player_circle)
 
     [plt.setp(ax.texts, text="") for ax in g.axes.flat]  # remove the original texts
     # important to add this before setting titles
@@ -150,12 +182,18 @@ def run_gaze_per_position_plots():
     # TODO run for all subjects
     print('Creating gaze per position plots for all data...')
     df = read_data()
-    df = calculate_avg_gaze_distance_per_field(df)
-    # plot_gaze_heatmap_per_position_of_player(df)
-    plot_gaze_kde_per_player_position(df)
+    df_gaze_info = calculate_avg_gaze_distance_per_field(df)
+
+    try:
+        plot_gaze_heatmap_per_position_of_player(df_gaze_info)
+        plot_gaze_kde_per_player_position(df)
+    except Exception as e:
+        print('!!! -- Gaze Plots for all failed because of: \n' + str(e))
 
     print('Creating gaze per position plots for each subject separately...')
     for subject in tqdm(get_all_subjects()):
-        df = read_subject_data(subject)
-        df = calculate_avg_gaze_distance_per_field(df)
-        plot_gaze_kde_per_player_position(df)
+        try:
+            plot_gaze_kde_per_player_position(df, subject_id=subject)
+            plot_gaze_heatmap_per_position_of_player(df_gaze_info, subject_id=subject)
+        except Exception as e:
+            print('!!! -- Gaze Plots for {} failed because of: \n'.format(subject) + str(e))
