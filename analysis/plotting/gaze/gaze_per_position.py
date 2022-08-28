@@ -73,7 +73,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
         df = df[df['subject_id'] == subject_id]
 
     pos2str = {448: 'left', 1216: 'center', 2112: 'right'}
-    df['target_position'] = df['target_position'].apply(lambda x: pos2str[x])
+    df['target_position'] = df['target_position'].apply(lambda x: pos2str[x]).copy()
 
     print('min max distance: {} --- {}'.format(df['gaze_distance'].min(), df['gaze_distance'].max()))
     print('min max angle: {} --- {}'.format(df['gaze_angle'].min(), df['gaze_angle'].max()))
