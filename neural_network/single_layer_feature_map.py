@@ -69,18 +69,16 @@ def get_inputs_outputs_for_nn(df):
     state_fms = [create_single_layer_feature_map_from_state(state) for state in tqdm(states)]
     gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
 
-    inputs = state_fms
+    inputs = np.array(state_fms)
     outputs = gaze_pos
     return inputs, outputs
 
 
 def save_inputs_output_for_training_of_nn(inputs, outputs):
     print("\nSaving data in input and output file...")
-    # flatten input feature maps
-    flattened_states = [np.ravel(state) for state in inputs]
 
     # save inputs and outputs as .npz
-    np.savez_compressed('../neural_network/input.npz', flattened_states)
+    np.savez_compressed('../neural_network/input.npz', inputs)
     np.savez_compressed('../neural_network/output.npz', outputs)
 
     print("Done!")
@@ -88,6 +86,7 @@ def save_inputs_output_for_training_of_nn(inputs, outputs):
 
 def run_create_IO_data_for_NN():
     df = read_data()
+    
     inputs, outputs = get_inputs_outputs_for_nn(df)
     save_inputs_output_for_training_of_nn(inputs, outputs)
 
