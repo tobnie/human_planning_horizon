@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import pandas as pd
 
 from analysis.data_utils import get_all_subjects, read_subject_data
@@ -30,6 +31,10 @@ def load_trial_orders():
         # add subject_id
         trial_order_df['subject_id'] = subject_id
 
+        # strip strings since utf-8 encoding whitespaces are not shown in sciView
+        trial_order_df['subject_id'] = trial_order_df['subject_id'].str.strip()
+        trial_order_df['game_difficulty'] = trial_order_df['game_difficulty'].str.strip()
+
         trial_order_dfs.append(trial_order_df)
 
     return pd.concat(trial_order_dfs)
@@ -39,9 +44,9 @@ def add_trial_numbers_to_df(df):
     trial_order_df = load_trial_orders()
 
     # add trial information
-    # TODO somehow merge is not working
     df_filtered = trial_order_df[['subject_id', 'game_difficulty', 'world_number', 'trial']]
     result_df = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
+
     return result_df
 
 
