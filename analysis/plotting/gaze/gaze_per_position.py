@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+import config
 from analysis.data_utils import read_data, read_subject_data
 
 
@@ -46,7 +47,7 @@ def plot_heatmap(*args, **kwargs):
                                 fill_value=0)
 
     if args[0] == 'gaze_angle':
-        ax = sns.heatmap(data_pivot, vmin=-np.pi, vmax=np.pi, center=0),   # , annot=True, annot_kws={"fontsize": 8})
+        ax = sns.heatmap(data_pivot, vmin=-np.pi, vmax=np.pi, center=0),  # , annot=True, annot_kws={"fontsize": 8})
         # set color bar ticks
         # cbar = ax.collections[0].colorbar
         # cbar.set_ticks([-np.pi, 0, np.pi])
@@ -104,12 +105,38 @@ def plot_gaze_heatmap_per_position_of_player(df):
     plt.show()
 
 
-def plot_gaze_kde_per_player_position(df):
-    g = sns.FacetGrid(df, col="player_x_field", row="player_y_field")
-    g.map_dataframe(sns.kdeplot, x='gaze_x', y='gaze_y', shade=True, cmap="viridis")
+def plot_kde_with_player_position(*args, **kwargs):
+    data = kwargs.pop('data')
 
-    for ax in g.axes[0]:
-        ax.invert_yaxis()
+    ax = sns.kdeplot(data=data, x='gaze_x', y='gaze_y', shade=True, cmap="viridis")
+
+    # plot circle for player position
+    # TODO also plot player position. The below code always plotted the same position
+    # player_x = data['player_x_field'].iloc[0]
+    # player_y = data['player_y_field'].iloc[0]
+    # player_circle = plt.Circle((player_x, player_y), 50, color='red')
+    # ax.add_patch(player_circle)
+
+
+def plot_gaze_kde_per_player_position(df):
+    # only use gaze samples within screen:
+    gaze_on_screen_mask = (0.0 <= df['gaze_x']) & (df['gaze_x'] <= config.DISPLAY_WIDTH_PX) & (0.0 <= df['gaze_y']) & (
+            df['gaze_y'] <= config.DISPLAY_HEIGHT_PX)
+    df = df[gaze_on_screen_mask]
+
+    with sns.plotting_context('paper', font_scale=1.3):
+        g = sns.FacetGrid(df, col="player_x_field", row="player_y_field", margin_titles=True,
+                          row_order=reversed(range(int(df['player_y_field'].max()))))
+
+    g.map_dataframe(plot_kde_with_player_position)
+
+    [plt.setp(ax.texts, text="") for ax in g.axes.flat]  # remove the original texts
+    # important to add this before setting titles
+    g.set_titles(row_template='{row_name}', col_template='{col_name}')
+
+    # TODO needed? I think no, rather on a FacetGrid Level
+    # for ax in g.axes[0]:
+    #     ax.invert_yaxis()
 
     plt.suptitle('Gaze Density in the Level per Position')
     plt.savefig('./imgs/gaze/gaze_density_per_position.png')
@@ -120,7 +147,8 @@ def plot_gaze_kde_per_player_position(df):
     #     sns.kdeplot(x=x, y=y, shade=True, cmap="viridis", ax=g.ax_joint)
 
 
+# TODO run for all subjects
 df = read_subject_data('AN06AN')
 df = calculate_avg_gaze_distance_per_field(df)
-plot_gaze_heatmap_per_position_of_player(df)
+# plot_gaze_heatmap_per_position_of_player(df)
 plot_gaze_kde_per_player_position(df)
