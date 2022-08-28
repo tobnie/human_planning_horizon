@@ -7,7 +7,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, get_all_subjects, get_only_onscreen_data
+from analysis.data_utils import read_data, read_subject_data, get_all_subjects, get_only_onscreen_data, position2field
 
 
 def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidean'):
@@ -17,6 +17,11 @@ def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidea
         return np.abs(gaze_x - player_x) + np.abs(gaze_y - player_y)
     else:
         raise RuntimeError("Please specify a valid metric other than {}. Valid metrics are: \n 'euclidean', 'manhattan'".format(metric))
+
+
+def calculate_gaze_distance_in_fields(gaze_x, gaze_y, player_x_field, player_y_field):
+    gaze_x_field, gaze_y_field = position2field(gaze_x, gaze_y)
+    return np.abs(gaze_x_field - player_x_field) + np.abs(gaze_y_field - player_y_field)
 
 
 def calculate_gaze_angle_relative_to_player(gaze_x, gaze_y, player_x, player_y):
@@ -31,6 +36,8 @@ def calculate_avg_gaze_distance_per_field(df):
 
     # add gaze_distances to df
     df['gaze_distance'] = df[['gaze_x', 'gaze_y', 'player_x', 'player_y']].apply(lambda x: calculate_gaze_distance(*x), axis=1)
+    df['gaze_distance_field'] = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].apply(
+        lambda x: calculate_gaze_distance_in_fields(*x), axis=1)
     df['gaze_angle'] = df[['gaze_x', 'gaze_y', 'player_x', 'player_y']].apply(lambda x: calculate_gaze_angle_relative_to_player(*x), axis=1)
 
     # TODO also do for manhattan distance?: then we would also need to assign a field to the gaze
@@ -157,7 +164,7 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
 
     # only use gaze samples within screen:
     df = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].copy()
-    # df = get_only_onscreen_data(df).copy()
+    df = get_only_onscreen_data(df).copy()
     df = df.reset_index()
 
     with sns.plotting_context('paper', font_scale=1.3):
@@ -171,8 +178,9 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
     ax = g.axes
     for i in range(ax.shape[0]):
         for j in range(ax.shape[1]):
+            i_corrected = ax.shape[0] - i - 1
             player_x = j * config.FIELD_WIDTH + config.PLAYER_WIDTH / 2
-            player_y = i * config.FIELD_HEIGHT + config.PLAYER_HEIGHT / 2
+            player_y = i_corrected * config.FIELD_HEIGHT + config.PLAYER_HEIGHT / 2
             player_circle = plt.Circle((player_x, player_y), 50, color='red')
             ax[i, j].add_patch(player_circle)
 
@@ -197,18 +205,22 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
     plt.close(plt.gcf())
 
 
+# TODO plot gaze distance (manhattan)
+
 def run_gaze_per_position_plots():
     # TODO run for all subjects
-    print('Creating gaze per position plots for all data...')
+    # print('Creating gaze per position plots for all data...')
+    # df = read_data()
+    # df_gaze_info = calculate_avg_gaze_distance_per_field(df)
+    #
+    # try:
+    #     plot_gaze_heatmap_per_position_of_player(df_gaze_info)
+    #     plot_gaze_kde_per_player_position(df)
+    # except Exception as e:
+    #     print('!!! -- Gaze Plots for all failed because of: \n' + str(e))
+
     df = read_data()
     df_gaze_info = calculate_avg_gaze_distance_per_field(df)
-
-    try:
-        plot_gaze_heatmap_per_position_of_player(df_gaze_info)
-        plot_gaze_kde_per_player_position(df)
-    except Exception as e:
-        print('!!! -- Gaze Plots for all failed because of: \n' + str(e))
-
     print('Creating gaze per position plots for each subject separately...')
     for subject in tqdm(get_all_subjects()):
         try:

@@ -87,3 +87,22 @@ def get_eyetracker_samples(subject, difficulty, world_number):
     samples = df[['time', 'gaze_x', 'gaze_y', 'pupil_size']]
     samples = samples.to_numpy()
     return samples
+
+
+def position2field(x, y):
+    field_x = int(round(x / config.FIELD_WIDTH))
+    field_y = int(round(y / config.FIELD_HEIGHT))
+    return field_x, field_y
+
+
+def assign_position_to_fields(x, y, width):
+    field_x_start, field_y = position2field(x, y)
+    field_width = int(width // config.FIELD_WIDTH)
+    return field_x_start, field_y, field_width
+
+
+def field2screen(field_coords):
+    FIELD_WIDTH = config.FIELD_WIDTH
+    FIELD_HEIGHT = config.FIELD_HEIGHT
+    screen_coords = [(x * FIELD_WIDTH + FIELD_WIDTH / 2, y * FIELD_HEIGHT + FIELD_HEIGHT / 2) for x, y in field_coords]
+    return np.array(screen_coords)
