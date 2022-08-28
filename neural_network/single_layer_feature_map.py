@@ -3,19 +3,29 @@ from tqdm import tqdm
 
 import config
 from analysis.data_utils import read_data, read_subject_data, create_state_from_string, get_only_onscreen_data
-from data.save_data_compressed import assign_position_to_fields
+from data.save_data_compressed import assign_position_to_fields, create_feature_map_from_state
+
+TARGET_POS2DISCRETE = {448: -1, 1216: 0, 2112: 1}
 
 
 def create_state_from_str(string):
     return np.fromstring(string)
 
 
-# player: 1, vehicle: 2, lilypad: 3
-def create_single_layer_feature_map_from_state(state):
+def create_single_layer_feature_map_from_state(state, target_pos=None):
+    """ Creates a feature map consisting of layer with the following encodings:
+    player: 1, vehicle: 2, lilypad: 3, target_position: 4
+    """
     feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES))
 
+    # encode target position
+    if target_pos is not None:
+        x_target_pos = int(round(target_pos / config.FIELD_WIDTH))
+        y_target_pos = config.N_LANES - 1
+        feature_map[x_target_pos, y_target_pos] = 4
+
     # object types are Player: 0, Vehicle: 1, LilyPad: 2
-    for obj_type, x, y, width in state:
+    for obj_type, x, y, width in reversed(state):
         x_start, y, width = assign_position_to_fields(x, y, width)
 
         # correct player width
@@ -36,28 +46,36 @@ def create_single_layer_feature_map_from_state(state):
 
     # invert y axis
     feature_map = np.flip(feature_map, axis=1)
+
     return feature_map
 
 
-# def create_single_layer_feature_map_from_state(state):
-#     # create 'deep' feature map
-#     normal_fm = create_feature_map_from_state(state)
-#
-#     single_layer_fm = np.zeros_like(normal_fm[:, :, 0])
-#
-#     # transform into feature_map where number encodes object instead of depth
-#     for depth_i in reversed(range(normal_fm.shape[-1])):
-#         obj_positions = np.where(normal_fm[:, :, depth_i] == 1)
-#
-#         # by the following we can recognize collisions in a feature map by a value > 10
-#         # TODO do we want it that way? we could keep it. if we discard it, the player value is written last, such that the underlying collision is hidden
-#         single_layer_fm[obj_positions] = single_layer_fm[obj_positions] * 10 + depth_i + 1
-#
-#     return single_layer_fm
+def get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm):
+    df = df[['gaze_x', 'gaze_y', 'state', 'target_position']]
+
+    df = get_only_onscreen_data(df)
+
+    target_pos = df['target_position'].apply(lambda x: TARGET_POS2DISCRETE[x]).to_numpy()
+
+    # creating states from df
+    print('Creating States from df...')
+    states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
+
+    print('\nConverting States to Feature Maps...')
+    if single_layer_fm:
+        state_fms = [create_single_layer_feature_map_from_state(state, p_target) for state, p_target in tqdm(zip(states, target_pos))]
+    else:
+        raise NotImplementedError("Not yet implemented")
+        # state_fms = [create_feature_map_from_state(state) for state in tqdm(states)]
+    gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
+
+    inputs = np.array(state_fms)
+    outputs = gaze_pos
+    return inputs, outputs, target_pos
 
 
-def get_inputs_outputs_for_nn(df):
-    df = df[['gaze_x', 'gaze_y', 'state']]
+def get_inputs_outputs_for_nn(df, single_layer_fm):
+    df = df[['gaze_x', 'gaze_y', 'state', 'target_position']]
 
     df = get_only_onscreen_data(df)
 
@@ -66,30 +84,48 @@ def get_inputs_outputs_for_nn(df):
     states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
 
     print('\nConverting States to Feature Maps...')
-    state_fms = [create_single_layer_feature_map_from_state(state) for state in tqdm(states)]
+    if single_layer_fm:
+        state_fms = [create_single_layer_feature_map_from_state(state) for state in tqdm(states)]
+    else:
+        state_fms = [create_feature_map_from_state(state) for state in tqdm(states)]
     gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
+
+    target_pos = df['target_position'].apply(lambda x: TARGET_POS2DISCRETE[x]).to_numpy()
 
     inputs = np.array(state_fms)
     outputs = gaze_pos
-    return inputs, outputs
+    return inputs, outputs, target_pos
 
 
-def save_inputs_output_for_training_of_nn(inputs, outputs):
+def save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=None, suffix=''):
     print("\nSaving data in input and output file...")
 
     # save inputs and outputs as .npz
-    np.savez_compressed('../neural_network/input.npz', inputs)
-    np.savez_compressed('../neural_network/output.npz', outputs)
+    if suffix != '':
+        suffix = '_' + suffix
+
+    file_name_in = f'input{suffix}.npz'
+    np.savez_compressed(f'../neural_network/{file_name_in}', inputs)
+    np.savez_compressed(f'../neural_network/output.npz', outputs)
+
+    if target_pos is not None:
+        np.savez_compressed(f'../neural_network/target_pos.npz', target_pos)
 
     print("Done!")
 
 
 def run_create_IO_data_for_NN():
     df = read_data()
-    
-    inputs, outputs = get_inputs_outputs_for_nn(df)
-    save_inputs_output_for_training_of_nn(inputs, outputs)
 
-    # example_state = np.array(df['state'][0])
-    # fm_test = create_single_layer_feature_map_from_state(example_state)
-    # print(fm_test)
+    inputs, outputs, target_pos = get_inputs_outputs_for_nn(df, single_layer_fm=True)
+    save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=target_pos)
+
+    inputs, outputs, target_pos = get_inputs_outputs_for_nn(df, single_layer_fm=False)
+    save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=target_pos, suffix='deep_fm')
+
+    inputs, outputs, target_pos = get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm=True)
+    save_inputs_output_for_training_of_nn(inputs, outputs, suffix='including_target_pos')
+
+    # TODO
+    # inputs, outputs, target_pos = get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm=False)
+    # save_inputs_output_for_training_of_nn(inputs, outputs, suffix='including_target_pos_deep')
