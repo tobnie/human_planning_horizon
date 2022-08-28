@@ -26,7 +26,7 @@ def read_data():
     return pd.concat(subject_dfs)
 
 
-def state_converter(instr):
+def create_state_from_string(instr):
     instr = instr.replace("[", "").replace("]", "")  # .split(",")
     return np.fromstring(instr, sep=', ', dtype=int).reshape((-1, 4))
 
@@ -34,7 +34,7 @@ def state_converter(instr):
 def read_subject_data(subject_id):
     # TODO convert when loading or rather convert states only when needed?
     df = pd.read_csv(f'../data/compressed_data/{subject_id}_compressed.gzip',
-                     compression='gzip')  # , converters={'state': state_converter})
+                     compression='gzip')  # , converters={'state': create_state_from_string})
     df.drop(df.columns[0], axis=1, inplace=True)
     df.dropna(inplace=True)
     return df
