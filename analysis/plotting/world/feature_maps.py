@@ -11,20 +11,17 @@ def get_feature_map_for_object(feature_map, obj_name):
     """ Returns the feature map for the given object type.
     obj_name must either be 'player', 'vehicle', or 'lilypad'"""
     obj_type = OBJECT_TO_INT[obj_name.lower()]
-    if feature_map.ndim == 3:
-        return feature_map[:, :, obj_type]
-    else:
-        return feature_map[:, :, :, obj_type]
+    return feature_map[:, :, obj_type]
 
 
 def get_feature_map_for_player(feature_map):
     return get_feature_map_for_object(feature_map, 'player')
 
 
-def get_feature_map_distribution_for_object(feature_maps, obj_name):
+def get_feature_map_distribution_for_object(feature_map, obj_name):
     """ Returns the distribution of the given object type in the feature map.
     obj_name must either be 'player', 'vehicle', or 'lilypad'"""
-    fm = get_feature_map_for_object(feature_maps, obj_name)
+    fm = get_feature_map_for_object(feature_map, obj_name)
     return fm.sum(axis=0)
 
 
@@ -38,26 +35,26 @@ def get_feature_map_distribution_for_water(feature_maps):
     return water_fm.sum(axis=0)
 
 
-def get_feature_map_distribution_for_player(feature_maps):
-    return get_feature_map_distribution_for_object(feature_maps, 'player')
+def get_feature_map_distribution_for_player(feature_map):
+    return get_feature_map_distribution_for_object(feature_map, 'player')
 
 
-def get_feature_map_for_avoidance(feature_maps):
+def get_avoidance_map(feature_map):
     """ Returns the feature map for the objects that should be avoided in the feature map."""
     # TODO need to distinguish between street and water section, since in street section the player is standing still, while it is moving in the river section
 
     # get feature maps
-    vehicle_fm = get_feature_map_distribution_for_object(feature_maps, 'vehicle')
-    water_fm = get_feature_map_distribution_for_water(feature_maps)
+    vehicle_fm = get_feature_map_distribution_for_object(feature_map, 'vehicle')
+    water_fm = get_feature_map_distribution_for_water(feature_map)
 
     # combine feature maps
     avoidance_fm = vehicle_fm + water_fm
     return avoidance_fm
 
 
-def get_feature_map_distribution_for_avoidance(feature_maps):
+def get_feature_map_distribution_for_avoidance(feature_map):
     """ Returns the distribution of the objects that should be avoided in the feature map."""
-    avoidance_fm = get_feature_map_for_avoidance(feature_maps)
+    avoidance_fm = get_avoidance_map(feature_map)
     return avoidance_fm
 
 
@@ -67,8 +64,9 @@ def get_avoidance_distribution_around_player_from_state_dict(state_dict, radius=
 
 def get_avoidance_distribution_around_player_from_state_list(states, radius=1):
     fms = states_to_feature_maps(states)
-    fms_around_player = get_area_around_player(fms, radius=radius)
-    return get_feature_map_distribution_for_avoidance(fms_around_player)
+    fms_around_player = get_area_around_player(fms, None, None, radius=radius)  # TODO
+    avoidance_map = get_feature_map_distribution_for_avoidance(fms_around_player)
+    return avoidance_map
 
 
 def get_player_position_in_map(feature_map):
@@ -80,7 +78,8 @@ def get_player_position_in_map(feature_map):
 
 def get_area_around_field(feature_map, x, y, radius=1, pad_sides=True):
     """ Returns the area around a given field in the feature map (preserves depth)"""
-
+    x = int(x)
+    y = int(y)
     if pad_sides:
         # pad sides with ones
         padded_fm = np.pad(feature_map, ((radius, radius), (radius, radius), (0, 0)), 'constant', constant_values=1)
@@ -88,18 +87,14 @@ def get_area_around_field(feature_map, x, y, radius=1, pad_sides=True):
         # shift coordinates of desired field to account for padding
         x = x + radius
         y = y + radius
-    area_around_field = feature_map[x - radius:x + radius + 1, y - radius:y + radius + 1]
+
+    area_around_field = feature_map[y - radius:y + radius + 1, x - radius:x + radius + 1]
 
     return area_around_field
 
 
-def get_area_around_player(feature_map, radius=1):
+def get_area_around_player(feature_map, player_x, player_y, radius=1):
     """ Returns the area around the player in the feature map (preserves depth)"""
-    player_x, player_y = get_player_position_in_map(feature_map)
-
-    if feature_map.ndim == 4:
-        return get_area_around_player_list(feature_map, radius)
-
     area_around_player = get_area_around_field(feature_map, player_x, player_y, radius)
     return area_around_player
 
@@ -134,5 +129,3 @@ def filter_fms_for_player_position(fms, row):
 
     filtered_fms = fms[filter_array == 1]
     return filtered_fms
-
-

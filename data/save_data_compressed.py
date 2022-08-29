@@ -8,7 +8,7 @@ import config
 from itertools import product
 import pandas as pd
 
-from analysis.data_utils import get_all_subjects
+from analysis.data_utils import get_all_subjects, assign_position_to_fields
 from analysis.plotting.performance.performances import add_game_status_to_df
 from analysis.plotting.player.player_position_heatmap import add_player_position_in_field_coordinates
 from analysis.plotting.sosci_utils import add_experience_to_df
@@ -244,20 +244,6 @@ def get_times_actions_states_samples(subject_id, diffs_and_worlds=None):
     return t_a_s_s
 
 
-def field2screen(field_coords):
-    FIELD_WIDTH = config.FIELD_WIDTH
-    FIELD_HEIGHT = config.FIELD_HEIGHT
-    screen_coords = [(x * FIELD_WIDTH + FIELD_WIDTH / 2, y * FIELD_HEIGHT + FIELD_HEIGHT / 2) for x, y in field_coords]
-    return np.array(screen_coords)
-
-
-def assign_position_to_fields(x, y, width):
-    field_y = int(round(y / config.FIELD_HEIGHT))
-    field_x_start = int(round(x / config.FIELD_WIDTH))
-    field_width = int(width // config.FIELD_WIDTH)
-    return field_x_start, field_y, field_width
-
-
 def create_feature_map_from_state(state):
     feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 3))
 
@@ -280,9 +266,6 @@ def create_feature_map_from_state(state):
         feature_map[x_start:x_start + width, y, obj_type] = 1
 
     feature_map = np.rot90(feature_map)
-
-    # invert y axis
-    feature_map = np.flip(feature_map, axis=1)
 
     return feature_map
 

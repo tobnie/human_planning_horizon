@@ -110,5 +110,6 @@ def plot_player_path(ax, states, target_position):
     plt.ylim((0, config.DISPLAY_HEIGHT_PX))
     draw_grid(ax)
 
+
 def get_center_of_player(x, y):
     return get_center_of_entity(x, y, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)

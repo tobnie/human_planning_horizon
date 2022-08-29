@@ -51,7 +51,7 @@ def calculate_avg_gaze_distance_per_field(df):
     return df
 
 
-def plot_heatmap(*args, **kwargs):
+def _plot_heatmap(*args, **kwargs):
     data = kwargs.pop('data')
     data_pivot = pd.pivot_table(data, values=args[0], index='player_y_field', columns='player_x_field', aggfunc=np.mean,
                                 fill_value=0)
@@ -65,7 +65,7 @@ def plot_heatmap(*args, **kwargs):
     else:
         ax = sns.heatmap(data_pivot)  # , annot=True, annot_kws={"fontsize": 8})
 
-    plt.gca().invert_yaxis()
+    ax.invert_yaxis()
 
 
 def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
@@ -104,7 +104,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
 
     # ---plot per target
     g = sns.FacetGrid(df, col='target_position')
-    g.map_dataframe(plot_heatmap, 'gaze_distance')
+    g.map_dataframe(_plot_heatmap, 'gaze_distance')
 
     if subject_id:
         plt.suptitle('Average Distance from Player to Gaze Sample - {}'.format(subject_id))
@@ -134,7 +134,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
 
     # ---plot per target
     g = sns.FacetGrid(df, col='target_position')
-    g.map_dataframe(plot_heatmap, 'gaze_angle')
+    g.map_dataframe(_plot_heatmap, 'gaze_angle')
 
     if subject_id:
         plt.savefig(directory_path + 'angle_per_position_by_target.png')

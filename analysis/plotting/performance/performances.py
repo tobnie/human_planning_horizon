@@ -15,8 +15,6 @@ def plot_performance_per_difficulty(df=None):
 
     last_time_steps = get_last_time_steps_of_games(df).copy()
 
-    last_time_steps = add_game_status_to_df(last_time_steps)
-
     # counts = df.groupby(['subject_id', 'game_difficulty', 'game_status']).tails(1).size()
     counts = last_time_steps.groupby(['subject_id', 'game_difficulty', 'game_status']).size().reset_index().rename(columns={0: 'count'})
 
@@ -61,4 +59,4 @@ def plot_performance_per_difficulty(df=None):
     plt.show()
 
 
-# plot_performance_per_difficulty()
+plot_performance_per_difficulty()

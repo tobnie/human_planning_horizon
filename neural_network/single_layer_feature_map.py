@@ -2,8 +2,8 @@ import numpy as np
 from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, create_state_from_string, get_only_onscreen_data
-from data.save_data_compressed import assign_position_to_fields, create_feature_map_from_state
+from analysis.data_utils import read_data, read_subject_data, create_state_from_string, get_only_onscreen_data, assign_position_to_fields
+from data.save_data_compressed import create_feature_map_from_state
 
 TARGET_POS2DISCRETE = {448: -1, 1216: 0, 2112: 1}
 

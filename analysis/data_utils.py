@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import pandas as pd
-from bleach.html5lib_shim import convert_entity
 
 import config
 
@@ -32,11 +31,9 @@ def create_state_from_string(instr):
 
 
 def read_subject_data(subject_id):
-    # TODO convert when loading or rather convert states only when needed?
     df = pd.read_csv(f'../data/compressed_data/{subject_id}_compressed.gzip',
                      compression='gzip')  # , converters={'state': create_state_from_string})
     df.drop(df.columns[0], axis=1, inplace=True)
-    df.dropna(inplace=True)
     return df
 
 
@@ -75,6 +72,18 @@ def add_game_status_to_df(df):
     return df_merged
 
 
+def get_street_data(df):
+    street_mask = (df['player_y_field'] >= 1) & (df['player_y_field'] <= 6)
+    df_street = df[street_mask]
+    return df_street
+
+
+def get_river_data(df):
+    river_mask = (df['player_y_field'] >= 8) & (df['player_y_field'] <= 13)
+    df_river = df[river_mask]
+    return df_river
+
+
 def get_last_time_steps_of_games(df):
     # get indices of last dataframe row of each game
     last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(1)
@@ -87,6 +96,12 @@ def get_eyetracker_samples(subject, difficulty, world_number):
     samples = df[['time', 'gaze_x', 'gaze_y', 'pupil_size']]
     samples = samples.to_numpy()
     return samples
+
+
+def transform_target_pos_to_string(df):
+    pos2str = {448: 'left', 1216: 'center', 2112: 'right'}
+    df['target_position'] = df['target_position'].apply(lambda x: pos2str[x]).copy()
+    return df
 
 
 def position2field(x, y):
