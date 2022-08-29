@@ -63,7 +63,7 @@ def do_something_for_all_worlds(subject_id, func, diffs_and_worlds=None):
 
 
 def get_all_samples_for_subject(subject, worlds=None):
-    return do_something_for_all_worlds(subject, get_eyetracker_samples, worlds)
+    return do_something_for_all_worlds(subject, get_eyetracker_samples_only, worlds)
 
 
 def get_eyetracker_events_data_path(subject, difficulty, world_name, training=False):
@@ -91,7 +91,7 @@ def get_time_from_state_file(state_file):
     return int(state_file.split('.')[0].split('_')[1])
 
 
-def get_eyetracker_samples(subject, difficulty, world_name, training=False):
+def get_eyetracker_samples_only(subject, difficulty, world_name, training=False):
     path = get_samples_data_path(subject, difficulty, world_name, training)
     return read_npz(path)
 
@@ -387,11 +387,27 @@ def get_samples_from_time_state_action_samples(time_action_state_samples):
     return all_samples
 
 
+def field2screen(field_coords):
+    FIELD_WIDTH = config.FIELD_WIDTH
+    FIELD_HEIGHT = config.FIELD_HEIGHT
+    screen_coords = [(x * FIELD_WIDTH + FIELD_WIDTH / 2, y * FIELD_HEIGHT + FIELD_HEIGHT / 2) for x, y in field_coords]
+    return np.array(screen_coords)
+
+
 def get_times_actions_states_samples_for_row(subject_id, row, worlds=None):
     """ Returns all time-action-state-samples when the player is in a specific row"""
     time_action_state_samples = get_times_actions_states_samples(subject_id, worlds)
     filtered_time_action_state_samples = filter_times_actions_states_and_samples_for_row(time_action_state_samples, row=row)
     return filtered_time_action_state_samples
+
+
+def get_times_actions_states_samples_for_all_players_in_row(row, worlds=None):
+    """ Returns all time-action-state-samples when the player is in a specific row"""
+    all_tass = []
+    for subject_id in get_all_subjects():
+        tass_subject = get_times_actions_states_samples_for_row(subject_id, row, worlds)
+        all_tass.extend(tass_subject)
+    return all_tass
 
 
 def get_samples_for_player_in_row(subject_id, row):
@@ -416,6 +432,11 @@ def transform_times_actions_states_samples_to_fm(time_action_state_samples):
     times, actions, states, samples = zip(*time_action_state_samples)
     fms = states_to_feature_maps(states)
     return list(zip(times, actions, fms, samples))
+
+
+def get_player_position_from_state(state):
+    """ Returns the position of the player in the given state"""
+    return state[:, :, 0]
 
 
 def assign_position_to_fields(x, y, width):
@@ -459,7 +480,6 @@ def create_feature_map_from_state(state):
     feature_map = np.flip(feature_map, axis=1)
 
     return feature_map
-
 
 # worlds_by_target_pos = get_worlds_by_target_position()
 # tass_left = get_times_actions_states_samples_for_all(worlds=worlds_by_target_pos['left'])

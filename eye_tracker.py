@@ -44,7 +44,6 @@ class MyEyeTracker:
         """ Shows a status message on the experimenter's screen. """
         self.tracker.status_msg(msg)
 
-    # TODO implement safety hook to check if eye tracker is connected?
     def connected(self):
         """ Returns True, if the eye tracker is currently connected. False, otherwise."""
         return self.tracker.connected()
@@ -81,7 +80,7 @@ class MyEyeTracker:
     def extract_events(self):
         """ Extracts events from the eye tracker and saves them in a list. """
 
-        for i in range(3):  # TODO why for i in range(3)? --> because it only looks at the next 3 events?
+        for i in range(3):
             tc, d = self.get_event()
             if tc is None and d is None:
                 pass

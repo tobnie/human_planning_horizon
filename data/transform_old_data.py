@@ -7,8 +7,6 @@ from analysis.analysis_utils import get_times_states, get_level_data_path
 from game.world_generation.generation_config import GameDifficulty
 
 
-# TODO data sophia
-# TODO remove old data
 # TODO also do for training data
 def transform_subject_data(s_id_list):
     for subject_id in s_id_list:

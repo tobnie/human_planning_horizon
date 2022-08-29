@@ -4,6 +4,7 @@ snippets/
 
 *.rar
 *.zip
+*.gzip
 
 # IDEA
 .idea/

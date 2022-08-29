@@ -86,7 +86,7 @@ class Game:
             sample = self.eye_tracker.get_sample()
             time = sample[0]
             self.logger.log_eyetracker_samples(time, sample[1:])
-            self.eye_tracker.extract_events()  # TODO check this
+            self.eye_tracker.extract_events()
         else:
             time = self.game_time
 

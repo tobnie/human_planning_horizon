@@ -1,7 +1,8 @@
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 import config
-from analysis.analysis_utils import get_eyetracker_samples, get_all_subjects
+from analysis.analysis_utils import get_eyetracker_samples_only, get_all_subjects
 from analysis.plotting.gaze.events.event_detection import get_blinks_from_samples
 
 
@@ -29,11 +30,10 @@ def plot_and_save_blinks():
     for subject in get_all_subjects():
         for difficulty in ['easy', 'normal', 'hard']:
             fig, ax = plt.subplots(4, 5)
-            for i in range(20):
-                world_name = f'world_{i}'
+            for i in tqdm(range(20)):
 
                 # get blinks
-                samples = get_eyetracker_samples(subject, difficulty, world_name)
+                samples = get_eyetracker_samples_only(subject, difficulty, i)
 
                 # plotting
                 plot_blinks(ax[i // 5, i % 5], samples, f'world {i}')
@@ -41,3 +41,6 @@ def plot_and_save_blinks():
             plt.tight_layout()
             plt.savefig(f'./imgs/blinks/{subject}_{difficulty}_blinks.png')
             plt.close(fig)
+
+
+plot_and_save_blinks()

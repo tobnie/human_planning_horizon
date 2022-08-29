@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 import config
-from analysis.analysis_utils import get_world_properties, get_eyetracker_samples, get_times_states, get_all_subjects
+from analysis.analysis_utils import get_world_properties, get_eyetracker_samples_only, get_times_states, get_all_subjects
 from analysis.plotting.plotting_utils import color_fader
 from analysis.plotting.world.world_coordinates import plot_player_path
 from game.world_generation.generation_config import GameDifficulty
@@ -74,7 +74,7 @@ def create_gaze_and_path_plots():
 
                 # get game data
                 try:
-                    samples = get_eyetracker_samples(subject, difficulty, world_name)
+                    samples = get_eyetracker_samples_only(subject, difficulty, world_name)
                     filtered_samples = filter_off_samples(samples)
                     times_states = get_times_states(subject, difficulty, world_name)
                     world_props = get_world_properties(subject, difficulty, world_name)
