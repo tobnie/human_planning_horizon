@@ -5,25 +5,30 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from analysis.data_utils import read_data, get_street_data, get_river_data
-from analysis.plotting.gaze.events.event_detection import try_saccade_detection
-from analysis.plotting.gaze.vector_utils import calc_euclidean_distance, calc_angle
+from analysis.data_utils import read_data, get_street_data, get_river_data, read_subject_data
+from analysis.plotting.gaze.events.event_detection import try_saccade_detection, try_saccade_detection2
+from analysis.plotting.gaze.vector_utils import calc_euclidean_distance, calc_angle, calc_angle_relative_to_vertical_center
 
 SACC_DURATION_THRESHOLD = 400
 
 
-def get_saccade_dataframe(df):
+def get_saccade_dataframe(df, use_other_saccade_algo=False):
     experience_df = df[['subject_id', 'game_difficulty', 'world_number', 'experience', 'trial', 'game_status', 'score']].drop_duplicates()
     data = df.groupby(['subject_id', 'game_difficulty', 'world_number'])[['subject_id', 'experience', 'time', 'gaze_x', 'gaze_y']].agg(
         {'time': list, 'gaze_x': list, 'gaze_y': list}).reset_index()
     data = data.merge(experience_df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
     sacc_df = data[
         ['subject_id', 'game_difficulty', 'world_number', 'gaze_x', 'gaze_y', 'time', 'experience', 'game_status', 'trial', 'score']].copy()
-    sacc_df['sacc'] = sacc_df.apply(lambda x: try_saccade_detection(x['gaze_x'], x['gaze_y'], x['time'])[-1], axis=1)
+
+    if use_other_saccade_algo:
+        # remove blinks for marius algo
+        sacc_df['sacc'] = sacc_df.apply(lambda x: try_saccade_detection2(x['gaze_x'], x['gaze_y'], x['time'])[-1], axis=1)
+    else:
+        sacc_df['sacc'] = sacc_df.apply(lambda x: try_saccade_detection(x['gaze_x'], x['gaze_y'], x['time'])[-1], axis=1)
 
     # remove rows where no saccades were detected
     sacc_df['sacc'] = sacc_df['sacc'].apply(lambda x: np.nan if len(x) == 0 else x)
-    sacc_df.dropna(inplace=True)
+    sacc_df.dropna(subset=['sacc'], inplace=True)
 
     # reformat df
     sacc_df = sacc_df.explode('sacc')
@@ -220,7 +225,7 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
 
     # over game outcome
     g = sns.FacetGrid(df, col="game_status", margin_titles=True)
-    g.map(sns.histplot, 'amplitude', stat='density')
+    g.map(sns.histplot, 'amplitude', stat='density', binwidth=50)
     plt.suptitle('Sacc Amplitudes per game outcome')
     plt.tight_layout()
     plt.savefig(directory + 'amplitude_hist_per_game_outcome.png')
@@ -235,7 +240,7 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
 
     # over experience
     g = sns.FacetGrid(df, col="experience", margin_titles=True)
-    g.map_dataframe(sns.histplot, 'amplitude', stat='density')
+    g.map_dataframe(sns.histplot, 'amplitude', stat='density', binwidth=50)
     plt.suptitle('Sacc Amplitudes per experience')
     plt.tight_layout()
     plt.savefig(directory + 'amplitude_hist_per_experience.png')
@@ -250,7 +255,7 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
 
     # over difficulty
     g = sns.FacetGrid(df, col="game_difficulty", margin_titles=True)
-    g.map_dataframe(sns.histplot, 'amplitude', stat='density')
+    g.map_dataframe(sns.histplot, 'amplitude', stat='density', binwidth=50)
     plt.suptitle('Sacc Amplitudes per difficulty')
     plt.tight_layout()
     plt.savefig(directory + 'amplitude_hist_per_difficulty.png')
@@ -265,7 +270,7 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
 
     # over score
     g = sns.FacetGrid(df, col="score", margin_titles=True)
-    g.map_dataframe(sns.histplot, 'amplitude', stat='density')
+    g.map_dataframe(sns.histplot, 'amplitude', stat='density', binwidth=50)
     plt.suptitle('Sacc Amplitudes per Score')
     plt.tight_layout()
     plt.savefig(directory + 'amplitude_hist_per_score.png')
@@ -280,7 +285,7 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
 
     # over difficulty
     g = sns.FacetGrid(df, col="world_number", row='game_difficulty', margin_titles=True)
-    g.map_dataframe(sns.histplot, 'amplitude', stat='density')
+    g.map_dataframe(sns.histplot, 'amplitude', stat='density', binwidth=50)
     plt.suptitle('Sacc Amplitudes per difficulty')
     plt.tight_layout()
     plt.savefig(directory + 'amplitude_hist_per_difficulty_per_world.png')
@@ -294,13 +299,83 @@ def plot_sacc_histograms(df, directory='./imgs/saccades/', subfolder=''):
     plt.show()
 
 
-def do_all_plots(df, subfolder=''):
-    # get saccade data
-    sacc_df = get_saccade_dataframe(df)
+def plot_sacc_boxplots(df, directory='./imgs/saccades/', subfolder=''):
+    directory = directory + subfolder
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
-    # threshold saccades
-    sacc_df = filter_saccade_df(sacc_df)
+    # over game outcome
+    sns.boxplot(data=df, x='game_status', y='amplitude')
+    plt.suptitle('Sacc Amplitudes per game outcome')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_amplitude_per_game_outcome.png')
+    plt.show()
 
+    sns.boxplot(data=df, x='game_status', y='angle')
+    plt.suptitle('Sacc Angles per game outcome')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_angle_per_game_outcome.png')
+    plt.show()
+
+    # over experience
+    sns.boxplot(data=df, x='experience', y='amplitude')
+    plt.suptitle('Sacc Amplitudes per experience')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_amplitude_per_experience.png')
+    plt.show()
+
+    sns.boxplot(data=df, x='experience', y='angle')
+    plt.suptitle('Sacc Angles per experience')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_angle_per_experience.png')
+    plt.show()
+
+    # over difficulty
+    sns.boxplot(data=df, x='game_difficulty', y='amplitude')
+    plt.suptitle('Sacc Amplitudes per difficulty')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_amplitude_per_difficulty.png')
+    plt.show()
+
+    sns.boxplot(data=df, x='game_difficulty', y='angle')
+    plt.suptitle('Sacc Angles per difficulty')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_angle_per_difficulty.png')
+    plt.show()
+
+    # over difficulty
+    g = sns.FacetGrid(data=df, row="game_difficulty", margin_titles=True)
+    g.map_dataframe(sns.boxplot, 'world_number', 'amplitude')
+    plt.suptitle('Sacc Amplitudes per difficulty')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_amplitude_per_difficulty_per_world.png')
+    plt.show()
+
+    g = sns.FacetGrid(data=df, row='game_difficulty', margin_titles=True)
+    g.map_dataframe(sns.boxplot, 'world_number', 'angle')
+    plt.suptitle('Sacc Angles per difficulty')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_angle_per_difficulty_per_world.png')
+    plt.show()
+
+    df_without_nan_score = df.dropna(subset=['score'])
+    # over score
+    sns.boxplot(data=df_without_nan_score, x='score', y='amplitude')
+    plt.suptitle('Sacc Amplitudes per Score')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_amplitude_per_score.png')
+    plt.show()
+
+    sns.boxplot(data=df_without_nan_score, x='score', y='angle')
+    plt.suptitle('Sacc Angles per Score')
+    plt.tight_layout()
+    plt.savefig(directory + 'box_angle_per_score.png')
+    plt.show()
+
+
+
+def do_all_plots(sacc_df, subfolder=''):
+    plot_sacc_boxplots(sacc_df, subfolder=subfolder)
     plot_sacc_histograms(sacc_df, subfolder=subfolder)
     plot_sacc_per_game_status(sacc_df, subfolder=subfolder)
     plot_sacc_per_difficulty(sacc_df, subfolder=subfolder)
@@ -309,20 +384,77 @@ def do_all_plots(df, subfolder=''):
 
     # need to drop nan trials for next plot:
     # drop rows with no trial information:
-    df_without_nan_trials = df.dropna()
-    sacc_df_without_nan_trials = get_saccade_dataframe(df_without_nan_trials)
-    sacc_df_without_nan_trials = filter_saccade_df(sacc_df_without_nan_trials)
-
+    sacc_df_without_nan_trials = sacc_df.dropna(subset=['trial'])
     plot_sacc_per_trial(sacc_df_without_nan_trials, subfolder=subfolder)
+
+
+def calc_visual_degree_from_px(x):
+    d = 800  # mm
+    w = 595  # mm
+    h = 335  # mm
+    res_x = 2560  # px
+    res_y = 1440  # px
+    mm_per_px_w = w / res_x
+    mm_per_px_h = h / res_y
+    mm_per_px = 0.5 * (mm_per_px_w + mm_per_px_h)
+    deg = np.arctan(x * mm_per_px / d)
+    return np.rad2deg(deg)
+
+
+def sacc_duration_by_amplitude(amplitude_deg):
+    """ Amplitude given in deg. Following the formula by Dodge and Cline (1901), Hyde (1959) and Robinson (1964).
+    Only holds for amplitudes > 5°.
+    """
+    return 2.2 * amplitude_deg + 21  # ms
+
+
+def filter_saccade_data2(df):
+    df['amplitude_deg'] = df['amplitude'].apply(calc_visual_degree_from_px)
+    df['sacc_duration_calculated'] = df['amplitude_deg'].apply(sacc_duration_by_amplitude)
+    df['diff_in_calculation'] = df['duration'] - df['sacc_duration_calculated']
+    sacc_df_only_over_5_deg = df[df['amplitude_deg'] > 5]
+
+    # remove microsaccades (saccades under 5 minutes)
+    df = df[df['amplitude_deg'] > 5 / 60]
+    median_error = sacc_df_only_over_5_deg['diff_in_calculation'].median()
+
+    # remove samples that deviate one median from the calculated duration
+    df = df[df['diff_in_calculation'] <= median_error]
+    return df
+
+
+def get_saccs_filter_and_plot(df, subfolder=''):
+    # get saccade data
+    sacc_df = get_saccade_dataframe(df)
+    # threshold saccades
+    sacc_df = filter_saccade_df(sacc_df)
+    sacc_df = filter_saccade_data2(sacc_df)
+
+    print(f'n={len(sacc_df)}')
+
+    do_all_plots(sacc_df, subfolder=subfolder)
+
+    # again for street
+    street_df = get_street_data(df)
+    sacc_df = get_saccade_dataframe(street_df)
+    sacc_df = filter_saccade_df(sacc_df)
+    sacc_df = filter_saccade_data2(sacc_df)
+    do_all_plots(sacc_df, subfolder=subfolder + 'street/')
+
+    # again for river
+    river_df = get_river_data(df)
+    sacc_df = get_saccade_dataframe(river_df)
+    sacc_df = filter_saccade_df(sacc_df)
+    sacc_df = filter_saccade_data2(sacc_df)
+    do_all_plots(sacc_df, subfolder=subfolder + 'river/')
 
 
 # load data
 df = read_data()
 
-do_all_plots(df)
+# other_algo_df = get_saccade_dataframe(df, use_other_saccade_algo=True)
+# other_algo_df = filter_saccade_df(other_algo_df)
+# other_algo_df, median_error_other_algo = filter_saccade_data2(other_algo_df)
 
-street_df = get_street_data(df)
-do_all_plots(street_df, subfolder='street/')
-
-river_df = get_river_data(df)
-do_all_plots(river_df, subfolder='river/')
+subfolder = 'error_less_than_median_of_error/'
+get_saccs_filter_and_plot(df, subfolder=subfolder)

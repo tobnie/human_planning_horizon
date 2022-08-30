@@ -40,6 +40,9 @@ __author__ = "Edwin Dalmaijer"
 import numpy
 import numpy as np
 
+import config
+from analysis.plotting.gaze.events.saccade_filtering_marius import detect_samples_marius
+
 BLINK_LB = 50  # lower bound for the duration of a blink in ms
 BLINK_UB = 450  # upper bound for the duration of a blink in ms
 
@@ -311,3 +314,15 @@ def get_saccades_from_samples(samples):
         return [], []
     time, x, y, _ = list(zip(*samples))
     return saccade_detection(np.array(x), np.array(y), np.array(time))
+
+
+def try_saccade_detection2(x, y, time):
+    try:
+        x = np.array(x) - config.DISPLAY_WIDTH_PX / 2
+        y = np.array(y) - config.DISPLAY_HEIGHT_PX / 2
+        samples = list(zip(time, x, y))
+        results = detect_samples_marius(samples)
+        return results
+    except ValueError as e:
+        print('Error during Saccade Detection:', str(e))
+        return [], []
