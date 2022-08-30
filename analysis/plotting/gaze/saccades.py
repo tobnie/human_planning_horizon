@@ -13,8 +13,10 @@ SACC_DURATION_THRESHOLD = 400
 
 
 def get_saccade_dataframe(df, use_other_saccade_algo=False):
+    positions_df = df[['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field']]
     experience_df = df[['subject_id', 'game_difficulty', 'world_number', 'experience', 'trial', 'game_status', 'score']].drop_duplicates()
-    data = df.groupby(['subject_id', 'game_difficulty', 'world_number'])[['subject_id', 'experience', 'time', 'gaze_x', 'gaze_y']].agg(
+    data = df.groupby(['subject_id', 'game_difficulty', 'world_number'])[
+        ['subject_id', 'experience', 'time', 'gaze_x', 'gaze_y', 'player_y_field']].agg(
         {'time': list, 'gaze_x': list, 'gaze_y': list}).reset_index()
     data = data.merge(experience_df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
     sacc_df = data[
@@ -46,6 +48,9 @@ def get_saccade_dataframe(df, use_other_saccade_algo=False):
     sacc_df['sacc_x_end'] = sacc_info_df['x_end']
     sacc_df['sacc_y_end'] = sacc_info_df['y_end']
     sacc_df['duration'] = sacc_info_df['duration']
+
+    sacc_df = sacc_df.merge(positions_df, on=['subject_id', 'game_difficulty', 'world_number', 'time'], how='left')
+
     return sacc_df
 
 
@@ -373,7 +378,6 @@ def plot_sacc_boxplots(df, directory='./imgs/saccades/', subfolder=''):
     plt.show()
 
 
-
 def do_all_plots(sacc_df, subfolder=''):
     plot_sacc_boxplots(sacc_df, subfolder=subfolder)
     plot_sacc_histograms(sacc_df, subfolder=subfolder)
@@ -423,6 +427,91 @@ def filter_saccade_data2(df):
     return df
 
 
+def print_per_score_mean_classification(df):
+    df = df.dropna(subset=['score']).copy()
+    print('-----Classification via over / under Mean-----')
+    mean_score = df['score'].mean()
+    df['scorer_type'] = df['score'].apply(lambda x: 'high' if x > mean_score else 'low')
+
+    print(df[['subject_id', 'scorer_type']].drop_duplicates()['scorer_type'].value_counts())
+
+    print('\n------By High / Low Scoring:')
+    print('\nMean:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].median())
+
+
+def print_per_score_median_classification(df):
+    df = df.dropna(subset=['score']).copy()
+    print('-----Classification via over / under Median-----')
+    median_score = df['score'].median()
+    df['scorer_type'] = df['score'].apply(lambda x: 'high' if x > median_score else 'low').copy()
+
+    print(df[['subject_id', 'scorer_type']].drop_duplicates()['scorer_type'].value_counts())
+
+    print('\n------By High / Low Scoring:')
+    print('\nMean:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].median())
+
+
+def print_per_score_half_classification(df):
+    print('-----Classification via 50/50-----')
+
+    df = df.dropna(subset=['score']).copy()
+
+    # get middle value:
+    subjects_with_score = df[['subject_id', 'score']].drop_duplicates()
+    middle_score = subjects_with_score.sort_values(by='score')['score'].iloc[int(len(subjects_with_score) // 2)]
+
+    df['scorer_type'] = df['score'].apply(lambda x: 'high' if x >= middle_score else 'low').copy()
+
+    print(df[['subject_id', 'scorer_type']].drop_duplicates()['scorer_type'].value_counts())
+
+    print('\n------By High / Low Scoring:')
+    print('\nMean:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['scorer_type'])[['amplitude', 'angle']].median())
+
+
+def print_info(df):
+    df['location'] = df['player_y_field'].apply(classify_location)
+
+    print('------General:')
+    print('\nMean:')
+    print(df.groupby(['experience'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['experience'])[['amplitude', 'angle']].median())
+
+    print('\n------Per Subject:')
+    print('\nMean:')
+    print(df.groupby(['experience', 'subject_id'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['experience', 'subject_id'])[['amplitude', 'angle']].median())
+
+    print('------Per Location:')
+    print('\nMean:')
+    print(df.groupby(['location', 'experience'])[['amplitude', 'angle']].mean())
+    print('\nMedian:')
+    print(df.groupby(['location', 'experience'])[['amplitude', 'angle']].median())
+
+
+def classify_location(player_y_field):
+    if 8 <= player_y_field <= 13:
+        return 'river'
+    if 1 <= player_y_field <= 6:
+        return 'street'
+    if player_y_field == 0:
+        return 'start'
+    if player_y_field == 14:
+        return 'finish'
+    if player_y_field == 7:
+        return 'middle'
+
+
 def get_saccs_filter_and_plot(df, subfolder=''):
     # get saccade data
     sacc_df = get_saccade_dataframe(df)
@@ -431,6 +520,10 @@ def get_saccs_filter_and_plot(df, subfolder=''):
     sacc_df = filter_saccade_data2(sacc_df)
 
     print(f'n={len(sacc_df)}')
+    print_per_score_half_classification(sacc_df)
+    print_per_score_mean_classification(sacc_df)
+    print_per_score_median_classification(sacc_df)
+    print_info(sacc_df)
 
     do_all_plots(sacc_df, subfolder=subfolder)
 
