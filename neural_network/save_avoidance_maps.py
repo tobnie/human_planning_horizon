@@ -3,7 +3,7 @@ import numpy as np
 import config
 from analysis.data_utils import read_data, create_state_from_string, read_subject_data
 from analysis.plotting.world.feature_maps import get_area_around_player, get_avoidance_map
-from data.save_data_compressed import create_feature_map_from_state
+from data.preprocessing import create_feature_map_from_state
 
 
 def invert_water_in_fm(fm):

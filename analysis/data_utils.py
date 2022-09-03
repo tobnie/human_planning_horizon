@@ -4,11 +4,12 @@ import numpy as np
 import pandas as pd
 
 import config
+from analysis.plotting.score.recalculate_score import add_estimated_scores_when_missing
 
-WIN_THRESHOLD_Y = (config.N_LANES - 2) * config.FIELD_HEIGHT
-TIME_OUT_THRESHOLD = config.LEVEL_TIME - 100
+WIN_THRESHOLD_Y = (config.N_LANES - 1) * config.FIELD_HEIGHT
+TIME_OUT_THRESHOLD = config.LEVEL_TIME - config.PLAYER_UPDATE_INTERVAL
 
-SKIP_SUBJECTS = ['MA02CA', 'PE10MI']
+SKIP_SUBJECTS = ['MA02CA', 'PE10MI', 'ZI01SU', 'NI07LU']
 
 
 def get_all_subjects():
@@ -22,7 +23,9 @@ def read_data():
     for subject in get_all_subjects():
         subject_df = read_subject_data(subject)
         subject_dfs.append(subject_df)
-    return pd.concat(subject_dfs)
+    df = pd.concat(subject_dfs)
+    df = add_estimated_scores_when_missing(df)
+    return df
 
 
 def create_state_from_string(instr):
@@ -55,18 +58,26 @@ def get_all_gazes(df=None):
     return df.loc[['gaze_x', 'gaze_y']]
 
 
-def return_status(time, player_y):
-    if player_y >= WIN_THRESHOLD_Y:
-        return 'won'
-    elif time >= TIME_OUT_THRESHOLD:
-        return 'timed_out'
+def return_status(time, player_y, player_x, target_position):
+    # player in last sample was in second to last row and player center was below target field
+    x_win_range = (target_position - config.FIELD_WIDTH / 2, target_position + config.FIELD_WIDTH / 2)
+    if x_win_range[0] <= player_x <= x_win_range[1] and player_y >= 13:
+        if time < TIME_OUT_THRESHOLD:
+            return 'won'
+        else:
+            return 'timed_out'
     else:
-        return 'lost'
+        if time < TIME_OUT_THRESHOLD:
+            return 'lost'
+        else:
+            return 'timed_out'
 
 
 def add_game_status_to_df(df):
     last_time_steps = get_last_time_steps_of_games(df).copy()
-    last_time_steps['game_status'] = last_time_steps.apply(lambda x: return_status(x['time'], x['player_y']), axis=1)
+
+    last_time_steps['game_status'] = last_time_steps.apply(
+        lambda x: return_status(x['time'], x['player_y'], x['player_x'], x['target_position']), axis=1)
     df_filtered = last_time_steps[['subject_id', 'game_difficulty', 'world_number', 'game_status']]
     df_merged = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
     return df_merged
@@ -84,7 +95,10 @@ def get_river_data(df):
     return df_river
 
 
-def get_last_time_steps_of_games(df):
+def get_last_time_steps_of_games(df=None):
+    if df is None:
+        df = read_data()
+
     # get indices of last dataframe row of each game
     last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(1)
     return last_time_steps

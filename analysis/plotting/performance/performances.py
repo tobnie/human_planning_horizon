@@ -3,29 +3,14 @@ import itertools
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from analysis.analysis_utils import get_all_subjects
-from analysis.data_utils import read_data, add_game_status_to_df
+from analysis.data_utils import read_data, get_all_subjects
 from analysis.performance.games_won import get_last_time_steps_of_games
 import seaborn as sns
 
 
-def plot_performance_per_difficulty(df=None):
-    if df is None:
-        df = read_data()
-
-    last_time_steps = get_last_time_steps_of_games(df).copy()
-
-    # counts = df.groupby(['subject_id', 'game_difficulty', 'game_status']).tails(1).size()
-    counts = last_time_steps.groupby(['subject_id', 'game_difficulty', 'game_status']).size().reset_index().rename(columns={0: 'count'})
-
-    combined = [get_all_subjects(), ['easy', 'normal', 'hard'], ['won', 'timed_out', 'lost']]
-    all_combinations = pd.DataFrame(columns=['subject_id', 'game_difficulty', 'game_status'], data=list(itertools.product(*combined)))
-
-    counts = all_combinations.merge(counts, on=['subject_id', 'game_difficulty', 'game_status'], how='left').fillna(0)
-
-    # normalized_counts
-    games_per_difficulty = 20
-    counts['percentage'] = counts['count'].div(games_per_difficulty)
+def plot_performance_per_difficulty():
+    last_time_steps = get_last_time_steps_of_games().copy()
+    counts = pd.read_csv('performance_stats.csv', index_col=0)
 
     # plot number of game outcomes
     g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
@@ -59,4 +44,121 @@ def plot_performance_per_difficulty(df=None):
     plt.show()
 
 
-plot_performance_per_difficulty()
+def get_absolute_counts(df):
+    df['won_total'] = df[df['game_status'] == 'won'].sum()
+    df['won_total_percentage'] = df['won_total'] / 60
+    return df
+
+
+def save_performance_stats():
+    df = read_data()
+
+    last_time_steps = get_last_time_steps_of_games(df).copy()
+
+    # counts = df.groupby(['subject_id', 'game_difficulty', 'game_status']).tails(1).size()
+    counts = last_time_steps.groupby(['subject_id', 'game_difficulty', 'game_status']).size().reset_index().rename(columns={0: 'count'})
+
+    combined = [get_all_subjects(), ['easy', 'normal', 'hard'], ['won', 'timed_out', 'lost']]
+    all_combinations = pd.DataFrame(columns=['subject_id', 'game_difficulty', 'game_status'], data=list(itertools.product(*combined)))
+
+    counts = all_combinations.merge(counts, on=['subject_id', 'game_difficulty', 'game_status'], how='left').fillna(0)
+    counts_per_difficulty = counts.merge(last_time_steps[['subject_id', 'score']], on='subject_id', how='left').drop_duplicates()
+
+    # normalized_counts PER DIFFICULTY
+    games_per_difficulty = 20
+    counts_per_difficulty['percentage'] = counts_per_difficulty['count'].div(games_per_difficulty)
+
+    counts_per_difficulty.to_csv('performance_stats.csv')
+
+
+def print_average_game_endings():
+    df = pd.read_csv('performance_stats.csv', index_col=0)
+
+    # df = df.apply(lambda x: get_absolute_counts(df)).reset_index()
+
+    wins = df.groupby(['subject_id', 'game_status']).agg(['mean', 'std', 'median']).reset_index()
+
+    # all_wins = df['game_status'].agg()
+
+    print('Average Won Games: ', df[df['game_status'] == 'won']['percentage'].mean())
+    print('Average Timed Out Games: ', df[df['game_status'] == 'timed_out']['percentage'].mean())
+    print('Average Lost Games: ', df[df['game_status'] == 'lost']['percentage'].mean())
+
+    # best subject:
+    scores = df[['subject_id', 'percentage', 'game_status', 'score']].groupby(['subject_id', 'game_status', 'score']).agg(
+        percentage_over_all=('percentage', 'mean')).reset_index()
+    best_subject = scores.loc[scores['score'] == scores['score'].max()]
+    print('\n\n ---- Best Subject ----')
+    print('Won Games: ', best_subject[best_subject['game_status'] == 'won']['percentage_over_all'].mean())
+
+    # worst subject
+    worst_subject = scores.loc[scores['score'] == scores['score'].min()]
+    print('\n\n ---- Worst Subject ----')
+    print('Won Games: ', worst_subject[worst_subject['game_status'] == 'won']['percentage_over_all'].mean())
+
+    # Variance and median of won games:
+    print("\n\n")
+    print('Variance of won games: ', scores[scores['game_status'] == 'won']['percentage_over_all'].var())
+    print('Median of won games: ', scores[scores['game_status'] == 'won']['percentage_over_all'].median())
+    # print(df)
+
+
+def save_game_durations():
+    last_time_steps = get_last_time_steps_of_games().copy()
+    durations = last_time_steps[['subject_id', 'game_difficulty', 'world_number', 'time', 'score', 'experience', 'game_status']]
+    durations.to_csv('game_durations.csv', index=False)
+
+
+def histogram_over_avg_trial_times():
+    game_durations = pd.read_csv('game_durations.csv')
+
+    game_durations_won = game_durations[game_durations['game_status'] == 'won'].copy()
+
+    game_durations_won.loc[:, 'time'] = game_durations_won.loc[:, 'time'].div(1000)
+
+    print('Completion Time Mean: ', game_durations_won['time'].mean())
+    print('Completion Time Var: ', game_durations_won['time'].var())
+    print('Completion Time Median: ', game_durations_won['time'].median())
+
+    game_durations_won.rename(columns={'game_difficulty': 'Level Difficulty', 'oldName2': 'newName2'}, inplace=True)
+    game_durations_won[game_durations_won['game_status'] == 'normal'] = 'medium'
+    fig, ax = plt.subplots()
+    sns.histplot(data=game_durations_won, ax=ax, multiple='stack', x='time', kde=False, binwidth=2, hue='Level Difficulty', element='bars',
+                 legend=True, palette=['green', 'yellow', 'red'])
+    ax.set_title('Histogram of Trial Times')
+    ax.set_xlabel('Time [s]')
+    ax.set_ylabel('Count')
+    plt.savefig('imgs/performance/trial_times_hist.png')
+    plt.savefig('../paper/trial_times_hist.svg', format="svg")
+    plt.show()
+
+
+def bar_plot_mean_score_per_level():
+    df = pd.read_csv('performance_stats.csv', index_col=0)
+    df = df[['subject_id', 'score']].drop_duplicates()
+    df['score_per_level'] = df['score'].div(60)
+
+    print('Mean Score Per Level: ', df['score_per_level'].mean())
+    print('Var Score Per Level: ', df['score_per_level'].var())
+    print('Median Score Per Level: ', df['score_per_level'].median())
+
+    df.sort_values(by='score_per_level', inplace=True)
+    sns.barplot(data=df, x='subject_id', y='score_per_level', palette=['C0'])  #, order=df['score_per_level'])
+    plt.title('Mean Scores per Level')
+    plt.ylabel('mean score per level')
+    plt.xlabel('subjects')
+    plt.xticks(rotation=60)
+    plt.tight_layout()
+    plt.savefig('imgs/performance/score_per_level.png')
+    plt.savefig('../paper/score_per_level.svg', format="svg")
+    plt.show()
+
+
+if __name__ == '__main__':
+    # save_performance_stats()
+    # save_game_durations()
+    # print_average_game_endings()
+
+    histogram_over_avg_trial_times()
+    bar_plot_mean_score_per_level()
+# plot_performance_per_difficulty()

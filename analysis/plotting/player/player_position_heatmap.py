@@ -81,6 +81,7 @@ def plot_position_heatmap_per_player(df=None):
     plt.show()
 
 
-df = read_data()
-plot_player_position_heatmap(df)
-plot_position_heatmap_per_player(df)
+if __name__ == '__main__':
+    df = read_data()
+    plot_player_position_heatmap(df)
+    plot_position_heatmap_per_player(df)

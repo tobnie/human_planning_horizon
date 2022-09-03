@@ -1,6 +1,6 @@
-import pygame
-
-pygame.init()
+# import pygame
+#
+# pygame.init()
 
 DISPLAY_WIDTH_PX = 2560  # pygame.display.Info().current_w
 DISPLAY_HEIGHT_PX = 1440  # pygame.display.Info().current_h
@@ -40,7 +40,7 @@ PLAYER_UPDATE_INTERVAL = 350
 # points
 WIN_BONUS = 200
 DEATH_PENALTY = -100
-VISITED_LANE_BONUS = 10
+VISITED_LANE_BONUS = 5
 
 # point multiplier
 EASY_MULTIPLIER = 1

@@ -209,12 +209,6 @@ def filter_times_actions_states_by_action(times_action_states):
     return states_dict
 
 
-def get_all_subjects():
-    data_dir = f'../data/level_data/'
-    subjects = [f for f in os.listdir(data_dir) if os.path.isdir(data_dir + f)]
-    return subjects
-
-
 def get_all_levels_for_subject(subject):
     all_difficulties = []
     world = []

@@ -11,6 +11,7 @@ import pandas as pd
 from analysis.data_utils import get_all_subjects, assign_position_to_fields
 from analysis.plotting.performance.performances import add_game_status_to_df
 from analysis.plotting.player.player_position_heatmap import add_player_position_in_field_coordinates
+from analysis.plotting.score.recalculate_score import add_estimated_scores_when_missing
 from analysis.plotting.sosci_utils import add_experience_to_df
 from analysis.score_utils import add_max_score_to_df
 from analysis.trial_order_utils import add_trial_numbers_to_df
@@ -116,6 +117,15 @@ def get_times_states_from_single_npz(subject, difficulty, world_name, training=F
     npz_file = np.load(get_state_path_single_npz(subject, difficulty, world_name, training), allow_pickle=True)
     times = npz_file['times']
     states = npz_file['states']
+
+    for state in states:
+        # transform
+        # margin_between_player_and_field_y = (config.FIELD_HEIGHT - config.PLAYER_HEIGHT) / 2
+        state[0, 2] = config.DISPLAY_HEIGHT_PX - state[0, 2] - config.PLAYER_HEIGHT
+
+        # transform y of each state:
+        state[1:, 2] = config.DISPLAY_HEIGHT_PX - state[1:, 2] - config.FIELD_HEIGHT
+
     times_states = list(zip(times, states))
     return times_states
 
@@ -352,7 +362,7 @@ def run_preprocessing():
                         player_width = state[0, 3]
                         player_height = config.PLAYER_HEIGHT
                         player_x = player_pos[0] + player_width / 2
-                        player_y = config.DISPLAY_HEIGHT_PX - player_pos[1] - player_height / 2
+                        player_y = player_pos[1] + player_height / 2
                         player_xs_i.append(player_x)
                         player_ys_i.append(player_y)
 
