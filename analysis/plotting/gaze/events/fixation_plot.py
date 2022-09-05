@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import config
 from analysis.analysis_utils import get_eyetracker_samples_only, get_all_subjects
 from analysis.plotting.gaze.events.event_detection import get_fixations_from_samples
-from analysis.plotting.world.world_coordinates import plot_world_background
+from analysis.world.world_coordinates import plot_world_background
 
 
 def plot_fixation_times(ax, samples, title=''):

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 import config
-from analysis.plotting.score.recalculate_score import add_estimated_scores_when_missing
+from analysis.score.recalculate_score import add_estimated_scores_when_missing
 
 WIN_THRESHOLD_Y = (config.N_LANES - 1) * config.FIELD_HEIGHT
 TIME_OUT_THRESHOLD = config.LEVEL_TIME - config.PLAYER_UPDATE_INTERVAL
@@ -61,7 +61,7 @@ def get_all_gazes(df=None):
 def return_status(time, player_y, player_x, target_position):
     # player in last sample was in second to last row and player center was below target field
     x_win_range = (target_position - config.FIELD_WIDTH / 2, target_position + config.FIELD_WIDTH / 2)
-    if x_win_range[0] <= player_x <= x_win_range[1] and player_y >= 13:
+    if x_win_range[0] <= player_x <= x_win_range[1] and player_y >= 13 * config.FIELD_HEIGHT:
         if time < TIME_OUT_THRESHOLD:
             return 'won'
         else:

@@ -7,6 +7,8 @@ from analysis.data_utils import read_data, get_all_subjects
 from analysis.performance.games_won import get_last_time_steps_of_games
 import seaborn as sns
 
+from analysis.score.recalculate_score import add_level_score_estimations_to_df
+
 
 def plot_performance_per_difficulty():
     last_time_steps = get_last_time_steps_of_games().copy()
@@ -69,6 +71,7 @@ def save_performance_stats():
     counts_per_difficulty['percentage'] = counts_per_difficulty['count'].div(games_per_difficulty)
 
     counts_per_difficulty.to_csv('performance_stats.csv')
+    print('Saved Performance Stats')
 
 
 def print_average_game_endings():
@@ -107,6 +110,7 @@ def save_game_durations():
     last_time_steps = get_last_time_steps_of_games().copy()
     durations = last_time_steps[['subject_id', 'game_difficulty', 'world_number', 'time', 'score', 'experience', 'game_status']]
     durations.to_csv('game_durations.csv', index=False)
+    print('Saved Game Durations')
 
 
 def histogram_over_avg_trial_times():
@@ -120,8 +124,8 @@ def histogram_over_avg_trial_times():
     print('Completion Time Var: ', game_durations_won['time'].var())
     print('Completion Time Median: ', game_durations_won['time'].median())
 
-    game_durations_won.rename(columns={'game_difficulty': 'Level Difficulty', 'oldName2': 'newName2'}, inplace=True)
-    game_durations_won[game_durations_won['game_status'] == 'normal'] = 'medium'
+    game_durations_won.replace('normal', 'medium', inplace=True)
+    game_durations_won.rename(columns={'game_difficulty': 'Level Difficulty'}, inplace=True)
     fig, ax = plt.subplots()
     sns.histplot(data=game_durations_won, ax=ax, multiple='stack', x='time', kde=False, binwidth=2, hue='Level Difficulty', element='bars',
                  legend=True, palette=['green', 'yellow', 'red'])
@@ -133,17 +137,19 @@ def histogram_over_avg_trial_times():
     plt.show()
 
 
+def add_estimated_level_scores(df):
+    return add_level_score_estimations_to_df(df)
+
+
 def bar_plot_mean_score_per_level():
-    df = pd.read_csv('performance_stats.csv', index_col=0)
-    df = df[['subject_id', 'score']].drop_duplicates()
-    df['score_per_level'] = df['score'].div(60)
+    df = pd.read_csv('level_scores.csv')
 
-    print('Mean Score Per Level: ', df['score_per_level'].mean())
-    print('Var Score Per Level: ', df['score_per_level'].var())
-    print('Median Score Per Level: ', df['score_per_level'].median())
+    print('Mean Score Per Level: ', df['level_score'].mean())
+    print('Var Score Per Level: ', df['level_score'].var())
+    print('Median Score Per Level: ', df['level_score'].median())
 
-    df.sort_values(by='score_per_level', inplace=True)
-    sns.barplot(data=df, x='subject_id', y='score_per_level', palette=['C0'])  #, order=df['score_per_level'])
+    # df.sort_values(by='level_score', inplace=True)
+    sns.barplot(data=df, x='subject_id', y='level_score', palette=['C0'], order=df['level_score'])
     plt.title('Mean Scores per Level')
     plt.ylabel('mean score per level')
     plt.xlabel('subjects')
@@ -154,11 +160,21 @@ def bar_plot_mean_score_per_level():
     plt.show()
 
 
+def save_level_scores():
+    df = read_data()
+    df = add_level_score_estimations_to_df(df)
+    scores_per_level = df[['subject_id', 'game_difficulty', 'world_number', 'level_score', 'score']]
+    scores_per_level.to_csv('level_scores.csv', index=False)
+    print('Saved Level Scores')
+
+
 if __name__ == '__main__':
     # save_performance_stats()
     # save_game_durations()
-    # print_average_game_endings()
+    # save_level_scores()
 
-    histogram_over_avg_trial_times()
+    # print_average_game_endings()
+    # histogram_over_avg_trial_times()
     bar_plot_mean_score_per_level()
+
 # plot_performance_per_difficulty()

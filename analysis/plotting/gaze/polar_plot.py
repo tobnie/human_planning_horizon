@@ -5,7 +5,7 @@ from scipy import stats
 import config
 from analysis.analysis_utils import get_times_states, get_eyetracker_samples_only, get_world_properties, get_all_subjects
 from analysis.plotting.gaze.gaze_plot import filter_off_samples
-from analysis.plotting.world.world_coordinates import get_center_of_player
+from analysis.world.world_coordinates import get_center_of_player
 
 
 def calc_angles_between_player_and_gaze(player_positions, gaze_positions):
