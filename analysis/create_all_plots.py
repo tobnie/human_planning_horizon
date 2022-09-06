@@ -1,11 +1,9 @@
 from analysis.plotting.actions.action_plots import plot_and_save_action_distributions
 from analysis.plotting.gaze.events.blink_plot import plot_and_save_blinks
-from analysis.plotting.gaze.events.fixation_plot import plot_and_save_fixations, plot_and_save_fixation_times
 from analysis.plotting.gaze.events.saccade_plot import plot_and_save_saccades
-from analysis.plotting.gaze.gaze_plot import create_gaze_and_path_plots
+from analysis.gaze.gaze_plot import create_gaze_and_path_plots
 from analysis.plotting.gaze.polar_plot import plot_gaze_angles_for_all_subjects
 from analysis.plotting.world.avoidance_plots import plot_and_save_avoidance_maps
-from analysis.plotting.gaze.gaze_with_density import create_and_save_gaze_densities_per_row, create_and_save_gaze_density_for_all
 
 # print('Creating gaze plots for all...')
 # create_and_save_gaze_density_for_all()
