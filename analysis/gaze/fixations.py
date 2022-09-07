@@ -8,8 +8,8 @@ import seaborn as sns
 import matplotlib as mpl
 
 import config
-from analysis import paper_colors
-from analysis.data_utils import get_street_data, get_river_data
+from analysis import paper_plot_utils
+from analysis.data_utils import get_street_data, get_river_data, subject2letter
 from analysis.gaze.events.event_detection import try_fixation_detection
 from analysis.gaze.vector_utils import calc_angle, calc_manhattan_distance, calc_euclidean_distance
 
@@ -110,8 +110,8 @@ def plot_fixation_distance_per_position(df, subject_id=None):
         os.makedirs(directory_path)
 
     # plot heatmap distance
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(100 * weighted_fix_distance_pivot, ax=ax, cmap=paper_colors.CMAP,
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.heatmap(100 * weighted_fix_distance_pivot, ax=ax, cmap=paper_plot_utils.CMAP,
                 cbar_kws={'label': 'Manhattan distance in $10^{-2}$ fields/ms'},
                 linewidths=.1)
     ax.invert_yaxis()
@@ -267,12 +267,13 @@ def plot_fixation_distance_box_per_region(df):
 
     df['region'] = df['player_y_field'].apply(get_region_from_field)
 
-    edge_colors = [paper_colors.C0, paper_colors.C1]
-    box_colors = [paper_colors.C0_soft, paper_colors.C1_soft]
+    edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
+    box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
 
     # create boxplot
     sns.set_style("whitegrid")
-    ax = sns.boxplot(data=df, y="weighted_fix_distance_manhattan", x="region",  width=0.2, linewidth=1.5,
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.boxplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", width=0.2, linewidth=1.5,
                      flierprops=dict(markersize=2),
                      showmeans=True, meanline=True)
 
@@ -316,20 +317,20 @@ def ttest_fixation_distance_street_river():
 
     # perform (Welch's) t-test
     # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street, equal_var=False,
-                                         alternative='greater')  # use equal_var=False bc of different sample sizes
+    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street, alternative='greater')  # use equal_var=False bc of different sample sizes
     print('Test in Weighted Euclidean Distances')
     print(ttest_result)
+    print('dof=', len(fix_distances_river) - 1 + len(fix_distances_street) - 1)
 
     fix_distances_river = df_river['weighted_fix_distance_manhattan']
     fix_distances_street = df_street['weighted_fix_distance_manhattan']
 
     # perform (Welch's) t-test
     # t test manhattan distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street, equal_var=False,
-                                         alternative='greater')  # use equal_var=False bc of different sample sizes
+    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street, alternative='greater')  # use equal_var=False bc of different sample sizes
     print('Test in Weighted Manhattan Distances')
     print(ttest_result)
+    print('dof=', len(fix_distances_river) - 1 + len(fix_distances_street) - 1)
 
 
 def kstest_fixation_distance_street_river():
@@ -358,6 +359,24 @@ def kstest_fixation_distance_street_river():
     kstest_result = scipy.stats.kstest(fix_distances_river, fix_distances_street, alternative='two-sided')
     print('Test in Weighted Manhattan Distances')
     print(kstest_result)
+
+
+def plot_avg_fixation_distance_per_subject():
+    df = pd.read_csv('fixations.csv')
+
+    # TODO whats up with the scores per level
+    level_scores_df = pd.read_csv('level_scores.csv').drop_duplicates()
+    # order_df = level_scores_df.groupby(['subject_id'])['level_score'].mean().reset_index().sort_values('level_score')
+    order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.pointplot(data=df, ax=ax, x='subject_id', y='weighted_fix_distance_manhattan', join=False, order=order_df['subject_id'])
+
+    xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
+    ax.set_xticklabels(xlabels)
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import os
+import string
 
 import numpy as np
 import pandas as pd
@@ -135,3 +136,11 @@ def field2screen(field_coords):
     FIELD_HEIGHT = config.FIELD_HEIGHT
     screen_coords = [(x * FIELD_WIDTH + FIELD_WIDTH / 2, y * FIELD_HEIGHT + FIELD_HEIGHT / 2) for x, y in field_coords]
     return np.array(screen_coords)
+
+
+def subject2letter(subject_id):
+    unique_subjects = get_all_subjects()
+    for i, subj_id in enumerate(unique_subjects):
+        if subject_id == subj_id:
+            return string.ascii_uppercase[i]
+    return None

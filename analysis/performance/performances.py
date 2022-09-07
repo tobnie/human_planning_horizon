@@ -3,10 +3,11 @@ import string
 
 import matplotlib
 import pandas as pd
+import scipy.stats
 from matplotlib import pyplot as plt
 
-from analysis import paper_colors
-from analysis.data_utils import read_data, get_all_subjects, get_last_time_steps_of_games
+from analysis import paper_plot_utils
+from analysis.data_utils import read_data, get_all_subjects, get_last_time_steps_of_games, subject2letter
 import seaborn as sns
 
 from analysis.score.recalculate_score import add_level_score_estimations_to_df
@@ -128,9 +129,9 @@ def histogram_over_avg_trial_times():
 
     game_durations_won.replace('normal', 'medium', inplace=True)
     game_durations_won.rename(columns={'game_difficulty': 'Level Difficulty'}, inplace=True)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     ax.yaxis.grid(True)
-    colors = ['#0571B0', '#F7F7F7', '#CA0020']
+    colors = [paper_plot_utils.C0, '#F7F7F7', paper_plot_utils.C1]
     sns.histplot(data=game_durations_won, ax=ax, multiple='stack', x='time', kde=False, binwidth=3, hue='Level Difficulty', element='bars',
                  legend=True, palette=colors, zorder=10)
 
@@ -152,15 +153,16 @@ def plot_mean_score_per_level():
     print('Var Score Per Level: ', df['level_score'].var())
     print('Median Score Per Level: ', df['level_score'].median())
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     order_df = df.groupby(['subject_id'])['level_score'].mean().reset_index().sort_values('level_score')
-    sns.pointplot(data=df, ax=ax, x='subject_id', y='level_score', palette=[paper_colors.C0], markers='.', capsize=.6, errwidth=0.8, join=False,
+    sns.pointplot(data=df, ax=ax, x='subject_id', y='level_score', palette=[paper_plot_utils.C0], markers='.', capsize=.6, errwidth=0.8,
+                  join=False,
                   errorbar='se', order=order_df['subject_id'])
     sns.despine(bottom=True, left=True)
     ax.set_ylabel('Mean score per level')
     ax.set_xlabel('Subjects')
 
-    xlabels = [string.ascii_uppercase[i] for i, _ in enumerate(ax.get_xticklabels())]
+    xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
     ax.set_xticklabels(xlabels)
 
     plt.tight_layout()
@@ -175,6 +177,54 @@ def save_level_scores():
     scores_per_level = df[['subject_id', 'game_difficulty', 'world_number', 'level_score', 'score']]
     scores_per_level.to_csv('level_scores.csv', index=False)
     print('Saved Level Scores')
+
+
+def anova_mean_level_score():
+    print('H0: Means for score per level are equal | H1: Means are different for each subject')
+
+    df = pd.read_csv('level_scores.csv').drop_duplicates()
+
+    scores = df.groupby('subject_id')['level_score'].apply(list).tolist()
+
+    anova_result = scipy.stats.f_oneway(*scores)
+    print(anova_result)
+    print('dof=', len(scores) - 1)  # TODO correct?
+
+
+def ttest_mean_level_score_easy_normal():
+    df = pd.read_csv('game_durations.csv')
+
+    # get weighted fixation distances
+    df_easy = df[df['game_difficulty'] == 'easy']
+    df_normal = df[df['game_difficulty'] == 'normal']
+
+    times_easy = df_easy['time']
+    times_normal = df_normal['time']
+
+    print('H0: Same Means | H1: Mean Game Durations for easy levels less than for medium levels')
+
+    # perform (Welch's) t-test
+    ttest_result = scipy.stats.ttest_ind(times_easy, times_normal, alternative='less')  # use equal_var=False bc of different sample sizes
+    print(ttest_result)
+    print('dof=', len(times_easy) - 1 + len(times_normal) - 1)
+
+
+def ttest_mean_level_score_normal_hard():
+    df = pd.read_csv('game_durations.csv')
+
+    # get weighted fixation distances
+    df_normal = df[df['game_difficulty'] == 'normal']
+    df_hard = df[df['game_difficulty'] == 'hard']
+
+    times_normal = df_normal['time']
+    times_hard = df_hard['time']
+
+    print('H0: Same Means | H1: Mean Game Durations for medium levels less than for hard levels')
+
+    # perform (Welch's) t-test
+    ttest_result = scipy.stats.ttest_ind(times_normal, times_hard, alternative='less')  # use equal_var=False bc of different sample sizes
+    print(ttest_result)
+    print('dof=', len(times_normal) - 1 + len(times_hard) - 1)
 
 
 if __name__ == '__main__':

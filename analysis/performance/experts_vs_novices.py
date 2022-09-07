@@ -4,7 +4,7 @@ import scipy.stats
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 
-from analysis import paper_colors
+from analysis import paper_plot_utils
 
 
 def get_fixations_with_scores():
@@ -60,14 +60,15 @@ def plot_fixation_distance_box_scoring_groups():
     df = get_fixations_with_scores()
     df = add_scoring_group_information_to_df(df)
 
-    edge_colors = [paper_colors.C0, paper_colors.C1]
-    box_colors = [paper_colors.C0_soft, paper_colors.C1_soft]
+    edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
+    box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
 
     # create boxplot
     sns.set_style("whitegrid")
-    ax = sns.boxplot(data=df, x='scoring_group', y='weighted_fix_distance_manhattan', width=0.2, linewidth=1.5,
-                     flierprops=dict(markersize=2),
-                     showmeans=True, meanline=True)
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.boxplot(data=df, ax=ax, x='scoring_group', y='weighted_fix_distance_manhattan', width=0.2, linewidth=1.5,
+                flierprops=dict(markersize=2),
+                showmeans=True, meanline=True)
 
     # iterate over boxes
     box_patches = [patch for patch in ax.patches if type(patch) == mpl.patches.PathPatch]
@@ -111,20 +112,22 @@ def ttest_fixation_distance_scoring_groups():
 
     # perform (Welch's) t-test
     # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers, equal_var=False,
+    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers,
                                          alternative='less')  # use equal_var=False bc of different sample sizes
     print('Test in Weighted Euclidean Distances')
     print(ttest_result)
+    print('dof=', len(fix_distances_low_scorers) - 1 + len(fix_distances_high_scorers) - 1)
 
     fix_distances_high_scorers = df_high_scorers['weighted_fix_distance_manhattan']
     fix_distances_low_scorers = df_low_scorers['weighted_fix_distance_manhattan']
 
     # perform (Welch's) t-test
     # t test manhattan distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers, equal_var=False,
+    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers,
                                          alternative='less')  # use equal_var=False bc of different sample sizes
     print('Test in Weighted Manhattan Distances')
     print(ttest_result)
+    print('dof=', len(fix_distances_low_scorers) - 1 + len(fix_distances_high_scorers) - 1)
 
 
 def kstest_fixation_distance_scoring_groups():
