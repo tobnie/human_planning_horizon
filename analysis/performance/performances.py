@@ -90,6 +90,11 @@ def print_average_game_endings():
     print('Average Timed Out Games: ', df[df['game_status'] == 'timed_out']['percentage'].mean())
     print('Average Lost Games: ', df[df['game_status'] == 'lost']['percentage'].mean())
 
+    print('----- Per difficulty -----')
+    print('Average Won Games: ', df[df['game_status'] == 'won'].groupby('game_difficulty')['percentage'].mean())
+    print('Average Timed Out Games: ', df[df['game_status'] == 'timed_out'].groupby('game_difficulty')['percentage'].mean())
+    print('Average Lost Games: ', df[df['game_status'] == 'lost'].groupby('game_difficulty')['percentage'].mean())
+
     # best subject:
     scores = df[['subject_id', 'percentage', 'game_status', 'score']].groupby(['subject_id', 'game_status', 'score']).agg(
         percentage_over_all=('percentage', 'mean')).reset_index()
@@ -191,7 +196,7 @@ def anova_mean_level_score():
     print('dof=', len(scores) - 1)  # TODO correct?
 
 
-def ttest_mean_level_score_easy_normal():
+def ttest_mean_time_easy_normal():
     df = pd.read_csv('game_durations.csv')
 
     # get weighted fixation distances
@@ -209,7 +214,7 @@ def ttest_mean_level_score_easy_normal():
     print('dof=', len(times_easy) - 1 + len(times_normal) - 1)
 
 
-def ttest_mean_level_score_normal_hard():
+def ttest_mean_time_normal_hard():
     df = pd.read_csv('game_durations.csv')
 
     # get weighted fixation distances
@@ -232,8 +237,8 @@ if __name__ == '__main__':
     # save_game_durations()
     # save_level_scores()
 
-    # print_average_game_endings()
+    print_average_game_endings()
     # histogram_over_avg_trial_times()
-    plot_mean_score_per_level()
+    # plot_mean_score_per_level()
 
 # plot_performance_per_difficulty()

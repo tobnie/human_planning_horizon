@@ -132,7 +132,7 @@ def ttest_fixation_distance_scoring_groups():
 
 def kstest_fixation_distance_scoring_groups():
     # get data
-    df = get_fixations_with_scores()
+    df = pd.read_csv('level_scores.csv').drop_duplicates()
     df = add_scoring_group_information_to_df(df)
 
     # get weighted fixation distances
@@ -157,6 +157,26 @@ def kstest_fixation_distance_scoring_groups():
     kstest_result = scipy.stats.kstest(fix_distances_low_scorers, fix_distances_high_scorers, alternative='two-sided')
     print('Test in Weighted Manhattan Distances')
     print(kstest_result)
+
+
+def ttest_mean_level_score_high_scorer_low_scorer():
+    # get data
+    df = pd.read_csv('level_scores.csv').drop_duplicates()
+    df = add_scoring_group_information_to_df(df)
+
+    # get weighted fixation distances
+    df_high_scorers = df[df['scoring_group'] == 'high']
+    df_low_scorers = df[df['scoring_group'] == 'low']
+    level_score_high_scorers = df_high_scorers['level_score']
+    level_score_low_scorers = df_low_scorers['level_score']
+
+    print('H0: Same Means | H1: Mean Score per Level for Low Scorers is less than for High Scorers')
+
+    # perform t-test
+    ttest_result = scipy.stats.ttest_ind(level_score_low_scorers, level_score_high_scorers,
+                                         alternative='less')  # use equal_var=False bc of different sample sizes
+    print(ttest_result)
+    print('dof=', len(level_score_low_scorers) - 1 + len(level_score_high_scorers) - 1)
 
 
 if __name__ == '__main__':
