@@ -5,18 +5,28 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 
 from analysis import paper_plot_utils
+from analysis.data_utils import get_all_subjects
 
 
 def get_fixations_with_scores():
     return pd.read_csv('fixations.csv')
 
 
-def add_scoring_group_information_to_df(df):
+def add_scoring_group_information_to_df(df, percent_split=0.25):
     performance_stats = pd.read_csv('performance_stats.csv', index_col=0)
-    median_score = performance_stats['score'].median()
 
+    scores_only = performance_stats[['subject_id', 'score']].drop_duplicates()
+
+    q025 = scores_only['score'].quantile(percent_split)
+
+    print(f'Scoring groups split at {q025} which is {100 * percent_split}% percentile')
     # classify based on score
-    df['scoring_group'] = df['score'].apply(lambda x: 'low' if x < median_score else 'high')
+    scores_only['scoring_group'] = scores_only['score'].apply(lambda x: 'low' if x < q025 else 'high')
+    print('Split Ratio {}/{}'.format(scores_only[scores_only['scoring_group'] == 'low'].shape[0],
+                                     scores_only[scores_only['scoring_group'] == 'high'].shape[0]))
+
+    df['scoring_group'] = df['score'].apply(lambda x: 'low' if x < q025 else 'high')
+
     return df
 
 
@@ -97,6 +107,56 @@ def plot_fixation_distance_box_scoring_groups():
     plt.show()
 
 
+def plot_fixation_distance_scoring_groups_for_different_splits():
+    # get data
+    df = get_fixations_with_scores()
+    n = len(get_all_subjects())
+    fig, axs = plt.subplots(nrows=3, ncols=4, figsize=(10, 10))
+
+    for i in range(n - 1):
+        ax = axs[int(i // 4), i % 4]
+        percent_split = (i + 1) / n
+        df_ax = add_scoring_group_information_to_df(df, percent_split)
+
+        edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
+        box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
+
+        # create boxplot
+        sns.set_style("whitegrid")
+
+        sns.boxplot(data=df_ax, ax=ax, x='scoring_group', y='weighted_fix_distance_manhattan', width=0.2, linewidth=1.5,
+                    flierprops=dict(markersize=2),
+                    showmeans=True, meanline=True)
+
+        # iterate over boxes
+        box_patches = [patch for patch in ax.patches if type(patch) == mpl.patches.PathPatch]
+        if len(box_patches) == 0:  # in matplotlib older than 3.5, the boxes are stored in ax2.artists
+            box_patches = ax.artists
+        num_patches = len(box_patches)
+        lines_per_boxplot = len(ax.lines) // num_patches
+        for j, patch in enumerate(box_patches):
+            # Set the linecolor on the patch to the facecolor, and set the facecolor to None
+            patch.set_edgecolor(edge_colors[j])
+            patch.set_facecolor(box_colors[j])
+
+            # Each box has associated Line2D objects (to make the whiskers, fliers, etc.)
+            # Loop over them here, and use the same color as above
+            for line in ax.lines[j * lines_per_boxplot: (j + 1) * lines_per_boxplot]:
+                line.set_color(edge_colors[j])
+                line.set_mfc(edge_colors[j])  # facecolor of fliers
+                line.set_mec(edge_colors[j])  # edgecolor of fliers
+
+        ax.set_title('{}/{} split'.format(i + 1, n - (i + 1)))
+        ax.set_yscale('log')
+        ax.set_xlabel('Scoring group')
+        ax.set_ylabel('Fixation distance [fields/ms]')
+        # ax.set_ylim((1e-4, 1))
+
+    # plt.savefig('../paper/fixation_distance_scoring_group.svg', format='svg')
+    plt.tight_layout()
+    plt.show()
+
+
 def ttest_fixation_distance_scoring_groups():
     # get data
     df = get_fixations_with_scores()
@@ -132,8 +192,14 @@ def ttest_fixation_distance_scoring_groups():
 
 def kstest_fixation_distance_scoring_groups():
     # get data
-    df = pd.read_csv('level_scores.csv').drop_duplicates()
+    df = get_fixations_with_scores()
     df = add_scoring_group_information_to_df(df)
+
+    # fixations_df = pd.read_csv('fixations.csv')[
+    #     ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'weighted_fix_distance_euclidean',
+    #      'weighted_fix_distance_manhattan']]
+    #
+    # df = fixations_df.merge(df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
 
     # get weighted fixation distances
     df_high_scorers = df[df['scoring_group'] == 'high']
