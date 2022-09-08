@@ -106,10 +106,10 @@ def save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=None, suff
 
     file_name_in = f'input{suffix}.npz'
     np.savez_compressed(f'../neural_network/{file_name_in}', inputs)
-    np.savez_compressed(f'../neural_network/output.npz', outputs)
+    np.savez_compressed(f'data/output.npz', outputs)
 
     if target_pos is not None:
-        np.savez_compressed(f'../neural_network/target_pos.npz', target_pos)
+        np.savez_compressed(f'data/target_pos.npz', target_pos)
 
     print("Done!")
 

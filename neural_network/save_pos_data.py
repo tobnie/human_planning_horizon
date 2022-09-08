@@ -12,4 +12,4 @@ df = get_only_onscreen_data(df)
 player_pos = df[['player_x_field', 'player_y_field']].to_numpy()
 
 # save data
-np.savez_compressed('input_position.npz', player_pos)
+np.savez_compressed('data/input_position.npz', player_pos)
