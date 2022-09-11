@@ -61,7 +61,7 @@ def add_fixation_distance_and_angle(df):
 def save_fixation_info():
     df = read_data()
     df = add_fixation_info_to_df(df)
-    df.to_csv('fixations.csv')
+    df.to_csv('fixations.csv', index=False)
     print('Saved Fixation Information')
     return df
 
@@ -338,7 +338,7 @@ def plot_fixation_distance_box_per_region(df):
 
 
 def ttest_fixation_distance_street_river():
-    df = pd.read_csv('fixations.csv')
+    df = pd.read_csv('../data/fixations.csv')
 
     # get weighted fixation distances
     df_river = get_river_data(df)
@@ -370,7 +370,7 @@ def ttest_fixation_distance_street_river():
 
 
 def kstest_fixation_distance_street_river():
-    df = pd.read_csv('fixations.csv')
+    df = pd.read_csv('../data/fixations.csv')
 
     # get weighted fixation distances
     df_river = get_river_data(df)
@@ -398,11 +398,8 @@ def kstest_fixation_distance_street_river():
 
 
 def plot_avg_fixation_distance_per_subject():
-    df = pd.read_csv('fixations.csv')
+    df = pd.read_csv('../data/fixations.csv')
 
-    # TODO whats up with the scores per level
-    level_scores_df = pd.read_csv('level_scores.csv').drop_duplicates()
-    # order_df = level_scores_df.groupby(['subject_id'])['level_score'].mean().reset_index().sort_values('level_score')
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
@@ -420,7 +417,7 @@ if __name__ == '__main__':
     df = transform_target_pos_to_string(df)
     df = add_fixation_info_to_df(df)
 
-    # df = pd.read_csv('fixations.csv')
+    # df = pd.read_csv('../data/fixations.csv')
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 

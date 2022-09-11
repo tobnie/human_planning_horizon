@@ -9,11 +9,11 @@ from analysis.data_utils import get_all_subjects
 
 
 def get_fixations_with_scores():
-    return pd.read_csv('fixations.csv')
+    return pd.read_csv('../data/fixations.csv')
 
 
 def add_scoring_group_information_to_df(df, percent_split=0.25):
-    performance_stats = pd.read_csv('performance_stats.csv', index_col=0)
+    performance_stats = pd.read_csv('../data/performance_stats.csv', index_col=0)
 
     scores_only = performance_stats[['subject_id', 'score']].drop_duplicates()
 
@@ -195,7 +195,7 @@ def kstest_fixation_distance_scoring_groups():
     df = get_fixations_with_scores()
     df = add_scoring_group_information_to_df(df)
 
-    # fixations_df = pd.read_csv('fixations.csv')[
+    # fixations_df = pd.read_csv('../data/fixations.csv')[
     #     ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'weighted_fix_distance_euclidean',
     #      'weighted_fix_distance_manhattan']]
     #
@@ -227,7 +227,7 @@ def kstest_fixation_distance_scoring_groups():
 
 def ttest_mean_level_score_high_scorer_low_scorer():
     # get data
-    df = pd.read_csv('level_scores.csv').drop_duplicates()
+    df = pd.read_csv('../data/level_scores.csv').drop_duplicates()
     df = add_scoring_group_information_to_df(df)
 
     # get weighted fixation distances

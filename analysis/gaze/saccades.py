@@ -524,14 +524,14 @@ def save_saccades():
     sacc_df = filter_saccade_df(sacc_df)
     sacc_df = filter_saccade_data2(sacc_df)
 
-    sacc_df.to_csv('saccades.csv')
+    sacc_df.to_csv('saccades.csv', index=False)
     print('Saved Saccade Information')
     return df
 
 
 def get_saccs_filter_and_plot(subfolder=''):
     # get saccade data
-    sacc_df = pd.read_csv('saccades.csv')
+    sacc_df = pd.read_csv('../data/saccades.csv')
 
     print(f'n={len(sacc_df)}')
     # print_per_score_half_classification(sacc_df)

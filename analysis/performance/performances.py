@@ -12,7 +12,7 @@ from analysis.score.recalculate_score import add_level_score_estimations_to_df
 
 def plot_performance_per_difficulty():
     last_time_steps = get_last_time_steps_of_games().copy()
-    counts = pd.read_csv('performance_stats.csv', index_col=0)
+    counts = pd.read_csv('../data/performance_stats.csv', index_col=0)
 
     # plot number of game outcomes
     g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
@@ -70,12 +70,12 @@ def save_performance_stats():
     games_per_difficulty = 20
     counts_per_difficulty['percentage'] = counts_per_difficulty['count'].div(games_per_difficulty)
 
-    counts_per_difficulty.to_csv('performance_stats.csv')
+    counts_per_difficulty.to_csv('performance_stats.csv', index=False)
     print('Saved Performance Stats')
 
 
 def print_average_game_endings():
-    df = pd.read_csv('performance_stats.csv', index_col=0)
+    df = pd.read_csv('../data/performance_stats.csv', index_col=0)
 
     # df = df.apply(lambda x: get_absolute_counts(df)).reset_index()
 
@@ -119,7 +119,7 @@ def save_game_durations():
 
 
 def histogram_over_avg_trial_times():
-    game_durations = pd.read_csv('game_durations.csv')
+    game_durations = pd.read_csv('../data/game_durations.csv')
 
     game_durations_won = game_durations[game_durations['game_status'] == 'won'].copy()
 
@@ -149,7 +149,7 @@ def add_estimated_level_scores(df):
 
 
 def plot_mean_score_per_level():
-    df = pd.read_csv('level_scores.csv').drop_duplicates()
+    df = pd.read_csv('../data/level_scores.csv').drop_duplicates()
 
     print('Mean Score Per Level: ', df['level_score'].mean())
     print('Var Score Per Level: ', df['level_score'].var())
@@ -184,7 +184,7 @@ def save_level_scores():
 def anova_mean_level_score():
     print('H0: Means for score per level are equal | H1: Means are different for each subject')
 
-    df = pd.read_csv('level_scores.csv').drop_duplicates()
+    df = pd.read_csv('../data/level_scores.csv').drop_duplicates()
 
     scores = df.groupby('subject_id')['level_score'].apply(list).tolist()
 
@@ -194,7 +194,7 @@ def anova_mean_level_score():
 
 
 def ttest_mean_time_easy_normal():
-    df = pd.read_csv('game_durations.csv')
+    df = pd.read_csv('../data/game_durations.csv')
 
     # get weighted fixation distances
     df_easy = df[df['game_difficulty'] == 'easy']
@@ -212,7 +212,7 @@ def ttest_mean_time_easy_normal():
 
 
 def ttest_mean_time_normal_hard():
-    df = pd.read_csv('game_durations.csv')
+    df = pd.read_csv('../data/game_durations.csv')
 
     # get weighted fixation distances
     df_normal = df[df['game_difficulty'] == 'normal']
