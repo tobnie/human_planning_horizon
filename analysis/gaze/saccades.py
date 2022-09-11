@@ -5,9 +5,9 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from analysis.data_utils import read_data, get_street_data, get_river_data, read_subject_data
-from analysis.plotting.gaze.events.event_detection import try_saccade_detection, try_saccade_detection2
-from analysis.plotting.gaze.vector_utils import calc_euclidean_distance, calc_angle, calc_angle_relative_to_vertical_center
+from analysis.data_utils import read_data, get_street_data, get_river_data
+from analysis.gaze.events.event_detection import try_saccade_detection, try_saccade_detection2
+from analysis.gaze.vector_utils import calc_euclidean_distance, calc_angle
 
 SACC_DURATION_THRESHOLD = 400
 
@@ -556,12 +556,13 @@ def get_saccs_filter_and_plot(subfolder=''):
     do_all_plots(sacc_df, subfolder=subfolder + 'river/')
 
 
-# load data
-# df = read_data()
+if __name__ == '__main__':
+    # load data
+    # df = read_data()
 
-# other_algo_df = get_saccade_dataframe(df, use_other_saccade_algo=True)
-# other_algo_df = filter_saccade_df(other_algo_df)
-# other_algo_df, median_error_other_algo = filter_saccade_data2(other_algo_df)
+    # other_algo_df = get_saccade_dataframe(df, use_other_saccade_algo=True)
+    # other_algo_df = filter_saccade_df(other_algo_df)
+    # other_algo_df, median_error_other_algo = filter_saccade_data2(other_algo_df)
 
-subfolder = 'error_less_than_median_of_error/'
-get_saccs_filter_and_plot(subfolder=subfolder)
+    subfolder = 'error_less_than_median_of_error/'
+    get_saccs_filter_and_plot(subfolder=subfolder)
