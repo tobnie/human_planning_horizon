@@ -517,15 +517,20 @@ def classify_location(player_y_field):
         return 'middle'
 
 
+def save_saccades():
+    df = read_data()
+    sacc_df = get_saccade_dataframe(df)
+    # threshold saccades
+    sacc_df = filter_saccade_df(sacc_df)
+    sacc_df = filter_saccade_data2(sacc_df)
+
+    sacc_df.to_csv('saccades.csv')
+    print('Saved Saccade Information')
+    return df
+
+
 def get_saccs_filter_and_plot(subfolder=''):
     # get saccade data
-    # sacc_df = get_saccade_dataframe(df)
-    # # threshold saccades
-    # sacc_df = filter_saccade_df(sacc_df)
-    # sacc_df = filter_saccade_data2(sacc_df)
-    #
-    # sacc_df.to_csv('saccades.csv')
-    # print('Saved Saccade Information')
     sacc_df = pd.read_csv('saccades.csv')
 
     print(f'n={len(sacc_df)}')

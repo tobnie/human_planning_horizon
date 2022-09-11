@@ -2,8 +2,9 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 import config
-from analysis.analysis_utils import get_eyetracker_samples_only, get_all_subjects
-from analysis.plotting.gaze.events.event_detection import get_blinks_from_samples
+from analysis.analysis_utils import get_eyetracker_samples_only
+from analysis.data_utils import get_all_subjects
+from analysis.gaze.events.event_detection import get_blinks_from_samples
 
 
 def plot_blinks(ax, samples, title=''):

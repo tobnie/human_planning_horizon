@@ -9,8 +9,8 @@ from itertools import product
 import pandas as pd
 
 from analysis.data_utils import get_all_subjects, assign_position_to_fields, add_game_status_to_df
-from analysis.plotting.player.player_position_heatmap import add_player_position_in_field_coordinates
-from analysis.plotting.sosci_utils import add_experience_to_df
+from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates
+from analysis.sosci_utils import add_experience_to_df
 from analysis.score_utils import add_max_score_to_df
 from analysis.trial_order_utils import add_trial_numbers_to_df
 from game.world_generation.generation_config import GameDifficulty

@@ -1,7 +1,4 @@
 import itertools
-import string
-
-import matplotlib
 import pandas as pd
 import scipy.stats
 from matplotlib import pyplot as plt
@@ -233,10 +230,6 @@ def ttest_mean_time_normal_hard():
 
 
 if __name__ == '__main__':
-    # save_performance_stats()
-    # save_game_durations()
-    # save_level_scores()
-
     print_average_game_endings()
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()

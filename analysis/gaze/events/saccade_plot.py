@@ -1,8 +1,9 @@
 from matplotlib import pyplot as plt
 
 import config
-from analysis.analysis_utils import get_eyetracker_samples_only, get_all_subjects
-from analysis.plotting.gaze.events.event_detection import get_saccades_from_samples
+from analysis.analysis_utils import get_eyetracker_samples_only
+from analysis.data_utils import get_all_subjects
+from analysis.gaze.events.event_detection import get_saccades_from_samples
 from analysis.world.world_coordinates import plot_world_background
 
 

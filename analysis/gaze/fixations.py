@@ -58,6 +58,14 @@ def add_fixation_distance_and_angle(df):
     return df
 
 
+def save_fixation_info():
+    df = read_data()
+    df = add_fixation_info_to_df(df)
+    df.to_csv('fixations.csv')
+    print('Saved Fixation Information')
+    return df
+
+
 def add_fixation_info_to_df(df):
     fixation_df = get_fixation_dataframe(df)
     df = join_fixation_df_and_general_df(df, fixation_df)
@@ -98,8 +106,6 @@ def add_fixation_info_to_df(df):
          'weighted_fix_distance_manhattan']].drop_duplicates()
 
     df = df[df['weighted_fix_distance_euclidean'].notna()]
-    df.to_csv('fixations.csv')
-    print('Saved Fixation Information')
     return df
 
 
