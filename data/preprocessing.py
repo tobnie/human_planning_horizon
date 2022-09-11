@@ -202,10 +202,10 @@ def get_times_actions_states(subject_id, diffs_and_worlds=None):
     action_index = 0
     for t_s, state in times_states:
 
-        # next_t_a = times_actions[action_index + 1][0] if action_index + 1 < len(times_actions) else np.inf
-        t_a, action = times_actions[action_index]
+        t_a = times_actions[action_index + 1][0] if action_index + 1 < len(times_actions) else np.inf
 
         if t_s == t_a:
+            action = times_actions[action_index][1]
             times_actions_states.append((t_s, action, state))
             action_index += 1
         else:
