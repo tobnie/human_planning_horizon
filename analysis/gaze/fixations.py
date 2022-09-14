@@ -102,8 +102,9 @@ def add_fixation_info_to_df(df):
     df = df.merge(summed_fixation_durations, on=['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'],
                   how='left')
     df = df[
-        ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'score', 'weighted_fix_distance_euclidean',
-         'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan', 'fix_distance_euclidean']].drop_duplicates()
+        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field', 'score', 'weighted_fix_distance_euclidean',
+         'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
+         'fix_distance_euclidean']].drop_duplicates()
 
     df = df[df['weighted_fix_distance_euclidean'].notna()]
     return df
@@ -308,26 +309,30 @@ def plot_fixation_distance_box_per_region(df):
     sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     sns.boxplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", width=0.2, linewidth=1.5,
-                flierprops=dict(markersize=2),
-                showmeans=True, meanline=True)
+                showfliers=False,
+                # flierprops=dict(markersize=2),
+                showmeans=True, meanline=True,
+                boxprops={'zorder': 2})
 
     # iterate over boxes
     box_patches = [patch for patch in ax.patches if type(patch) == mpl.patches.PathPatch]
-    if len(box_patches) == 0:  # in matplotlib older than 3.5, the boxes are stored in ax2.artists
+    if len(box_patches) == 0:
         box_patches = ax.artists
     num_patches = len(box_patches)
     lines_per_boxplot = len(ax.lines) // num_patches
     for i, patch in enumerate(box_patches):
         # Set the linecolor on the patch to the facecolor, and set the facecolor to None
-        patch.set_edgecolor(edge_colors[i])
+        patch.set_edgecolor('k') #edge_colors[i])
         patch.set_facecolor(box_colors[i])
 
         # Each box has associated Line2D objects (to make the whiskers, fliers, etc.)
         # Loop over them here, and use the same color as above
         for line in ax.lines[i * lines_per_boxplot: (i + 1) * lines_per_boxplot]:
-            line.set_color(edge_colors[i])
-            line.set_mfc(edge_colors[i])  # facecolor of fliers
-            line.set_mec(edge_colors[i])  # edgecolor of fliers
+            line.set_color('k') #edge_colors[i])
+            line.set_mfc('k')  #edge_colors[i])  # facecolor of fliers
+            line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
+
+    sns.violinplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", size=0.5, palette=box_colors, inner=None, saturation=0.5)
 
     ax.set_yscale('log')
     ax.set_xlabel('')

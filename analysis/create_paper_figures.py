@@ -12,14 +12,14 @@ if __name__ == '__main__':
     # plot_fixation_distance_scoring_groups_for_different_splits()
 
     # plot_avg_fixation_distance_per_subject()
-    histogram_over_avg_trial_times()
+    # histogram_over_avg_trial_times()
     #
     sns.set_style("whitegrid")
-    plot_mean_score_per_level()
-    plot_fixation_distance_box_scoring_groups()
+    # plot_mean_score_per_level()
+    # plot_fixation_distance_box_scoring_groups()
     #
-    df = pd.read_csv('fixations.csv')
+    df = pd.read_csv('../data/fixations.csv')
     plot_fixation_distance_box_per_region(df)  # TODO remove outliers?
-    plot_fixation_distance_per_position(df)
-    print_fixation_distances_per_group()
+    # plot_fixation_distance_per_position(df)
+    # print_fixation_distances_per_group()
 

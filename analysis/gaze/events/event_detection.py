@@ -289,6 +289,15 @@ def saccade_detection(x, y, time, missing=-32768, minlen=5, maxvel=40, maxacc=34
     return Ssac, Esac
 
 
+def try_blink_detection(x, y, time):
+    try:
+        results = blink_detection(np.array(x), np.array(y), np.array(time))
+        return results
+    except ValueError as e:
+        print('Error during Fixation Detection:', str(e))
+        return [], []
+
+
 def try_fixation_detection(x, y, time):
     try:
         results = fixation_detection(np.array(x), np.array(y), np.array(time))
