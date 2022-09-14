@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 from analysis.data_utils import read_data, get_only_onscreen_data, create_state_from_string
@@ -8,9 +9,10 @@ from neural_network.single_layer_feature_map import TARGET_POS2DISCRETE, create_
 
 def run_create_IO_data_for_NN():
     # get data
-    df = read_data()
-    df = get_only_onscreen_data(df)
-    df = df[['gaze_x', 'gaze_y', 'state', 'target_position', 'gaze_x_field', 'gaze_y_field']]
+    df = pd.read_csv('../data/fixations.csv')
+    df = df[['weighted_fix_distance_euclidean',
+             'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
+             'fix_distance_euclidean']]
 
     # creating states from df
     print('Creating States from df...')
@@ -23,21 +25,22 @@ def run_create_IO_data_for_NN():
     print('Creating multi layer fms...')
     state_fms_deep = [create_feature_map_from_state(state) for state in tqdm(states)]
 
-    target_pos = df['target_position'].apply(lambda x: TARGET_POS2DISCRETE[x]).to_numpy()
-
     # outputs
-    gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
-    gaze_pos_fields = df[['gaze_x_field', 'gaze_y_field']].to_numpy()
+    gaze_pos = df[['fix_x', 'fix_y']].to_numpy()
+    gaze_pos_fields = df[['fix_x_field', 'fix_y_field']].to_numpy()
+    weighted_distance_manhattan = df['weighted_fix_distance_manhattan'].to_numpy()
+    weighted_distance_euclidean = df['weighted_fix_distance_euclidean'].to_numpy()
 
     # save all data
     print('Saving data...')
-    # D:\source\human_planning_horizon_nn\gaze_predictor\gaze_predictor\data
     dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/'
     np.savez_compressed(dir_path + 'single_layer_fm.npz', np.array(state_fms))
     np.savez_compressed(dir_path + 'multi_layer_fm.npz', np.array(state_fms_deep))
-    np.savez_compressed(dir_path + 'output_continuous.npz', gaze_pos)
-    np.savez_compressed(dir_path + 'output_discrete.npz', gaze_pos_fields)
-    np.savez_compressed(dir_path + 'target_pos.npz', target_pos)
+
+    np.savez_compressed(dir_path + 'gaze_pos_continuous.npz', gaze_pos)
+    np.savez_compressed(dir_path + 'gaze_pos_discrete.npz', gaze_pos_fields)
+    np.savez_compressed(dir_path + 'mfd.npz', weighted_distance_manhattan)
+    np.savez_compressed(dir_path + 'mfd_euclid.npz', weighted_distance_euclidean)
 
 
 if __name__ == '__main__':

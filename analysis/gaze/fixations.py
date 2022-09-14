@@ -103,7 +103,7 @@ def add_fixation_info_to_df(df):
                   how='left')
     df = df[
         ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'score', 'weighted_fix_distance_euclidean',
-         'weighted_fix_distance_manhattan']].drop_duplicates()
+         'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan', 'fix_distance_euclidean']].drop_duplicates()
 
     df = df[df['weighted_fix_distance_euclidean'].notna()]
     return df
