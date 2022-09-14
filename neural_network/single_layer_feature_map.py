@@ -1,9 +1,7 @@
 import numpy as np
-from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, create_state_from_string, get_only_onscreen_data, assign_position_to_fields
-from data.preprocessing import create_feature_map_from_state
+from analysis.data_utils import assign_position_to_fields
 
 TARGET_POS2DISCRETE = {448: -1, 1216: 0, 2112: 1}
 
@@ -48,84 +46,3 @@ def create_single_layer_feature_map_from_state(state, target_pos=None):
     feature_map = np.flip(feature_map, axis=1)
 
     return feature_map
-
-
-def get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm):
-    df = df[['gaze_x', 'gaze_y', 'state', 'target_position']]
-
-    df = get_only_onscreen_data(df)
-
-    target_pos = df['target_position'].apply(lambda x: TARGET_POS2DISCRETE[x]).to_numpy()
-
-    # creating states from df
-    print('Creating States from df...')
-    states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
-
-    print('\nConverting States to Feature Maps...')
-    if single_layer_fm:
-        state_fms = [create_single_layer_feature_map_from_state(state, p_target) for state, p_target in tqdm(zip(states, target_pos))]
-    else:
-        raise NotImplementedError("Not yet implemented")
-        # state_fms = [create_feature_map_from_state(state) for state in tqdm(states)]
-    gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
-
-    inputs = np.array(state_fms)
-    outputs = gaze_pos
-    return inputs, outputs, target_pos
-
-
-def get_inputs_outputs_for_nn(df, single_layer_fm):
-    df = df[['gaze_x', 'gaze_y', 'state', 'target_position']]
-
-    df = get_only_onscreen_data(df)
-
-    # creating states from df
-    print('Creating States from df...')
-    states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
-
-    print('\nConverting States to Feature Maps...')
-    if single_layer_fm:
-        state_fms = [create_single_layer_feature_map_from_state(state) for state in tqdm(states)]
-    else:
-        state_fms = [create_feature_map_from_state(state) for state in tqdm(states)]
-    gaze_pos = df[['gaze_x', 'gaze_y']].to_numpy()
-
-    target_pos = df['target_position'].apply(lambda x: TARGET_POS2DISCRETE[x]).to_numpy()
-
-    inputs = np.array(state_fms)
-    outputs = gaze_pos
-    return inputs, outputs, target_pos
-
-
-def save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=None, suffix=''):
-    print("\nSaving data in input and output file...")
-
-    # save inputs and outputs as .npz
-    if suffix != '':
-        suffix = '_' + suffix
-
-    file_name_in = f'input{suffix}.npz'
-    np.savez_compressed(f'../neural_network/{file_name_in}', inputs)
-    np.savez_compressed(f'data/output.npz', outputs)
-
-    if target_pos is not None:
-        np.savez_compressed(f'data/target_pos.npz', target_pos)
-
-    print("Done!")
-
-
-def run_create_IO_data_for_NN():
-    df = read_data()
-
-    inputs, outputs, target_pos = get_inputs_outputs_for_nn(df, single_layer_fm=True)
-    save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=target_pos)
-
-    inputs, outputs, target_pos = get_inputs_outputs_for_nn(df, single_layer_fm=False)
-    save_inputs_output_for_training_of_nn(inputs, outputs, target_pos=target_pos, suffix='deep_fm')
-
-    inputs, outputs, target_pos = get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm=True)
-    save_inputs_output_for_training_of_nn(inputs, outputs, suffix='including_target_pos')
-
-    # TODO
-    # inputs, outputs, target_pos = get_inputs_outputs_for_nn_including_target_position(df, single_layer_fm=False)
-    # save_inputs_output_for_training_of_nn(inputs, outputs, suffix='including_target_pos_deep')

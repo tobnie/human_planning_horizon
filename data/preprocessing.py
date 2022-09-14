@@ -9,7 +9,7 @@ from itertools import product
 import pandas as pd
 
 from analysis.data_utils import get_all_subjects, assign_position_to_fields, add_game_status_to_df
-from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates
+from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates, coords2fieldsx, coords2fieldsy
 from analysis.sosci_utils import add_experience_to_df
 from analysis.score_utils import add_max_score_to_df
 from analysis.trial_order_utils import add_trial_numbers_to_df
@@ -277,6 +277,12 @@ def create_feature_map_from_state(state):
     return feature_map
 
 
+def add_gaze_position_in_field_coordinates(df):
+    df['gaze_x_field'] = df['gaze_x'].apply(coords2fieldsx)
+    df['gaze_y_field'] = df['gaze_y'].apply(coords2fieldsy)
+    return df
+
+
 def run_preprocessing():
     # we want to save each row with:
     # subject_id, game_difficulty, world_number, time, gaze_x, gaze_y, pupil_size, player_x, player_y, action, state, (?)
@@ -385,6 +391,7 @@ def run_preprocessing():
 
         subject_df = add_game_status_to_df(subject_df)
         subject_df = add_player_position_in_field_coordinates(subject_df)
+        subject_df = add_gaze_position_in_field_coordinates(subject_df)
         subject_df = add_experience_to_df(subject_df)
         subject_df = add_trial_numbers_to_df(subject_df)
         subject_df = add_max_score_to_df(subject_df)
