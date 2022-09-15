@@ -77,5 +77,5 @@ def plot_IBI_per_subject():
 
 
 if __name__ == '__main__':
-    # save_blinks_and_IBIs()
-    plot_IBI_per_subject()
+    pass
+    # plot_IBI_per_subject()

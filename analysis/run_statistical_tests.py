@@ -1,3 +1,4 @@
+from analysis.gaze.blink_rates import ttest_blink_rate_street_river, kstest_blink_rate_distance_street_river
 from analysis.gaze.fixations import ttest_fixation_distance_street_river, kstest_fixation_distance_street_river
 from analysis.performance.experts_vs_novices import ttest_fixation_distance_scoring_groups, kstest_fixation_distance_scoring_groups, \
     ttest_mean_level_score_high_scorer_low_scorer
@@ -15,6 +16,13 @@ if __name__ == '__main__':
     ttest_fixation_distance_street_river()
     print('\n---- Kolmogorov Smirnov for fixation distances river / street ----')
     kstest_fixation_distance_street_river()
+
+    print('\n\n')
+
+    print('\n---- t-test for blink rates river / street ----')
+    ttest_blink_rate_street_river()
+    print('\n---- Kolmogorov Smirnov for blink rates river / street ----')
+    kstest_blink_rate_distance_street_river()
 
     print('\n\n')
 

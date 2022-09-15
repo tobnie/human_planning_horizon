@@ -58,7 +58,7 @@ def add_fixation_distance_and_angle(df):
     return df
 
 
-def save_fixation_info():
+def save_fixations():
     df = read_data()
     df = add_fixation_info_to_df(df)
     df.to_csv('fixations.csv', index=False)
