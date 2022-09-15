@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 from analysis.data_utils import read_data
 from analysis.gaze.events.event_detection import try_blink_detection
@@ -35,16 +36,12 @@ def get_blink_df():
 
 def save_blinks():
     df = get_blink_df()
-    df.to_csv('blinks.csv', index=False)
+    df.to_csv('../data/blinks.csv', index=False)
     print('Saved Blink Information')
     return df
 
 
 def calc_ibi_per_game(game_df):
-    # blink_starts = game_df['blink_start'].iloc[1:].reset_index(drop=True)
-    # blink_ends = game_df['blink_end'].iloc[:-1].reset_index(drop=True)
-    # ibis = blink_starts - blink_ends
-
     blink_starts = game_df['blink_start']
     blink_ends = game_df['blink_end'].shift()
     ibis = (blink_starts - blink_ends).dropna()
@@ -52,21 +49,33 @@ def calc_ibi_per_game(game_df):
 
 
 def calculate_ibi():
-    blink_df = pd.read_csv('blinks.csv')
-    blinks_per_game = blink_df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_ibi_per_game).reset_index(level=-1,
-                                                                                                                               drop=True).reset_index(
-        name='ibi')
+    blink_df = pd.read_csv('../data/blinks.csv')
+    blinks_per_game = blink_df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_ibi_per_game).reset_index(
+        level=-1, drop=True).reset_index(name='ibi')
     return blinks_per_game
 
 
-if __name__ == '__main__':
-    # save_blinks()
+def save_blinks_and_IBIs():
+    save_blinks()
     ibi_data = calculate_ibi()
-    import seaborn as sns
+    ibi_data.to_csv('../data/ibi.csv', index=False)
 
-    sns.histplot(data=ibi_data, x='ibi')
+
+def plot_IBI_per_subject():
+    ibi_data = pd.read_csv('../data/ibi.csv')
+    bin_width = 1000
+    ibi_data = ibi_data[ibi_data['ibi'] < 8_000]
+
+    sns.histplot(data=ibi_data, x='ibi', binwidth=bin_width, stat='proportion')
+    plt.savefig('./imgs/blinks/ibi/overall_ibi.png')
     plt.show()
 
-    # TODO could not recreate ibi blink patterns
-    sns.displot(data=ibi_data, x='ibi', col='subject_id', col_wrap=3)
+    g = sns.FacetGrid(ibi_data, col='subject_id', col_wrap=4)
+    g.map_dataframe(sns.histplot, 'ibi', binwidth=bin_width, stat='proportion')
+    plt.savefig('./imgs/blinks/ibi/subject_ibi.png')
     plt.show()
+
+
+if __name__ == '__main__':
+    # save_blinks_and_IBIs()
+    plot_IBI_per_subject()

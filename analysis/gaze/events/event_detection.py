@@ -50,19 +50,14 @@ BLINK_UB = 450  # upper bound for the duration of a blink in ms
 def blink_detection(x, y, time, missing=-32768):
     """Detects blinks, defined as a period of missing data that lasts for at
     least a minimal amount of samples
-
     arguments
-
     x		-	numpy array of x positions
     y		-	numpy array of y positions
     time		-	numpy array of EyeTribe timestamps
-
     keyword arguments
-
     missing	-	value to be used for missing data (default = 0.0)
     minlen	-	integer indicating the minimal amount of consecutive
                 missing samples
-
     returns
     Sblk, Eblk
                 Sblk	-	list of lists, each containing [starttime]
@@ -94,7 +89,8 @@ def blink_detection(x, y, time, missing=-32768):
             e = ends[-1]
         else:
             e = -1
-        # append only if the duration in samples is within the defined interval for a blink
+        # append only if the duration in samples is equal to or greater than
+        # the minimal duration
         if BLINK_UB >= time[e] - time[s] >= BLINK_LB:
             # add starting time
             Sblk.append([time[s]])
