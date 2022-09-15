@@ -72,24 +72,29 @@ def run_create_IO_data_for_recurrent_NN(prev_timesteps=5):
 
     # creating states from df
     print('Creating States from df...')
-    test = [create_state_from_string(state_string) for state_string in tqdm(df_arr[:, :, -1])]
-    df_arr[:, :, -1] = test
-    # TODO
-    df_arr = df_arr.reshape((prev_timesteps, -1, 3))
+
+    mfd = df_arr[:, 1].astype(float)
+    mfd = mfd[~np.isnan(mfd)]
+    states = df_arr[:, 2]
+
+    states = [create_state_from_string(state_string) for state_string in tqdm(states)]
 
     print('\nConverting States to Feature Maps...')
     print('Creating single layer fms...')
 
-    # # TODO put into sequences
-    # state_fm_seqs = [create_single_layer_feature_map_from_state(state, None) for state in tqdm(states)]
-    # print('Creating multi layer fms...')
-    # state_fm_deep_seqs = [create_feature_map_from_state(state) for state in tqdm(states)]
+    state_fm_seqs = np.array([create_single_layer_feature_map_from_state(state, None) for state in tqdm(states)])
+    state_fm_seqs = state_fm_seqs.reshape((mfd.shape[0], prev_timesteps, state_fm_seqs.shape[-2], state_fm_seqs.shape[-1]))
+
+    print('Creating multi layer fms...')
+    state_fm_deep_seqs = np.array([create_feature_map_from_state(state) for state in tqdm(states)])
+    state_fm_deep_seqs = state_fm_deep_seqs.reshape((mfd.shape[0], prev_timesteps, state_fm_deep_seqs.shape[-3], state_fm_deep_seqs.shape[-2], state_fm_deep_seqs.shape[-1]))
 
     # # save all data
-    # print('Saving data...')
-    # dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/'
-    # np.savez_compressed(dir_path + 'single_layer_fm_seq.npz', np.array(state_fm_seqs))
-    # np.savez_compressed(dir_path + 'multi_layer_fm_seq.npz', np.array(state_fm_deep_seqs))
+    print('Saving data...')
+    dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/'
+    np.savez_compressed(dir_path + 'single_layer_fm_seq.npz', state_fm_seqs)
+    np.savez_compressed(dir_path + 'multi_layer_fm_seq.npz', state_fm_deep_seqs)
+    np.savez_compressed(dir_path + 'mfd_seq.npz', mfd)
 
 
 if __name__ == '__main__':
