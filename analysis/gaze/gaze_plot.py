@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 import config
 from analysis.analysis_utils import get_world_properties, get_eyetracker_samples_only, get_times_states, get_all_subjects
-from analysis.plotting.plotting_utils import color_fader
+from analysis.plotting_utils import color_fader
 from analysis.world.world_coordinates import plot_player_path
 from game.world_generation.generation_config import GameDifficulty
 

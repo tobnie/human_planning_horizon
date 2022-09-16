@@ -3,8 +3,8 @@ import pandas as pd
 
 HORIZONTAL_RES = 2560
 VERTICAL_RES = 1440
-SCREEN_WIDTH_MM = 335
-SCREEN_HEIGHT_MM = 595
+SCREEN_WIDTH_MM = 595 # TODO maybe it only did not work because of switched values here
+SCREEN_HEIGHT_MM = 335
 D = 800
 
 
