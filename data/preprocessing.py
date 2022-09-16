@@ -330,7 +330,6 @@ def run_preprocessing():
 
                     # eye samples
                     gaze_xs_i.append(sample[1])
-                    # TODO gaze transformation correct?
                     gaze_y = config.DISPLAY_HEIGHT_PX - sample[2]
                     gaze_ys_i.append(gaze_y)
                     pupil_sizes_i.append(sample[3])
