@@ -1,17 +1,23 @@
+import os
 from functools import reduce
+from itertools import product
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from analysis.data_utils import read_data, get_only_onscreen_data, create_state_from_string
+from analysis.data_utils import read_data, create_state_from_string
 from data.preprocessing import create_feature_map_from_state
-from neural_network.single_layer_feature_map import TARGET_POS2DISCRETE, create_single_layer_feature_map_from_state
+from neural_network.single_layer_feature_map import create_single_layer_feature_map_from_state
 
 
-def run_create_IO_data_for_NN():
+def run_create_IO_data_for_NN(subject_id=None):
     # get data
     df = pd.read_csv('../data/fixations.csv')
+
+    if subject_id is not None:
+        df = df[df['subject_id'] == subject_id]
+
     df = df[['weighted_fix_distance_euclidean',
              'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
              'fix_distance_euclidean']]
@@ -36,6 +42,14 @@ def run_create_IO_data_for_NN():
     # save all data
     print('Saving data...')
     dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/'
+
+    if subject_id is not None:
+        dir_path += f'{subject_id}/'
+
+    # create directory if non-existent
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     np.savez_compressed(dir_path + 'single_layer_fm.npz', np.array(state_fms))
     np.savez_compressed(dir_path + 'multi_layer_fm.npz', np.array(state_fms_deep))
 
@@ -45,7 +59,7 @@ def run_create_IO_data_for_NN():
     np.savez_compressed(dir_path + 'mfd_euclid.npz', weighted_distance_euclidean)
 
 
-def run_create_IO_data_for_recurrent_NN(prev_timesteps=5):
+def run_create_IO_data_for_recurrent_NN(timesteps=5, stride=5):
     # get data
     df = read_data()
     fix_df = pd.read_csv('../data/fixations.csv')
@@ -58,14 +72,15 @@ def run_create_IO_data_for_recurrent_NN(prev_timesteps=5):
     # non_null_indices = (~df['weighted_fix_distance_manhattan'].isna()).index
     non_null_indices = list(non_null_indices)
 
-    index_ranges = [list(range(i - prev_timesteps + 1, i + 1)) for i in non_null_indices]
+    index_ranges = [list(range(i - stride * (timesteps - 1), i + 1, stride)) if i - stride * (timesteps - 1) > 0 else [] for i in
+                    non_null_indices]
     indices = reduce(lambda lst, rnge: lst + rnge, index_ranges)
 
     indices = np.array(indices)
-    indices = indices[indices >= prev_timesteps]
+    indices = indices[indices >= timesteps]
 
     five_tail = df.iloc[indices].reset_index(drop=True)
-    five_tail_grouped = five_tail.groupby(five_tail.index // 5)
+    five_tail_grouped = five_tail.groupby(five_tail.index // timesteps)
     five_tail_groups_filtered = five_tail_grouped.filter(lambda sub_frame: sub_frame['time'].is_monotonic)
     df = five_tail_groups_filtered.reset_index(drop=True)
     df_arr = df.to_numpy()
@@ -83,20 +98,38 @@ def run_create_IO_data_for_recurrent_NN(prev_timesteps=5):
     print('Creating single layer fms...')
 
     state_fm_seqs = np.array([create_single_layer_feature_map_from_state(state, None) for state in tqdm(states)])
-    state_fm_seqs = state_fm_seqs.reshape((mfd.shape[0], prev_timesteps, state_fm_seqs.shape[-2], state_fm_seqs.shape[-1]))
+
+    print('Shapes:\n')
+    print('MFD (output):', mfd.shape)
+    print('States before Reshaping:', state_fm_seqs.shape)
+
+    state_fm_seqs = state_fm_seqs.reshape((-1, timesteps, state_fm_seqs.shape[-2], state_fm_seqs.shape[-1]))
 
     print('Creating multi layer fms...')
     state_fm_deep_seqs = np.array([create_feature_map_from_state(state) for state in tqdm(states)])
-    state_fm_deep_seqs = state_fm_deep_seqs.reshape((mfd.shape[0], prev_timesteps, state_fm_deep_seqs.shape[-3], state_fm_deep_seqs.shape[-2], state_fm_deep_seqs.shape[-1]))
+    state_fm_deep_seqs = state_fm_deep_seqs.reshape(
+        (-1, timesteps, state_fm_deep_seqs.shape[-3], state_fm_deep_seqs.shape[-2], state_fm_deep_seqs.shape[-1]))
 
     # # save all data
     print('Saving data...')
-    dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/'
+    dir_path = '../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/lstm/timesteps={}_stride={}/'.format(timesteps,
+                                                                                                                        stride)
+
+    # create directory if non-existent
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     np.savez_compressed(dir_path + 'single_layer_fm_seq.npz', state_fm_seqs)
-    np.savez_compressed(dir_path + 'multi_layer_fm_seq.npz', state_fm_deep_seqs)
-    np.savez_compressed(dir_path + 'mfd_seq.npz', mfd)
+    np.savez_compressed(dir_path + 'multi_layer_fm_seq.npz'.format(timesteps, stride), state_fm_deep_seqs)
+    np.savez_compressed(dir_path + 'mfd_seq.npz'.format(timesteps, stride), mfd)
 
 
 if __name__ == '__main__':
-    run_create_IO_data_for_recurrent_NN()
-    # run_create_IO_data_for_NN()
+    # run_create_IO_data_for_NN(subject_id='ED06RA')
+
+    stride = [20, 10, 5]
+    prev_timesteps = reversed([5, 20, 50, 100])
+
+    for s, t_steps in tqdm(product(stride, prev_timesteps)):
+        print(f'Running with stride={s}, time_steps={t_steps}')
+        run_create_IO_data_for_recurrent_NN(timesteps=t_steps, stride=s)
