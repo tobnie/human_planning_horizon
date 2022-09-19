@@ -1,18 +1,14 @@
 import pandas as pd
 from remodnav import EyegazeClassifier
 
-from analysis.data_utils import read_subject_data
+from analysis.data_utils import read_subject_data, read_data
 from analysis.gaze.adaptiveIDT.data_filtering import PIX2DEG
 
 from analysis.player.player_position_heatmap import coords2fieldsx, coords2fieldsy
 
 
 def run_remodnav_as_method(data):
-    import logging
-    lgr = logging.getLogger('remodnav')
-    lgr.info('Read %i samples', len(data))
-
-    # TODO Choose values such that there are no warnings anymore?
+    # TODO Choose filter parameters such that there are no warnings anymore?
     # parameters
     sampling_rate = 60
     MIN_SACCADE_DURATION = 20 * 1e-3
@@ -27,16 +23,17 @@ def run_remodnav_as_method(data):
 
 
 def run_remodnav(trial_df):
-    trial_df = trial_df.copy()
-
     # format for remodnav algorithm
-    trial_df = trial_df[['gaze_x', 'gaze_y']]
-    trial_df.columns = ['x', 'y']
-    result_as_list_of_dicts = run_remodnav_as_method(trial_df.to_records())
+    gaze_df = trial_df.copy()[['gaze_x', 'gaze_y']]
+    gaze_df.columns = ['x', 'y']
+    result_as_list_of_dicts = run_remodnav_as_method(gaze_df.to_records())
     result_df = pd.DataFrame(result_as_list_of_dicts).drop('id', axis=1)
 
     # add duration
     result_df['duration'] = result_df['end_time'] - result_df['start_time']
+
+    # add level information
+    result_df = attribute_player_positions_to_time(trial_df, result_df)
 
     return result_df
 
@@ -90,16 +87,11 @@ def add_mfd_to_remodnav(df):
     return df
 
 
-if __name__ == '__main__':
+def get_fixations_from_remodnav():
     missing_threshold = -30000
-
-    subject_id = 'ED06RA'
-    game_difficulty = 'easy'
-    world_number = 10
-    df = read_subject_data(subject_id)
-    trial_df = df[df['trial'] == 35]
-    results = run_remodnav(trial_df)
-    results = attribute_player_positions_to_time(trial_df, results)
+    df = read_data()
+    results = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(run_remodnav).reset_index().drop(columns='level_3')
+    print(results)
 
     fixations = results[results['label'] == 'FIXA']
 
@@ -113,20 +105,26 @@ if __name__ == '__main__':
     # into field coordinates
     fixations['center_x_field'] = fixations['center_x'].apply(coords2fieldsx)
     fixations['center_y_field'] = fixations['center_y'].apply(coords2fieldsy)
-    # fixations['start_x_field'] = fixations['start_x'].apply(coords2fieldsx)
-    # fixations['start_y_field'] = fixations['start_y'].apply(coords2fieldsy)
-    fixations['manhattan_distance'] = fixations.apply(lambda x: abs(x['center_x_field'] - x['player_x_field']) + abs(x['center_y_field'] - x['player_y_field']), axis=1)
+    fixations['manhattan_distance'] = fixations.apply(
+        lambda x: abs(x['center_x_field'] - x['player_x_field']) + abs(x['center_y_field'] - x['player_y_field']), axis=1)
 
-    fixations = fixations.groupby(['player_x_field', 'player_y_field']).apply(add_mfd_to_remodnav)[['player_x_field', 'player_y_field', 'mfd']]
+    fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(add_mfd_to_remodnav)
     fixations = fixations.drop_duplicates()
-
-    old_fixations = pd.read_csv('../data/fixations.csv')
-    old_fixations = old_fixations[(old_fixations['subject_id'] == subject_id) & (old_fixations['game_difficulty'] == game_difficulty) & (old_fixations['world_number'] == world_number)]
-    old_fixations = old_fixations[['player_x_field', 'player_y_field', 'weighted_fix_distance_manhattan']]
-    old_fixations = old_fixations.drop_duplicates()
 
     print('New Method:')
     print(fixations)
 
-    print('Old Method:')
-    print(old_fixations)
+    fixations.to_csv('../data/fixations_remodnav.csv', index=False)
+    #
+    # old_fixations = pd.read_csv('../data/fixations.csv')
+    # old_fixations = old_fixations[(old_fixations['subject_id'] == subject_id) & (old_fixations['game_difficulty'] == game_difficulty) & (
+    #             old_fixations['world_number'] == world_number)]
+    # old_fixations = old_fixations[['player_x_field', 'player_y_field', 'weighted_fix_distance_manhattan']]
+    # old_fixations = old_fixations.drop_duplicates()
+    # print('Old Method:')
+    # print(old_fixations)
+
+
+if __name__ == '__main__':
+    get_fixations_from_remodnav()
+
