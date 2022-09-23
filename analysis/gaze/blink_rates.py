@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import scipy.stats
+import scipy
 from matplotlib import pyplot as plt
 
 from analysis.data_utils import get_river_data, get_street_data, read_data
@@ -25,7 +25,6 @@ def calc_blink_rate_per_game(game_df):
     n_blinks_total = len(game_df[game_df['blink_start'].notna()])
 
     # calculate blink rates
-    # TODO should we return 0 or np.nan if there are no blinks at all?
     blink_rate_street = n_blinks_street / time_on_street if time_on_street > 0 else np.nan
     blink_rate_river = n_blinks_river / time_on_river if time_on_river > 0 else np.nan
     blink_rate_total = n_blinks_total / game_time if n_blinks_total > 0 else np.nan
@@ -50,12 +49,31 @@ def save_blink_rates():
 def plot_blink_rates():
     blink_rates = pd.read_csv('../data/blink_rates.csv')
 
-    blink_rates_total = blink_rates['blink_rate'].dropna().values
-    blink_rates_street = blink_rates['blink_rate_street'].dropna().values
-    blink_rates_river = blink_rates['blink_rate_river'].dropna().values
-    plt.boxplot([blink_rates_total, blink_rates_street, blink_rates_river], labels=['total', 'street', 'river'])
+    blink_rates_total = blink_rates['blink_rate'].dropna()
+    blink_rates_street = blink_rates['blink_rate_street'].dropna()
+    blink_rates_river = blink_rates['blink_rate_river'].dropna()
+
+    # blink rates everywhere
+    print('--- Blink Rate Total ---')
+    print('Mean: ', blink_rates_total.mean())
+    print('Median: ', blink_rates_total.median())
+    print('Variance: ', blink_rates_total.var())
+
+    # blink rates on street
+    print('--- Street ---')
+    print('Mean: ', blink_rates_street.mean())
+    print('Median: ', blink_rates_street.median())
+    print('Variance: ', blink_rates_street.var())
+
+    # blink rates on river
+    print('--- River ---')
+    print('Mean: ', blink_rates_river.mean())
+    print('Median: ', blink_rates_river.median())
+    print('Variance: ', blink_rates_river.var())
+
+    plt.boxplot([blink_rates_total.values, blink_rates_street.values, blink_rates_river.values], labels=['total', 'street', 'river'])
     plt.ylabel('blink rate [blinks/s]')
-    plt.savefig('./imgs/blink_rates_box.png')
+    plt.savefig('./imgs/blinks/blink_rates_box.png')
     plt.show()
 
 
@@ -68,8 +86,7 @@ def ttest_blink_rate_street_river():
 
     # perform (Welch's) t-test
     # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(blink_rates_river, blink_rates_street,
-                                         alternative='greater')  # use equal_var=False bc of different sample sizes
+    ttest_result = scipy.stats.ttest_ind(blink_rates_river, blink_rates_street,  alternative='greater')
     print(ttest_result)
     print('dof=', len(blink_rates_street) - 1 + len(blink_rates_river) - 1)
 
@@ -88,6 +105,7 @@ def kstest_blink_rate_distance_street_river():
 
 
 if __name__ == '__main__':
-    plot_blink_rates()
-    ttest_blink_rate_street_river()
-    kstest_blink_rate_distance_street_river()
+    save_blink_rates()
+    # plot_blink_rates()
+    # ttest_blink_rate_street_river()
+    # kstest_blink_rate_distance_street_river()

@@ -1,10 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from analysis.analysis_utils import get_times_actions, get_all_times_actions_of_player, get_all_subjects
 from analysis.data_utils import read_data
 from game.world.player import PlayerAction
-from game.world_generation.generation_config import GameDifficulty
 
 
 def action_int_to_name(action_int):

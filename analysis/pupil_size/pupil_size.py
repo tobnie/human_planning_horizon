@@ -46,17 +46,19 @@ def get_nan_idx(df, expand=2):
     return expanded_idx
 
 
-def set_pupil_sizes_na(game_df):
+def set_gaze_information_nan(game_df):
     expand_around_na_samples = 2
     idx = get_nan_idx(game_df, expand_around_na_samples)
     if len(idx) > 0:
         game_df['pupil_size'][idx] = np.nan
+        # game_df['gaze_x'][idx] = -32768 # TODO do that or not?
+        # game_df['gaze_y'][idx] = -32768
     return game_df
 
 
 def add_pupil_size_z_score(subject_df):
     # drop zero pupil size and samples around them
-    subject_df.groupby(['subject_id', 'game_difficulty', 'world_number'], group_keys=False).apply(set_pupil_sizes_na)
+    subject_df = subject_df.groupby(['subject_id', 'game_difficulty', 'world_number'], group_keys=False).apply(set_gaze_information_nan).reset_index()
 
     # standardize for subject
     pupil_size = subject_df['pupil_size']
@@ -116,6 +118,7 @@ def plot_pupil_size():
     plt.savefig('./imgs/pupil_size/pupil_sizes_box.png')
     plt.show()
 
+    # TODO position names
     plt.violinplot(dataset=[pupil_size_total, pupil_size_street, pupil_size_river],
                    showextrema=False)  # , positions=['total', 'street', 'river'])
     plt.ylabel('pupil size z-score')
@@ -163,6 +166,6 @@ def kstest_pupil_size_street_river():
 
 if __name__ == '__main__':
     plot_pupil_size()
-    # ttest_pupil_size_street_river()
-    # kstest_pupil_size_street_river()
-    # plot_pupil_size_for_each_game()
+    ttest_pupil_size_street_river()
+    kstest_pupil_size_street_river()
+    plot_pupil_size_for_each_game()

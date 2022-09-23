@@ -12,7 +12,7 @@ from analysis.score.recalculate_score import add_level_score_estimations_to_df
 
 def plot_performance_per_difficulty():
     last_time_steps = get_last_time_steps_of_games().copy()
-    counts = pd.read_csv('../data/performance_stats.csv', index_col=0)
+    counts = pd.read_csv('../data/performance_stats.csv')
 
     # plot number of game outcomes
     g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
@@ -21,9 +21,15 @@ def plot_performance_per_difficulty():
     plt.savefig('./imgs/performance/game_endings_per_subject_per_difficulty.png')
     plt.show()
 
-    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
+    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, ci=None,
                     aspect=.7)
-    g.set(ylim=(0.0, 1.0))
+    g.set(ylim=(0.0, 0.8), ylabel="Percentage of game outcomes",
+       xlabel="Game Outcomes")
+
+    # set titles
+    for ax in g.axes:
+        ax.set_title(ax.title.get_text().split('=')[-1])
+
     plt.savefig('./imgs/performance/game_endings_per_subject.png')
     plt.show()
 
@@ -35,8 +41,12 @@ def plot_performance_per_difficulty():
     plt.show()
 
     # outcomes as stacked bar plot
-    last_time_steps.groupby(['game_difficulty', 'game_status'])['game_difficulty'].count().unstack('game_status').fillna(0).plot(kind='bar',
-                                                                                                                                 stacked=True)
+    outcome_count = last_time_steps.groupby(['game_difficulty', 'game_status'])['game_difficulty'].count().reset_index(name='count')
+    n_games = outcome_count['count'].sum()
+    # TODO ordering
+    ax = outcome_count.div(n_games).unstack('game_status').fillna(0).plot.barh(stacked=True)
+    ax.set_xlabel('Trial outcomes [%]')
+    ax.set_ylabel('Game difficulty')
     plt.savefig('./imgs/performance/game_endings_stacked.png')
 
     # plot average time
@@ -70,18 +80,17 @@ def save_performance_stats():
     games_per_difficulty = 20
     counts_per_difficulty['percentage'] = counts_per_difficulty['count'].div(games_per_difficulty)
 
-    counts_per_difficulty.to_csv('performance_stats.csv', index=False)
+    counts_per_difficulty.reset_index(inplace=True)
+    counts_per_difficulty.drop(columns=['index'], inplace=True)
+    counts_per_difficulty.to_csv('../data/performance_stats.csv', index=False)
     print('Saved Performance Stats')
 
 
 def print_average_game_endings():
-    df = pd.read_csv('../data/performance_stats.csv', index_col=0)
+    df = pd.read_csv('../data/performance_stats.csv')
 
-    # df = df.apply(lambda x: get_absolute_counts(df)).reset_index()
-
-    wins = df.groupby(['subject_id', 'game_status']).agg(['mean', 'std', 'median']).reset_index()
-
-    # all_wins = df['game_status'].agg()
+    status_difficulty_group = df.groupby(['game_status', 'game_difficulty'])
+    print(status_difficulty_group['percentage'].mean().div(3))
 
     print('Average Won Games: ', df[df['game_status'] == 'won']['percentage'].mean())
     print('Average Timed Out Games: ', df[df['game_status'] == 'timed_out']['percentage'].mean())
@@ -230,8 +239,11 @@ def ttest_mean_time_normal_hard():
 
 
 if __name__ == '__main__':
+    # save_performance_stats()
+    sns.set_style("whitegrid")
+    plot_performance_per_difficulty()
     print_average_game_endings()
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()
 
-# plot_performance_per_difficulty()
+

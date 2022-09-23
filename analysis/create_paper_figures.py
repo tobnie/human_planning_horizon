@@ -20,6 +20,6 @@ if __name__ == '__main__':
     #
     df = pd.read_csv('../data/fixations.csv')
     plot_fixation_distance_box_per_region(df)  # TODO remove outliers?
-    # plot_fixation_distance_per_position(df)
+    plot_fixation_distance_per_position(df)
     # print_fixation_distances_per_group()
 

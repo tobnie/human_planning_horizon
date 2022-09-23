@@ -396,13 +396,13 @@ def run_preprocessing():
         subject_df['gaze_x'] = subject_df['gaze_x'].replace([34208], -32768.0)
         subject_df['gaze_y'] = subject_df['gaze_y'].replace([34208], -32768.0)
 
+        subject_df = add_pupil_size_z_score(subject_df)
         subject_df = add_game_status_to_df(subject_df)
         subject_df = add_player_position_in_field_coordinates(subject_df)
         subject_df = add_region_info(subject_df)
         subject_df = add_gaze_position_in_field_coordinates(subject_df)
         subject_df = add_experience_to_df(subject_df)
         subject_df = add_trial_numbers_to_df(subject_df)
-        subject_df = add_pupil_size_z_score(subject_df)
         subject_df = add_max_score_to_df(subject_df)
 
         subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')

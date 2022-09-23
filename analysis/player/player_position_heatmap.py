@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -7,6 +8,7 @@ from analysis.data_utils import read_data
 
 
 def coords2fieldsx(x):
+    # TODO check if this is okay with missing samples at -32768
     return min(config.N_FIELDS_PER_LANE - 1, max(x // config.FIELD_WIDTH, 0))
 
 
@@ -26,9 +28,15 @@ def plot_player_position_heatmap(df=None):
 
     position_df = df[['subject_id', 'player_x_field', 'player_y_field']].copy()
 
-    heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'])
+    # TODO
+    # # add last row empty
+    # n = df.shape[0]
+    # df.loc[n, 'player_x_field'] = 5
+    # df.loc[n, 'player_y_field'] = 14
+
+    ax = heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'])
     sns.heatmap(heatmap_df)
-    plt.gca().invert_yaxis()
+    ax.invert_yaxis()
     plt.tight_layout()
     plt.title('player position heatmap')
     plt.savefig('./imgs/player_position/player_position_heatmap.png')
@@ -36,8 +44,8 @@ def plot_player_position_heatmap(df=None):
 
     # again with player start position set to zero
     heatmap_df.iloc[0, 9] = 0
-    sns.heatmap(heatmap_df)
-    plt.gca().invert_yaxis()
+    ax = sns.heatmap(heatmap_df)
+    ax.invert_yaxis()
     plt.title('start location set to zero for scaling of color')
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero.png')
@@ -50,8 +58,8 @@ def plot_player_position_heatmap(df=None):
 
     heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'])
     heatmap_df.iloc[0, 9] = 0  # set start position to zero
-    sns.heatmap(heatmap_df)
-    plt.gca().invert_yaxis()
+    ax = sns.heatmap(heatmap_df)
+    ax.invert_yaxis()
     plt.title('only won games')
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero_only_won_games.png')

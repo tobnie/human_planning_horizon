@@ -44,7 +44,7 @@ import config
 from analysis.gaze.events.saccade_filtering_marius import detect_samples_marius
 
 BLINK_LB = 50  # lower bound for the duration of a blink in ms
-BLINK_UB = 450  # upper bound for the duration of a blink in ms
+BLINK_UB = 350  # upper bound for the duration of a blink in ms
 
 
 def blink_detection(x, y, time, missing=-32768):

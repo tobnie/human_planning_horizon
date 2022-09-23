@@ -3,6 +3,7 @@ from analysis.gaze.fixations import ttest_fixation_distance_street_river, kstest
 from analysis.performance.experts_vs_novices import ttest_fixation_distance_scoring_groups, kstest_fixation_distance_scoring_groups, \
     ttest_mean_level_score_high_scorer_low_scorer
 from analysis.performance.performances import anova_mean_level_score, ttest_mean_time_easy_normal, ttest_mean_time_normal_hard
+from analysis.pupil_size.pupil_size import ttest_pupil_size_street_river, kstest_pupil_size_street_river
 
 if __name__ == '__main__':
     print('\n---- t-test for fixation distances between different scoring groups ----')
@@ -23,6 +24,13 @@ if __name__ == '__main__':
     ttest_blink_rate_street_river()
     print('\n---- Kolmogorov Smirnov for blink rates river / street ----')
     kstest_blink_rate_distance_street_river()
+
+    print('\n\n')
+
+    print('\n---- t-test for pupil size river / street ----')
+    ttest_pupil_size_street_river()
+    print('\n---- Kolmogorov Smirnov for pupil size river / street ----')
+    kstest_pupil_size_street_river()
 
     print('\n\n')
 
