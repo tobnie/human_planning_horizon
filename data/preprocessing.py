@@ -9,7 +9,9 @@ from itertools import product
 import pandas as pd
 
 from analysis.data_utils import get_all_subjects, assign_position_to_fields, add_game_status_to_df
+from analysis.gaze.fixations import get_region_from_field
 from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates, coords2fieldsx, coords2fieldsy
+from analysis.pupil_size.pupil_size import add_pupil_size_z_score
 from analysis.sosci_utils import add_experience_to_df
 from analysis.score_utils import add_max_score_to_df
 from analysis.trial_order_utils import add_trial_numbers_to_df
@@ -283,6 +285,11 @@ def add_gaze_position_in_field_coordinates(df):
     return df
 
 
+def add_region_info(df):
+    df['region'] = df['player_y_field'].apply(get_region_from_field)
+    return df
+
+
 def run_preprocessing():
     # we want to save each row with:
     # subject_id, game_difficulty, world_number, time, gaze_x, gaze_y, pupil_size, player_x, player_y, action, state, (?)
@@ -386,13 +393,16 @@ def run_preprocessing():
         subject_df = pd.DataFrame(subject_dict)
 
         # missing y samples get transformed as well, so replace them again to be classified as missing correctly.
-        subject_df = subject_df.replace([34208], -32768.0)
+        subject_df['gaze_x'] = subject_df['gaze_x'].replace([34208], -32768.0)
+        subject_df['gaze_y'] = subject_df['gaze_y'].replace([34208], -32768.0)
 
         subject_df = add_game_status_to_df(subject_df)
         subject_df = add_player_position_in_field_coordinates(subject_df)
+        subject_df = add_region_info(subject_df)
         subject_df = add_gaze_position_in_field_coordinates(subject_df)
         subject_df = add_experience_to_df(subject_df)
         subject_df = add_trial_numbers_to_df(subject_df)
+        subject_df = add_pupil_size_z_score(subject_df)
         subject_df = add_max_score_to_df(subject_df)
 
         subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
