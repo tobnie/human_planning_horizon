@@ -1,14 +1,11 @@
-# import pygame
-#
-# pygame.init()
-
+############################################### DISPLAY ################################################
 DISPLAY_WIDTH_PX = 2560  # pygame.display.Info().current_w
 DISPLAY_HEIGHT_PX = 1440  # pygame.display.Info().current_h
 
-# UI
+############################################### UI ################################################
 font_size = 24
 
-# world configuration
+############################################### WORLD ################################################
 N_LANES = 15
 N_STREET_LANES = 6
 N_WATER_LANES = 6
@@ -61,3 +58,6 @@ LILYPAD_FILE = 'lilypad.png'
 LOG_FILE = 'plank.jpg'
 CAR_FILE = 'car.png'
 STAR_FILE = 'star.png'
+
+############################################### EYE TRACKER ################################################
+MISSING_SAMPLE = -32768

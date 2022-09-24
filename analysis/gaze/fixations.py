@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import scipy
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, patches
 import seaborn as sns
 import matplotlib as mpl
 
@@ -11,7 +11,7 @@ import config
 from analysis import paper_plot_utils
 from analysis.data_utils import get_street_data, get_river_data, subject2letter, read_data, transform_target_pos_to_string
 from analysis.gaze.events.event_detection import try_fixation_detection
-from analysis.gaze.vector_utils import calc_angle, calc_manhattan_distance, calc_euclidean_distance
+from analysis.gaze.vector_utils import calc_angle, calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
 
 
 def get_fixation_dataframe(df):
@@ -51,10 +51,12 @@ def join_fixation_df_and_general_df(df, fixation_df):
 
 
 def add_fixation_distance_and_angle(df):
+    # TODO check whether -32768 samples are dropped for euclidean calculation --> if not, change it!
     df['fix_distance_euclidean'] = df.apply(lambda x: calc_euclidean_distance(x['player_x'], x['player_y'], x['fix_x'], x['fix_y']), axis=1)
     df['fix_distance_manhattan'] = df.apply(
         lambda x: calc_manhattan_distance(x['player_x_field'], x['player_y_field'], x['fix_x_field'], x['fix_y_field']), axis=1)
-    df['fix_angle'] = df.apply(lambda x: calc_angle(x['player_x'], x['player_y'], x['fix_x'], x['fix_y']), axis=1)
+    df['fix_angle'] = df.apply(
+        lambda x: calc_angle_relative_to_front(x['player_x_field'], x['player_y_field'], x['fix_x_field'], x['fix_y_field']), axis=1)
     return df
 
 
@@ -75,6 +77,7 @@ def add_fixation_info_to_df(df):
     df = df.copy()
     df['fix_distance_euclidean_time'] = df['fix_distance_euclidean'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
     df['fix_distance_manhattan_time'] = df['fix_distance_manhattan'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
+    df['fix_angle_time'] = df['fix_angle'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
 
     summed_fixation_durations = df.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'])[
         'fix_duration'].agg(fix_duration_sum='sum').reset_index()
@@ -89,22 +92,28 @@ def add_fixation_info_to_df(df):
         df.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'])[
             'fix_distance_manhattan_time'].agg(sum='sum').reset_index()['sum']
 
+    # for angle
+    summed_fixation_durations['fix_angle_time_sum'] = \
+        df.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'])[
+            'fix_angle_time'].agg(sum='sum').reset_index()['sum']
+
     # calculate final weighted value
     summed_fixation_durations['weighted_fix_distance_euclidean'] = summed_fixation_durations['fix_distance_euclidean_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
     summed_fixation_durations['weighted_fix_distance_manhattan'] = summed_fixation_durations['fix_distance_manhattan_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
-
-    # for checking in debugger only:
-    # df[(df['subject_id'] == 'AL09OL') & (df['game_difficulty'] == 'easy') & (df['world_number'] == 1) & (df['player_x_field'] == 8) & (df['player_y_field'] == 10)]
+    summed_fixation_durations['weighted_fix_angle'] = summed_fixation_durations['fix_angle_time_sum'].div(
+        summed_fixation_durations['fix_duration_sum'])
 
     # join summed fixations on original df
     df = df.merge(summed_fixation_durations, on=['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'],
                   how='left')
     df = df[
-        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field', 'score', 'weighted_fix_distance_euclidean',
-         'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
-         'fix_distance_euclidean']].drop_duplicates()
+        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field', 'score',
+         'weighted_fix_distance_euclidean',
+         'weighted_fix_distance_manhattan', 'weighted_fix_angle', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
+         'fix_distance_manhattan',
+         'fix_distance_euclidean', 'fix_angle', 'fix_duration']].drop_duplicates()
 
     df = df[df['weighted_fix_distance_euclidean'].notna()]
     return df
@@ -151,11 +160,6 @@ def plot_fixation_distance_per_position(df, subject_id=None):
                 linewidths=.1)
     ax.invert_yaxis()
 
-    # if subject_id:
-    #     plt.suptitle('Average Weighted Fixation Distance from Player - {}'.format(subject_id))
-    # else:
-    #     plt.suptitle('Average Weighted Fixation Distance from Player')
-
     plt.xlabel('')
     plt.ylabel('')
 
@@ -173,56 +177,53 @@ def plot_fixation_distance_per_position(df, subject_id=None):
     plt.show()
 
 
-def plot_fixation_distance_per_position2(df, subject_id=None):
-    # TODO weighted angle
+def plot_fixation_angle_per_position(df, subject_id=None):
     if subject_id:
         df = df[df['subject_id'] == subject_id]
+
+    n = df.shape[0]
+    df.loc[n, 'player_x_field'] = 5
+    df.loc[n, 'player_y_field'] = 14
+    df.loc[n, 'weighted_fix_angle'] = 0.0
+
+    # TODO fill value with nan and replace with mean value?
+    weighted_fix_angle_pivot = pd.pivot_table(df, values='weighted_fix_angle', index='player_y_field',
+                                              columns='player_x_field',
+                                              aggfunc=np.mean, fill_value=0, dropna=False)
 
     if subject_id:
         directory_path = './imgs/gaze/fixations/fixations_per_position/{}/'.format(subject_id)
     else:
         directory_path = './imgs/gaze/fixations/fixations_per_position/'
 
-    fix_angle_pivot = pd.pivot_table(df, values='weighted_fix_angle', index='player_y_field', columns='player_x_field',
-                                     aggfunc=np.mean, fill_value=0)
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
 
-    # ---plot per target
-    g = sns.FacetGrid(df, col='target_position')
-    g.map_dataframe(_plot_heatmap, 'weighted_fix_distance_manhattan', vmin=0, vmax=30)
-
-    if subject_id:
-        plt.suptitle('Average Weighted Fixation Distance from Player - {}'.format(subject_id))
-    else:
-        plt.suptitle('Average Weighted Fixation Distance from Player')
-
-    plt.tight_layout()
-    plt.savefig(directory_path + 'weighted_fixation_per_position_by_target.png')
-    plt.show()
-
-    # plot heatmap angle
-    ax = sns.heatmap(fix_angle_pivot, center=0)  # , annot=True, annot_kws={"fontsize": 8})
+    # plot heatmap distance
+    fig, ax = plt.subplots(figsize=(12, 12))  # paper_plot_utils.figsize)
+    sns.heatmap(weighted_fix_angle_pivot, ax=ax, cmap=paper_plot_utils.CMAP, annot=True,
+                cbar_kws={'label': 'Angle'},
+                linewidths=.1)
     ax.invert_yaxis()
 
-    if subject_id:
-        plt.suptitle('Average Weighted Angle from Fixation to Player - {}'.format(subject_id))
-    else:
-        plt.suptitle('Average Weighted Angle from Fixation to Player')
+    # if subject_id:
+    #     plt.suptitle('Average Weighted Fixation Distance from Player - {}'.format(subject_id))
+    # else:
+    #     plt.suptitle('Average Weighted Fixation Distance from Player')
+
+    plt.xlabel('')
+    plt.ylabel('')
+
+    ax.set_ylim((0, config.N_LANES))
+
+    xlabels = [int(float(item.get_text()) + 1) for item in ax.get_xticklabels()]
+    ax.set_xticklabels(xlabels)
+
+    ylabels = [int(float(item.get_text()) + 1) for item in ax.get_yticklabels()]
+    ax.set_yticklabels(ylabels)
 
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_per_position.png')
-    plt.show()
-
-    # ---plot per target
-    g = sns.FacetGrid(df, col='target_position')
-    g.map_dataframe(_plot_heatmap, 'weighted_fix_angle')
-
-    if subject_id:
-        plt.suptitle('Average Weighted Angle from Fixation to Player - {}'.format(subject_id))
-    else:
-        plt.suptitle('Average Weighted Angle from Fixation to Player')
-
-    plt.tight_layout()
-    plt.savefig(directory_path + 'weighted_fixation_angle_per_position_by_target.png')
     plt.show()
 
 
@@ -323,17 +324,18 @@ def plot_fixation_distance_box_per_region(df):
     lines_per_boxplot = len(ax.lines) // num_patches
     for i, patch in enumerate(box_patches):
         # Set the linecolor on the patch to the facecolor, and set the facecolor to None
-        patch.set_edgecolor('k') #edge_colors[i])
+        patch.set_edgecolor('k')  # edge_colors[i])
         patch.set_facecolor(box_colors[i])
 
         # Each box has associated Line2D objects (to make the whiskers, fliers, etc.)
         # Loop over them here, and use the same color as above
         for line in ax.lines[i * lines_per_boxplot: (i + 1) * lines_per_boxplot]:
-            line.set_color('k') #edge_colors[i])
-            line.set_mfc('k')  #edge_colors[i])  # facecolor of fliers
+            line.set_color('k')  # edge_colors[i])
+            line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
             line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
 
-    sns.violinplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", size=0.5, palette=box_colors, inner=None, saturation=0.5)
+    sns.violinplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", size=0.5, palette=box_colors, inner=None,
+                   saturation=0.5)
 
     ax.set_yscale('log')
     ax.set_xlabel('')
@@ -419,14 +421,104 @@ def plot_avg_fixation_distance_per_subject():
     plt.show()
 
 
+def plot_fixation_kde(df, axes):
+    if df.shape[0] < 5:
+        # TODO check for variance or use try except block
+        return
+
+    player_x = int(df['player_x_field'].values[0])
+    player_y = int(df['player_y_field'].values[0])
+
+    ax = axes[config.N_LANES - 1 - player_y, player_x]
+    ax.set_xlim((0, config.DISPLAY_WIDTH_PX))
+    ax.set_ylim((0, config.DISPLAY_HEIGHT_PX))
+
+    sns.kdeplot(df, x='fix_x', y='fix_y', weights='fix_duration', ax=ax, fill=True, cmap='mako')
+    sns.scatterplot(df, x='fix_x', y='fix_y', size='fix_duration', ax=ax, alpha=0.5, color='white')
+
+    # add player position
+    rect = patches.Rectangle((player_x * config.FIELD_WIDTH, player_y * config.FIELD_HEIGHT), config.FIELD_WIDTH, config.FIELD_HEIGHT,
+                             fill=True, color='r', alpha=0.5)
+    ax.add_patch(rect)
+
+
+def plot_fixations_kde():
+    df = pd.read_csv('../data/fixations.csv')
+
+    fig, axs = plt.subplots(config.N_LANES, config.N_FIELDS_PER_LANE, figsize=(60, 40), sharex='all', sharey='all')
+
+    grp_by_player_pos = df.groupby(['player_x_field', 'player_y_field'])
+    grp_by_player_pos.apply(lambda x: plot_fixation_kde(x, axs))
+
+    for i in range(axs.shape[0]):
+        for j in range(axs.shape[1]):
+            ax = axs[i, j]
+            ax.set_facecolor('darkgray')
+            ax.set_xticks(range(0, config.DISPLAY_WIDTH_PX + 1, int(config.FIELD_WIDTH)), rotation=90)
+            ax.set_yticks(range(0, config.DISPLAY_HEIGHT_PX + 1, int(config.FIELD_HEIGHT)))
+            ax.legend().set_visible(False)
+            if i == axs.shape[0] - 1:
+                ax.set_xlabel(f'col {j}')
+                ax.set_xticklabels(range(0, config.N_FIELDS_PER_LANE + 1), rotation=90)
+            if j == 0:
+                ax.set_ylabel(f'row {config.N_LANES - 1 - i}')
+                ax.set_yticklabels(range(0, config.N_LANES + 1))
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/fix_kde_per_position.png')
+    plt.show()
+
+
+def plot_polar_hist_for_fixations_per_position():
+    df = pd.read_csv('../data/fixations.csv')
+    fig, axs = plt.subplots(config.N_LANES, config.N_FIELDS_PER_LANE, figsize=(60, 40), subplot_kw=dict(projection="polar"))
+
+    grp_by_player_pos = df.groupby(['player_x_field', 'player_y_field'])
+    grp_by_player_pos.apply(lambda x: polar_hist_fixations(x, axs))
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/fix_polar_hist_per_position.png')
+    plt.show()
+
+
+def polar_hist_fixations(df, axs):
+    # get relevant values
+    fix_angle = df['fix_angle']
+    fix_dist = df['fix_distance_manhattan']
+    fix_duration = df['fix_duration']
+
+    # player coordinates
+    player_x = int(df['player_x_field'].values[0])
+    player_y = int(df['player_y_field'].values[0])
+
+    # get ax
+    ax = axs[config.N_LANES - 1 - player_y, player_x]
+
+    # define binning
+    angle_bins = np.linspace(0, 2 * np.pi, 45)
+    dist_bins = np.linspace(0, 8, 5)  # fix_dist.max(), 5)
+
+    # calculate histogram
+    hist, _, _ = np.histogram2d(fix_angle, fix_dist, weights=fix_duration, bins=(angle_bins, dist_bins))
+    A, R = np.meshgrid(angle_bins, dist_bins)
+
+    pc = ax.pcolormesh(A, R, hist.T, cmap="magma_r")
+    ax.set_theta_offset(np.pi / 2)
+    return pc
+
+
 if __name__ == '__main__':
     # df = read_data()
     # df = transform_target_pos_to_string(df)
     # df = add_fixation_info_to_df(df)
 
-    plot_avg_fixation_distance_per_subject()
+    # plot_avg_fixation_distance_per_subject()
 
-    # df = pd.read_csv('../data/fixations.csv')
+    # TODO run
+    # plot_fixations_kde()
+    # plot_polar_hist_for_fixations_per_position()
+    df = pd.read_csv('../data/fixations.csv')
+    plot_fixation_angle_per_position(df)
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 
