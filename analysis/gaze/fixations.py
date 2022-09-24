@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
-import scipy.stats
+import scipy
 from matplotlib import pyplot as plt
 import seaborn as sns
 import matplotlib as mpl
@@ -174,6 +174,7 @@ def plot_fixation_distance_per_position(df, subject_id=None):
 
 
 def plot_fixation_distance_per_position2(df, subject_id=None):
+    # TODO weighted angle
     if subject_id:
         df = df[df['subject_id'] == subject_id]
 
@@ -412,15 +413,18 @@ def plot_avg_fixation_distance_per_subject():
 
     xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
     ax.set_xticklabels(xlabels)
-
     plt.tight_layout()
+
+    plt.savefig('./imgs/gaze/fixations/mfd_per_score.png')
     plt.show()
 
 
 if __name__ == '__main__':
-    df = read_data()
-    df = transform_target_pos_to_string(df)
-    df = add_fixation_info_to_df(df)
+    # df = read_data()
+    # df = transform_target_pos_to_string(df)
+    # df = add_fixation_info_to_df(df)
+
+    plot_avg_fixation_distance_per_subject()
 
     # df = pd.read_csv('../data/fixations.csv')
     # plot_fixation_distance_per_position(df)
