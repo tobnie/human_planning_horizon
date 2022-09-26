@@ -24,7 +24,7 @@ def plot_performance_per_difficulty():
     g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, ci=None,
                     aspect=.7)
     g.set(ylim=(0.0, 0.8), ylabel="Percentage of game outcomes",
-       xlabel="Game Outcomes")
+          xlabel="Game Outcomes")
 
     # set titles
     for ax in g.axes:
@@ -182,10 +182,26 @@ def plot_mean_score_per_level():
     plt.show()
 
 
+def standardize_level_score(difficulty, level_score):
+    if level_score == -100:
+        return -100
+
+    if difficulty == 'hard':
+        return level_score / 3
+    elif difficulty == 'normal':
+        return level_score / 2
+    else:
+        return level_score
+
+
 def save_level_scores():
     df = read_data()
     df = add_level_score_estimations_to_df(df)
-    scores_per_level = df[['subject_id', 'game_difficulty', 'world_number', 'level_score', 'score']]
+    scores_per_level = df[['subject_id', 'game_difficulty', 'world_number', 'level_score', 'score']].drop_duplicates()
+
+    scores_per_level['standardized_level_score'] = scores_per_level.apply(
+        lambda x: standardize_level_score(x['game_difficulty'], x['level_score']), axis=1)
+
     scores_per_level.to_csv('level_scores.csv', index=False)
     print('Saved Level Scores')
 
@@ -245,5 +261,3 @@ if __name__ == '__main__':
     print_average_game_endings()
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()
-
-

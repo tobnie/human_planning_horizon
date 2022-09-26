@@ -237,31 +237,74 @@ def plot_fixation_distance_per_meta_data(df, subfolder=''):
     plt.suptitle('Average Weighted Fixation Distance per Experience')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_experience.png')
+    plt.show()
 
     sns.catplot(data=df, x='experience', y='weighted_fix_angle', kind='bar')
     plt.suptitle('Average Weighted Fixation Angle per Experience')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_experience.png')
+    plt.show()
 
     sns.catplot(data=df, x='score', y='weighted_fix_distance_manhattan', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Score')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_score.png')
+    plt.show()
 
     sns.catplot(data=df, x='score', y='weighted_fix_angle', kind='bar')
     plt.suptitle('Average Weighted Fixation Angle per Score')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_score.png')
+    plt.show()
 
     sns.catplot(data=df, x='subject_id', y='weighted_fix_distance_manhattan', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Subject')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_subject.png')
+    plt.show()
 
     sns.catplot(data=df, x='subject_id', y='weighted_fix_angle', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Subject')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_subject.png')
+    plt.show()
+
+    sns.catplot(data=df, x='level_score', y='weighted_fix_distance_manhattan', kind='bar')
+    plt.suptitle('Average Weighted Fixation Distance per Level Score')
+    plt.tight_layout()
+    plt.savefig(directory_path + 'weighted_fixation_distance_by_level_score.png')
+    plt.show()
+
+
+def plot_mfd_per_level_score(subfolder=''):
+    directory_path = './imgs/gaze/fixations/fixations_per_position/' + subfolder
+
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
+    fix_df = pd.read_csv('../data/fixations.csv')
+    level_scores = pd.read_csv('../data/level_scores.csv')
+
+    mean_mfd_df = fix_df.groupby(['subject_id', 'game_difficulty', 'world_number'])['weighted_fix_distance_manhattan'].mean().reset_index(
+        name='mfd')
+
+    mfd_and_score_df = level_scores.merge(mean_mfd_df, on=['subject_id', 'game_difficulty', 'world_number'], how='left').drop_duplicates()
+    # mfd_and_score_df = mfd_and_score_df[mfd_and_score_df['level_score'] > 250]  # only won games
+
+    sns.scatterplot(mfd_and_score_df, x='level_score', y='mfd', hue='game_difficulty')
+    plt.tight_layout()
+    plt.savefig(directory_path + 'weighted_fixation_distance_by_level_score.png')
+    plt.show()
+
+    sns.scatterplot(mfd_and_score_df, x='standardized_level_score', y='mfd', hue='game_difficulty')
+    plt.tight_layout()
+    plt.savefig(directory_path + 'weighted_fixation_distance_by_level_score_standardized.png')
+    plt.show()
+
+    sns.histplot(mfd_and_score_df, x='mfd', hue='game_difficulty', multiple="stack")
+    plt.tight_layout()
+    plt.savefig(directory_path + 'weighted_fixation_distance_by_game_difficulty.png')
+    plt.show()
 
 
 def get_region_from_field(y_field):
@@ -518,7 +561,8 @@ if __name__ == '__main__':
     # plot_fixations_kde()
     # plot_polar_hist_for_fixations_per_position()
     df = pd.read_csv('../data/fixations.csv')
-    plot_fixation_angle_per_position(df)
+    plot_mfd_per_level_score()
+    # plot_fixation_angle_per_position(df)
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 
