@@ -38,16 +38,16 @@ def print_fixation_distances_per_group():
     print('-----High Scorers-----')
     df_high_scorers = df[df['scoring_group'] == 'high']
     print('n =', len(df_high_scorers['subject_id'].unique()))
-    print('Mean:', df_high_scorers['weighted_fix_distance_manhattan'].mean())
-    print('Variance:', df_high_scorers['weighted_fix_distance_manhattan'].var())
-    print('Median:', df_high_scorers['weighted_fix_distance_manhattan'].median())
+    print('Mean:', df_high_scorers['mfd'].mean())
+    print('Variance:', df_high_scorers['mfd'].var())
+    print('Median:', df_high_scorers['mfd'].median())
 
     print('-----Low Scorers-----')
     df_low_scorers = df[df['scoring_group'] == 'low']
     print('n =', len(df_low_scorers['subject_id'].unique()))
-    print('Mean:', df_low_scorers['weighted_fix_distance_manhattan'].mean())
-    print('Variance:', df_low_scorers['weighted_fix_distance_manhattan'].var())
-    print('Median:', df_low_scorers['weighted_fix_distance_manhattan'].median())
+    print('Mean:', df_low_scorers['mfd'].mean())
+    print('Variance:', df_low_scorers['mfd'].var())
+    print('Median:', df_low_scorers['mfd'].median())
 
     print('\n\nEuclidean Distance')
     print('-----High Scorers-----')
@@ -76,7 +76,7 @@ def plot_fixation_distance_box_scoring_groups():
     # create boxplot
     sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.boxplot(data=df, ax=ax, x='scoring_group', y='weighted_fix_distance_manhattan', width=0.2, linewidth=1.5,
+    sns.boxplot(data=df, ax=ax, x='scoring_group', y='mfd', width=0.2, linewidth=1.5,
                 flierprops=dict(markersize=2),
                 showmeans=True, meanline=True)
 
@@ -124,7 +124,7 @@ def plot_fixation_distance_scoring_groups_for_different_splits():
         # create boxplot
         sns.set_style("whitegrid")
 
-        sns.boxplot(data=df_ax, ax=ax, x='scoring_group', y='weighted_fix_distance_manhattan', width=0.2, linewidth=1.5,
+        sns.boxplot(data=df_ax, ax=ax, x='scoring_group', y='mfd', width=0.2, linewidth=1.5,
                     flierprops=dict(markersize=2),
                     showmeans=True, meanline=True)
 
@@ -178,8 +178,8 @@ def ttest_fixation_distance_scoring_groups():
     print(ttest_result)
     print('dof=', len(fix_distances_low_scorers) - 1 + len(fix_distances_high_scorers) - 1)
 
-    fix_distances_high_scorers = df_high_scorers['weighted_fix_distance_manhattan']
-    fix_distances_low_scorers = df_low_scorers['weighted_fix_distance_manhattan']
+    fix_distances_high_scorers = df_high_scorers['mfd']
+    fix_distances_low_scorers = df_low_scorers['mfd']
 
     # perform (Welch's) t-test
     # t test manhattan distances:
@@ -197,7 +197,7 @@ def kstest_fixation_distance_scoring_groups():
 
     # fixations_df = pd.read_csv('../data/fixations.csv')[
     #     ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'weighted_fix_distance_euclidean',
-    #      'weighted_fix_distance_manhattan']]
+    #      'mfd']]
     #
     # df = fixations_df.merge(df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
 
@@ -215,8 +215,8 @@ def kstest_fixation_distance_scoring_groups():
     print('Test in Weighted Euclidean Distances')
     print(kstest_result)
 
-    fix_distances_high_scorers = df_high_scorers['weighted_fix_distance_manhattan']
-    fix_distances_low_scorers = df_low_scorers['weighted_fix_distance_manhattan']
+    fix_distances_high_scorers = df_high_scorers['mfd']
+    fix_distances_low_scorers = df_low_scorers['mfd']
 
     # perform (Welch's) t-test
     # t test manhattan distances:

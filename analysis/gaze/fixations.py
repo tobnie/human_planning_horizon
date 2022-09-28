@@ -10,9 +10,9 @@ import matplotlib as mpl
 
 import config
 from analysis import paper_plot_utils
-from analysis.data_utils import get_street_data, get_river_data, subject2letter, read_data, transform_target_pos_to_string
+from analysis.data_utils import get_street_data, get_river_data, subject2letter, read_data
 from analysis.gaze.events.event_detection import try_fixation_detection
-from analysis.gaze.vector_utils import calc_angle, calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
+from analysis.gaze.vector_utils import calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
 
 
 def get_fixation_dataframe(df):
@@ -101,9 +101,9 @@ def add_fixation_info_to_df(df):
     # calculate final weighted value
     summed_fixation_durations['weighted_fix_distance_euclidean'] = summed_fixation_durations['fix_distance_euclidean_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
-    summed_fixation_durations['weighted_fix_distance_manhattan'] = summed_fixation_durations['fix_distance_manhattan_time_sum'].div(
+    summed_fixation_durations['mfd'] = summed_fixation_durations['fix_distance_manhattan_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
-    summed_fixation_durations['weighted_fix_angle'] = summed_fixation_durations['fix_angle_time_sum'].div(
+    summed_fixation_durations['mfa'] = summed_fixation_durations['fix_angle_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
 
     # join summed fixations on original df
@@ -112,7 +112,7 @@ def add_fixation_info_to_df(df):
     df = df[
         ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field', 'score',
          'weighted_fix_distance_euclidean',
-         'weighted_fix_distance_manhattan', 'weighted_fix_angle', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
+         'mfd', 'mfa', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
          'fix_distance_manhattan',
          'fix_distance_euclidean', 'fix_angle', 'fix_duration']].drop_duplicates()
 
@@ -125,7 +125,7 @@ def _plot_heatmap(*args, **kwargs):
     data_pivot = pd.pivot_table(data, values=args[0], index='player_y_field', columns='player_x_field', aggfunc=np.mean,
                                 fill_value=0)
 
-    if args[0] == 'fix_angle' or args[0] == 'weighted_fix_angle':
+    if args[0] == 'fix_angle' or args[0] == 'mfa':
         ax = sns.heatmap(data_pivot, center=0)
     else:
         ax = sns.heatmap(data_pivot)  # , annot=True, annot_kws={"fontsize": 8})
@@ -140,9 +140,9 @@ def plot_fixation_distance_per_position(df, subject_id=None):
     n = df.shape[0]
     df.loc[n, 'player_x_field'] = 5
     df.loc[n, 'player_y_field'] = 14
-    df.loc[n, 'weighted_fix_distance_manhattan'] = 0.0
+    df.loc[n, 'mfd'] = 0.0
 
-    weighted_fix_distance_pivot = pd.pivot_table(df, values='weighted_fix_distance_manhattan', index='player_y_field',
+    weighted_fix_distance_pivot = pd.pivot_table(df, values='mfd', index='player_y_field',
                                                  columns='player_x_field',
                                                  aggfunc=np.mean, fill_value=0, dropna=False)
 
@@ -185,10 +185,10 @@ def plot_fixation_angle_per_position(df, subject_id=None):
     n = df.shape[0]
     df.loc[n, 'player_x_field'] = 5
     df.loc[n, 'player_y_field'] = 14
-    df.loc[n, 'weighted_fix_angle'] = 0.0
+    df.loc[n, 'mfa'] = 0.0
 
     # TODO fill value with nan and replace with mean value?
-    weighted_fix_angle_pivot = pd.pivot_table(df, values='weighted_fix_angle', index='player_y_field',
+    mfa_pivot = pd.pivot_table(df, values='mfa', index='player_y_field',
                                               columns='player_x_field',
                                               aggfunc=np.mean, fill_value=0, dropna=False)
 
@@ -202,7 +202,7 @@ def plot_fixation_angle_per_position(df, subject_id=None):
 
     # plot heatmap distance
     fig, ax = plt.subplots(figsize=(12, 12))  # paper_plot_utils.figsize)
-    sns.heatmap(weighted_fix_angle_pivot, ax=ax, cmap=paper_plot_utils.CMAP, annot=True,
+    sns.heatmap(mfa_pivot, ax=ax, cmap=paper_plot_utils.CMAP, annot=True,
                 cbar_kws={'label': 'Angle'},
                 linewidths=.1)
     ax.invert_yaxis()
@@ -234,43 +234,43 @@ def plot_fixation_distance_per_meta_data(df, subfolder=''):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
-    sns.catplot(data=df, x='experience', y='weighted_fix_distance_manhattan', kind='bar')
+    sns.catplot(data=df, x='experience', y='mfd', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Experience')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_experience.png')
     plt.show()
 
-    sns.catplot(data=df, x='experience', y='weighted_fix_angle', kind='bar')
+    sns.catplot(data=df, x='experience', y='mfa', kind='bar')
     plt.suptitle('Average Weighted Fixation Angle per Experience')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_experience.png')
     plt.show()
 
-    sns.catplot(data=df, x='score', y='weighted_fix_distance_manhattan', kind='bar')
+    sns.catplot(data=df, x='score', y='mfd', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Score')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_score.png')
     plt.show()
 
-    sns.catplot(data=df, x='score', y='weighted_fix_angle', kind='bar')
+    sns.catplot(data=df, x='score', y='mfa', kind='bar')
     plt.suptitle('Average Weighted Fixation Angle per Score')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_score.png')
     plt.show()
 
-    sns.catplot(data=df, x='subject_id', y='weighted_fix_distance_manhattan', kind='bar')
+    sns.catplot(data=df, x='subject_id', y='mfd', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Subject')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_subject.png')
     plt.show()
 
-    sns.catplot(data=df, x='subject_id', y='weighted_fix_angle', kind='bar')
+    sns.catplot(data=df, x='subject_id', y='mfa', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Subject')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_angle_by_subject.png')
     plt.show()
 
-    sns.catplot(data=df, x='level_score', y='weighted_fix_distance_manhattan', kind='bar')
+    sns.catplot(data=df, x='level_score', y='mfd', kind='bar')
     plt.suptitle('Average Weighted Fixation Distance per Level Score')
     plt.tight_layout()
     plt.savefig(directory_path + 'weighted_fixation_distance_by_level_score.png')
@@ -286,7 +286,7 @@ def plot_mfd_per_level_score(subfolder=''):
     fix_df = pd.read_csv('../data/fixations.csv')
     level_scores = pd.read_csv('../data/level_scores.csv')
 
-    mean_mfd_df = fix_df.groupby(['subject_id', 'game_difficulty', 'world_number'])['weighted_fix_distance_manhattan'].mean().reset_index(
+    mean_mfd_df = fix_df.groupby(['subject_id', 'game_difficulty', 'world_number'])['mfd'].mean().reset_index(
         name='mfd')
 
     mfd_and_score_df = level_scores.merge(mean_mfd_df, on=['subject_id', 'game_difficulty', 'world_number'], how='left').drop_duplicates()
@@ -325,16 +325,16 @@ def plot_fixation_distance_hist_per_region(df):
     fig, ax = plt.subplots()
     # multiple{“layer”, “dodge”, “stack”, “fill”}
     n_bins = 20
-    x = df[df['region'] == 'street']['weighted_fix_distance_manhattan']
+    x = df[df['region'] == 'street']['mfd']
     ax.hist(x, density=True, bins=n_bins, label='street')
-    y = df[df['region'] == 'river']['weighted_fix_distance_manhattan']
+    y = df[df['region'] == 'river']['mfd']
     ax.hist(y, density=True, bins=n_bins, alpha=0.5, label='river')
     ax.set_xscale('log')
     ax.legend()
 
-    # df = df.drop(df[df['weighted_fix_distance_manhattan'] > 0.3].index)
+    # df = df.drop(df[df['mfd'] > 0.3].index)
     # binwidth = 0.04
-    # sns.histplot(data=df, ax=ax, x="weighted_fix_distance_manhattan", hue="region", stat='proportion', multiple='fill', binwidth=binwidth, common_norm=False)  # multiple="stack",
+    # sns.histplot(data=df, ax=ax, x="mfd", hue="region", stat='proportion', multiple='fill', binwidth=binwidth, common_norm=False)  # multiple="stack",
     #
     # ax.set_xlabel('Average Fixation Distance [fields/ms]')
     # plt.savefig(directory_path + 'fixation_distance_per_region_hist.png')
@@ -354,7 +354,7 @@ def plot_fixation_distance_box_per_region(df):
     # create boxplot
     sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.boxplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", width=0.2, linewidth=1.5,
+    sns.boxplot(data=df, ax=ax, y="mfd", x="region", width=0.2, linewidth=1.5,
                 showfliers=False,
                 # flierprops=dict(markersize=2),
                 showmeans=True, meanline=True,
@@ -378,7 +378,7 @@ def plot_fixation_distance_box_per_region(df):
             line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
             line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
 
-    sns.violinplot(data=df, ax=ax, y="weighted_fix_distance_manhattan", x="region", size=0.5, palette=box_colors, inner=None,
+    sns.violinplot(data=df, ax=ax, y="mfd", x="region", size=0.5, palette=box_colors, inner=None,
                    saturation=0.5)
 
     ax.set_yscale('log')
@@ -409,8 +409,8 @@ def ttest_fixation_distance_street_river():
     print(ttest_result)
     print('dof=', len(fix_distances_river) - 1 + len(fix_distances_street) - 1)
 
-    fix_distances_river = df_river['weighted_fix_distance_manhattan']
-    fix_distances_street = df_street['weighted_fix_distance_manhattan']
+    fix_distances_river = df_river['mfd']
+    fix_distances_street = df_street['mfd']
 
     # perform (Welch's) t-test
     # t test manhattan distances:
@@ -439,8 +439,8 @@ def kstest_fixation_distance_street_river():
     print('Test in Weighted Euclidean Distances')
     print(kstest_result)
 
-    fix_distances_river = df_river['weighted_fix_distance_manhattan']
-    fix_distances_street = df_street['weighted_fix_distance_manhattan']
+    fix_distances_river = df_river['mfd']
+    fix_distances_street = df_street['mfd']
 
     # perform (Welch's) t-test
     # t test manhattan distances:
@@ -455,7 +455,7 @@ def plot_avg_fixation_distance_per_subject():
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.pointplot(data=df, ax=ax, x='subject_id', y='weighted_fix_distance_manhattan', join=False, order=order_df['subject_id'])
+    sns.pointplot(data=df, ax=ax, x='subject_id', y='mfd', join=False, order=order_df['subject_id'])
 
     xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
     ax.set_xticklabels(xlabels)
@@ -466,10 +466,10 @@ def plot_avg_fixation_distance_per_subject():
 
     # linear regression:
 
-    # df = df[['subject_id', 'score', 'weighted_fix_distance_manhattan']].groupby(['subject_id', 'score'])[
-    #     'weighted_fix_distance_manhattan'].mean().reset_index()
-    df = df[['subject_id', 'score', 'weighted_fix_distance_manhattan']].groupby(['subject_id', 'score'])[
-        'weighted_fix_distance_manhattan'].agg(['mean', 'sem', 'std'])
+    # df = df[['subject_id', 'score', 'mfd']].groupby(['subject_id', 'score'])[
+    #     'mfd'].mean().reset_index()
+    df = df[['subject_id', 'score', 'mfd']].groupby(['subject_id', 'score'])[
+        'mfd'].agg(['mean', 'sem', 'std'])
     df.columns = ['mfd', 'mfd_sem', 'mfd_std']
     df.reset_index(inplace=True)
 

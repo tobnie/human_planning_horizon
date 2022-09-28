@@ -1,7 +1,8 @@
+import numpy as np
 import pandas as pd
 from remodnav import EyegazeClassifier
 
-from analysis.data_utils import read_subject_data, read_data
+from analysis.data_utils import read_data
 from analysis.gaze.adaptiveIDT.data_filtering import PIX2DEG
 
 from analysis.player.player_position_heatmap import coords2fieldsx, coords2fieldsy
@@ -51,8 +52,10 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
     time_mask_remodnav = remodnav_results['start_time'] == time
     remodnav_row = remodnav_results[time_mask_remodnav]
 
+    time = trial_df.loc[idx_closest_time]['time']
     player_x_field = trial_df.loc[idx_closest_time]['player_x_field']
     player_y_field = trial_df.loc[idx_closest_time]['player_y_field']
+    state = trial_df.loc[idx_closest_time]['state']
 
     remodnav_new = {
         'time': time,
@@ -64,6 +67,7 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
         'start_y': remodnav_row['start_y'].values[0],
         'end_x': remodnav_row['end_x'].values[0],
         'end_y': remodnav_row['end_y'].values[0],
+        'state': state
     }
 
     return remodnav_new
@@ -87,7 +91,13 @@ def add_mfd_to_remodnav(df):
     return df
 
 
-def get_fixations_from_remodnav():
+def add_mfa_to_remodnav(df):
+    total_fix_duration = df['duration'].sum()
+    df['mfa'] = (df['manhattan_distance'] * df['duration']).sum() / total_fix_duration
+    return df
+
+
+def save_remodnav_fixations():
     missing_threshold = -30000
     df = read_data()
     results = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(run_remodnav).reset_index().drop(columns='level_3')
@@ -107,24 +117,17 @@ def get_fixations_from_remodnav():
     fixations['center_y_field'] = fixations['center_y'].apply(coords2fieldsy)
     fixations['manhattan_distance'] = fixations.apply(
         lambda x: abs(x['center_x_field'] - x['player_x_field']) + abs(x['center_y_field'] - x['player_y_field']), axis=1)
+    fixations['angle'] = fixations.apply(
+        lambda x: np.arctan2(x['center_y_field'] - x['player_y_field'], x['center_x_field'] - x['player_x_field']), axis=1)
 
-    fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(add_mfd_to_remodnav)
+    fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(
+        add_mfd_to_remodnav)
+    fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(
+        add_mfa_to_remodnav)
     fixations = fixations.drop_duplicates()
 
-    print('New Method:')
-    print(fixations)
-
     fixations.to_csv('../data/fixations_remodnav.csv', index=False)
-    #
-    # old_fixations = pd.read_csv('../data/fixations.csv')
-    # old_fixations = old_fixations[(old_fixations['subject_id'] == subject_id) & (old_fixations['game_difficulty'] == game_difficulty) & (
-    #             old_fixations['world_number'] == world_number)]
-    # old_fixations = old_fixations[['player_x_field', 'player_y_field', 'weighted_fix_distance_manhattan']]
-    # old_fixations = old_fixations.drop_duplicates()
-    # print('Old Method:')
-    # print(old_fixations)
 
 
 if __name__ == '__main__':
-    get_fixations_from_remodnav()
-
+    save_remodnav_fixations()
