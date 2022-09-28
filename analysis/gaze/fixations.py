@@ -466,10 +466,17 @@ def plot_avg_fixation_distance_per_subject():
 
     # linear regression:
 
+    # df = df[['subject_id', 'score', 'weighted_fix_distance_manhattan']].groupby(['subject_id', 'score'])[
+    #     'weighted_fix_distance_manhattan'].mean().reset_index()
     df = df[['subject_id', 'score', 'weighted_fix_distance_manhattan']].groupby(['subject_id', 'score'])[
-        'weighted_fix_distance_manhattan'].mean().reset_index()
+        'weighted_fix_distance_manhattan'].agg(['mean', 'sem', 'std'])
+    df.columns = ['mfd', 'mfd_sem', 'mfd_std']
+    df.reset_index(inplace=True)
+
     x = df['score']
-    y = df['weighted_fix_distance_manhattan']
+    y = df['mfd']
+    sem = df['mfd_sem']
+    std = df['mfd_std']
     res = scipy.stats.linregress(x, y, alternative='greater')
 
     print('Linear Regression for avg Fixation Distance per Level Score:')
@@ -500,9 +507,10 @@ def plot_avg_fixation_distance_per_subject():
     print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    plt.scatter(x, y, label='data')
+    # plt.scatter(x, y, label='data')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
-    plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
     plt.xlabel('level score')
     plt.ylabel('MFD')
