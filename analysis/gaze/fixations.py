@@ -1,4 +1,5 @@
 import os
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -289,7 +290,7 @@ def plot_mfd_per_level_score(subfolder=''):
         name='mfd')
 
     mfd_and_score_df = level_scores.merge(mean_mfd_df, on=['subject_id', 'game_difficulty', 'world_number'], how='left').drop_duplicates()
-    # mfd_and_score_df = mfd_and_score_df[mfd_and_score_df['level_score'] > 250]  # only won games
+    mfd_and_score_df = mfd_and_score_df[mfd_and_score_df['level_score'] > 250]  # only won games
 
     sns.scatterplot(mfd_and_score_df, x='level_score', y='mfd', hue='game_difficulty')
     plt.tight_layout()
@@ -463,6 +464,53 @@ def plot_avg_fixation_distance_per_subject():
     plt.savefig('./imgs/gaze/fixations/mfd_per_score.png')
     plt.show()
 
+    # linear regression:
+
+    df = df[['subject_id', 'score', 'weighted_fix_distance_manhattan']].groupby(['subject_id', 'score'])[
+        'weighted_fix_distance_manhattan'].mean().reset_index()
+    x = df['score']
+    y = df['weighted_fix_distance_manhattan']
+    res = scipy.stats.linregress(x, y, alternative='greater')
+
+    print('Linear Regression for avg Fixation Distance per Level Score:')
+    print(f'R-squared: {res.rvalue ** 2}')
+    print(f'p value: {res.pvalue}')
+
+    # calc 95% CI for slope
+    dof = x.shape[0] - 1
+    tinv = lambda p, df: abs(scipy.stats.t.ppf(p / 2, dof))
+    ts = tinv(0.05, len(x) - 2)
+    slope_ci_upper = res.slope + ts * res.stderr
+    slope_ci_lower = res.slope - ts * res.stderr
+    intercept_ci_upper = res.intercept + ts * res.intercept_stderr
+    intercept_ci_lower = res.intercept - ts * res.intercept_stderr
+
+    # calculate
+    steps = 1000
+    xlim = (x.min() - 1000, x.max() + 1000)
+    xx = np.arange(xlim[0], xlim[1], steps)
+    possible_bounds = np.zeros((4, xx.shape[0]))
+    for i, (slope, intercept) in enumerate(product([slope_ci_lower, slope_ci_upper], [intercept_ci_lower, intercept_ci_upper])):
+        possible_bounds[i] = intercept + xx * slope
+
+    bounds_max = np.max(possible_bounds, axis=0)
+    bounds_min = np.min(possible_bounds, axis=0)
+
+    print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
+    print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    plt.scatter(x, y, label='data')
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    plt.xlim(xlim)
+    plt.xlabel('level score')
+    plt.ylabel('MFD')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/mfd_per_score_w_lin_reg.png')
+    plt.show()
+
 
 def plot_fixation_kde(df, axes):
     if df.shape[0] < 5:
@@ -560,8 +608,9 @@ if __name__ == '__main__':
     # TODO run
     # plot_fixations_kde()
     # plot_polar_hist_for_fixations_per_position()
-    df = pd.read_csv('../data/fixations.csv')
-    plot_mfd_per_level_score()
+    # df = pd.read_csv('../data/fixations.csv')
+    plot_avg_fixation_distance_per_subject()
+    # plot_mfd_per_level_score()
     # plot_fixation_angle_per_position(df)
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
