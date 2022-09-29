@@ -6,7 +6,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 from analysis.data_utils import read_data, get_street_data, get_river_data
-from analysis.gaze.events.event_detection import try_saccade_detection, try_saccade_detection2
+from analysis.gaze.events.event_detection import try_saccade_detection
 from analysis.gaze.vector_utils import calc_euclidean_distance, calc_angle
 
 SACC_DURATION_THRESHOLD = 400

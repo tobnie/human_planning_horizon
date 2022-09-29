@@ -96,12 +96,18 @@ def get_river_data(df):
     return df_river
 
 
-def get_last_time_steps_of_games(df=None):
+def get_last_time_steps_of_games(df=None, n_time_steps=1):
     if df is None:
         df = read_data()
 
     # get indices of last dataframe row of each game
-    last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(1)
+    last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(n_time_steps)
+    last_time_steps['action'].replace('nan', np.nan, inplace=True)
+
+    actions = df.groupby(['subject_id', 'game_difficulty', 'world_number'])['action']
+    last_action = actions.apply(lambda x: x[x.last_valid_index()] if x.last_valid_index() is not None else np.nan)
+
+    last_time_steps['last_action'] = last_action.values  # TODO use that to improve estimation of game status
     return last_time_steps
 
 
