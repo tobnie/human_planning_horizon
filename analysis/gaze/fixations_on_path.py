@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 
 from analysis.data_utils import read_data
+from analysis.gaze.fixations import load_fixations
 
 
 def check_on_path(time, fix_x, fix_y, path, radius):
@@ -10,11 +11,8 @@ def check_on_path(time, fix_x, fix_y, path, radius):
         x = int(x)
         y = int(y)
         if t > time:
-            # TODO check in range around path field?
             if fix_x in range(x - radius, x + radius + 1, 1) and fix_y in range(y - radius, y + radius + 1, 1):
                 return True
-            # if x == fix_x and y == fix_y:
-            #     return True
 
     return False
 
@@ -38,7 +36,7 @@ def fixation_ratio_on_path(game_df):
 
 def fixations_on_path():
     df = read_data()
-    fix_df = pd.read_csv('../data/fixations.csv')
+    fix_df = load_fixations()
 
     df = df[['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field']]
     df_with_fix = df.merge(fix_df, on=['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field'],
