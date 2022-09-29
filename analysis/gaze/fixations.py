@@ -15,6 +15,18 @@ from analysis.gaze.events.event_detection import try_fixation_detection
 from analysis.gaze.vector_utils import calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
 
 
+def load_fixations(remodnav=True):
+    # load data
+    if remodnav:
+        df = pd.read_csv('../data/fixations_remodnav.csv')
+    else:
+        df = pd.read_csv('../data/fixations.csv')
+
+    # remove fixations outside of screen:
+    mask = (df['fix_x'] >= 0) & (df['fix_x'] <= config.DISPLAY_WIDTH_PX) & (df['fix_y'] >= 0) & (df['fix_y'] <= config.DISPLAY_HEIGHT_PX)
+    return df[mask]
+
+
 def get_fixation_dataframe(df):
     experience_df = df[['subject_id', 'game_difficulty', 'world_number']].drop_duplicates()
     data = df.groupby(['subject_id', 'game_difficulty', 'world_number'])[['subject_id', 'experience', 'time', 'gaze_x', 'gaze_y']].agg(
@@ -110,7 +122,7 @@ def add_fixation_info_to_df(df):
     df = df.merge(summed_fixation_durations, on=['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'],
                   how='left')
     df = df[
-        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x_field', 'player_y_field', 'score',
+        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x', 'player_y', 'player_x_field', 'player_y_field', 'score',
          'weighted_fix_distance_euclidean',
          'mfd', 'mfa', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
          'fix_distance_manhattan',
@@ -189,8 +201,8 @@ def plot_fixation_angle_per_position(df, subject_id=None):
 
     # TODO fill value with nan and replace with mean value?
     mfa_pivot = pd.pivot_table(df, values='mfa', index='player_y_field',
-                                              columns='player_x_field',
-                                              aggfunc=np.mean, fill_value=0, dropna=False)
+                               columns='player_x_field',
+                               aggfunc=np.mean, fill_value=0, dropna=False)
 
     if subject_id:
         directory_path = './imgs/gaze/fixations/fixations_per_position/{}/'.format(subject_id)
@@ -283,7 +295,7 @@ def plot_mfd_per_level_score(subfolder=''):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
-    fix_df = pd.read_csv('../data/fixations.csv')
+    fix_df = load_fixations()
     level_scores = pd.read_csv('../data/level_scores.csv')
 
     mean_mfd_df = fix_df.groupby(['subject_id', 'game_difficulty', 'world_number'])['mfd'].mean().reset_index(
@@ -383,14 +395,14 @@ def plot_fixation_distance_box_per_region(df):
 
     ax.set_yscale('log')
     ax.set_xlabel('')
-    ax.set_ylabel('Fixation distance [fields/ms]')
+    ax.set_ylabel('Fixation distance [fields]')
     plt.savefig(directory_path + 'fixation_distance_per_region_box.png')
     plt.savefig('../paper/fixation_distance_per_region_box.svg', format="svg")
     plt.show()
 
 
 def ttest_fixation_distance_street_river():
-    df = pd.read_csv('../data/fixations.csv')
+    df = load_fixations()
 
     # get weighted fixation distances
     df_river = get_river_data(df)
@@ -422,7 +434,7 @@ def ttest_fixation_distance_street_river():
 
 
 def kstest_fixation_distance_street_river():
-    df = pd.read_csv('../data/fixations.csv')
+    df = load_fixations()
 
     # get weighted fixation distances
     df_river = get_river_data(df)
@@ -450,7 +462,7 @@ def kstest_fixation_distance_street_river():
 
 
 def plot_avg_fixation_distance_per_subject():
-    df = pd.read_csv('../data/fixations.csv')
+    df = load_fixations()
 
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
 
@@ -542,7 +554,7 @@ def plot_fixation_kde(df, axes):
 
 
 def plot_fixations_kde():
-    df = pd.read_csv('../data/fixations.csv')
+    df = load_fixations()
 
     fig, axs = plt.subplots(config.N_LANES, config.N_FIELDS_PER_LANE, figsize=(60, 40), sharex='all', sharey='all')
 
@@ -569,7 +581,7 @@ def plot_fixations_kde():
 
 
 def plot_polar_hist_for_fixations_per_position():
-    df = pd.read_csv('../data/fixations.csv')
+    df = load_fixations()
     fig, axs = plt.subplots(config.N_LANES, config.N_FIELDS_PER_LANE, figsize=(60, 40), subplot_kw=dict(projection="polar"))
 
     grp_by_player_pos = df.groupby(['player_x_field', 'player_y_field'])

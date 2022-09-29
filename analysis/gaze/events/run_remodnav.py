@@ -53,12 +53,17 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
     remodnav_row = remodnav_results[time_mask_remodnav]
 
     time = trial_df.loc[idx_closest_time]['time']
+    player_x = trial_df.loc[idx_closest_time]['player_x']
+    player_y = trial_df.loc[idx_closest_time]['player_y']
     player_x_field = trial_df.loc[idx_closest_time]['player_x_field']
     player_y_field = trial_df.loc[idx_closest_time]['player_y_field']
     state = trial_df.loc[idx_closest_time]['state']
+    score = trial_df.loc[idx_closest_time]['score']
 
     remodnav_new = {
         'time': time,
+        'player_x': player_x,
+        'player_y': player_y,
         'player_x_field': player_x_field,
         'player_y_field': player_y_field,
         'label': remodnav_row['label'].values[0],
@@ -67,6 +72,7 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
         'start_y': remodnav_row['start_y'].values[0],
         'end_x': remodnav_row['end_x'].values[0],
         'end_y': remodnav_row['end_y'].values[0],
+        'score': score,
         'state': state
     }
 
@@ -87,13 +93,13 @@ def find_index_for_closest_value(series, value):
 
 def add_mfd_to_remodnav(df):
     total_fix_duration = df['duration'].sum()
-    df['mfd'] = (df['manhattan_distance'] * df['duration']).sum() / total_fix_duration
+    df['mfd'] = (df['fix_distance_manhattan'] * df['duration']).sum() / total_fix_duration
     return df
 
 
 def add_mfa_to_remodnav(df):
     total_fix_duration = df['duration'].sum()
-    df['mfa'] = (df['manhattan_distance'] * df['duration']).sum() / total_fix_duration
+    df['mfa'] = (df['fix_angle'] * df['duration']).sum() / total_fix_duration
     return df
 
 
@@ -109,22 +115,26 @@ def save_remodnav_fixations():
     fixations = fixations[
         (fixations.end_x > missing_threshold) & (fixations.end_y > missing_threshold) & (fixations.start_x > missing_threshold) & (
                 fixations.start_y > missing_threshold)]
-    fixations['center_x'] = fixations.apply(lambda x: (x['start_x'] + x['end_x']) / 2, axis=1)
-    fixations['center_y'] = fixations.apply(lambda x: (x['start_y'] + x['end_y']) / 2, axis=1)
+
+    # middle between start and end as fixation coordinate
+    fixations['fix_x'] = fixations.apply(lambda x: (x['start_x'] + x['end_x']) / 2, axis=1)
+    fixations['fix_y'] = fixations.apply(lambda x: (x['start_y'] + x['end_y']) / 2, axis=1)
 
     # into field coordinates
-    fixations['center_x_field'] = fixations['center_x'].apply(coords2fieldsx)
-    fixations['center_y_field'] = fixations['center_y'].apply(coords2fieldsy)
-    fixations['manhattan_distance'] = fixations.apply(
-        lambda x: abs(x['center_x_field'] - x['player_x_field']) + abs(x['center_y_field'] - x['player_y_field']), axis=1)
-    fixations['angle'] = fixations.apply(
-        lambda x: np.arctan2(x['center_y_field'] - x['player_y_field'], x['center_x_field'] - x['player_x_field']), axis=1)
+    fixations['fix_x_field'] = fixations['fix_x'].apply(coords2fieldsx)
+    fixations['fix_y_field'] = fixations['fix_y'].apply(coords2fieldsy)
+    fixations['fix_distance_manhattan'] = fixations.apply(
+        lambda x: abs(x['fix_x_field'] - x['player_x_field']) + abs(x['fix_y_field'] - x['player_y_field']), axis=1)
+    fixations['fix_angle'] = fixations.apply(
+        lambda x: np.arctan2(x['fix_y_field'] - x['player_y_field'], x['fix_x_field'] - x['player_x_field']), axis=1)
 
     fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(
         add_mfd_to_remodnav)
     fixations = fixations.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field']).apply(
         add_mfa_to_remodnav)
     fixations = fixations.drop_duplicates()
+
+    fixations.rename(columns={'duration': 'fix_duration'}, inplace=True)
 
     fixations.to_csv('../data/fixations_remodnav.csv', index=False)
 
