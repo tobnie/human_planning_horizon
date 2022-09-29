@@ -1,6 +1,6 @@
 import itertools
 import pandas as pd
-import scipy.stats
+import scipy
 from matplotlib import pyplot as plt
 
 from analysis import paper_plot_utils
@@ -254,10 +254,23 @@ def ttest_mean_time_normal_hard():
     print('dof=', len(times_normal) - 1 + len(times_hard) - 1)
 
 
+def plot_last_lanes_lost_games():
+    # get last data from each game
+    last_time_steps = get_last_time_steps_of_games(n_time_steps=1).copy()
+    last_time_steps = last_time_steps[last_time_steps['game_status'] != 'won']
+
+    # TODO do something about deaths in zero lane --> consider last action before death or something like that?
+    sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack')
+
+    plt.savefig('imgs/performance/lost_games_last_lane.png')
+    plt.show()
+
+
 if __name__ == '__main__':
     # save_performance_stats()
-    sns.set_style("whitegrid")
-    plot_performance_per_difficulty()
-    print_average_game_endings()
+    # sns.set_style("whitegrid")
+    # plot_performance_per_difficulty()
+    # print_average_game_endings()
+    plot_last_lanes_lost_games()
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()
