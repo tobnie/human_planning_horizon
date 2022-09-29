@@ -620,7 +620,7 @@ def polar_hist_fixations(df, axs):
 
 def calc_weighted_y_distance(game_df):
     total_fix_duration = game_df['fix_duration'].sum()
-    y_distance = game_df['fix_y'] - game_df['player_y']
+    y_distance = game_df['fix_y_field'] - game_df['player_y_field']
     return y_distance * game_df['fix_duration'] / total_fix_duration
 
 
@@ -631,41 +631,43 @@ def plot_gaze_y_position_relative_to_player():
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
     ax = sns.histplot(data=df, y='weighted_y_distance', hue='region', stat='proportion', multiple='stack')
     ax.set_ylabel('Weighted Fixation Distance in y relative to player')
-    ax.set_ylim((-20, 20))
     plt.savefig('./imgs/gaze/fixations/weighted_y_gaze_relative_to_player_hist.png')
     plt.tight_layout()
     plt.show()
 
     ax = sns.violinplot(data=df, y='weighted_y_distance', x='region')
-    ax.set_ylim((-20, 20))
     ax.set_ylabel('Weighted Fixation Distance in y relative to player')
     plt.savefig('./imgs/gaze/fixations/weighted_y_gaze_relative_to_player_violin.png')
     plt.tight_layout()
     plt.show()
 
     print('\n ----------------- Y Fix Position Relative to player')
-
     max_y = df['weighted_y_distance'].max()
     min_y = df['weighted_y_distance'].min()
     mean_y = df['weighted_y_distance'].mean()
     var_y = df['weighted_y_distance'].var()
+    median_y = df['weighted_y_distance'].median()
     print('\nGeneral:')
-    print(f'Range: [{min_y:.5f}, {max_y:.5f}] \t| mean {mean_y:.5f} with var {var_y:.5f}')
+    print(f'Range: [{min_y:.5f}, {max_y:.5f}] \t| mean {mean_y:.5f} with var {var_y:.5f} \t| median {median_y:.5f}')
 
     df_street = get_street_data(df)
     max_y_street = df_street['weighted_y_distance'].max()
     min_y_street = df_street['weighted_y_distance'].min()
     mean_y_street = df_street['weighted_y_distance'].mean()
     var_y_street = df_street['weighted_y_distance'].var()
+    median_y_street = df_street['weighted_y_distance'].median()
     print('\nStreet:')
-    print(f'Range: [{min_y_street:.5f}, {max_y_street:.5f}] \t| mean {mean_y_street:.5f} with var {var_y_street:.5f}')
+    print(
+        f'Range: [{min_y_street:.5f}, {max_y_street:.5f}] \t| mean {mean_y_street:.5f} with var {var_y_street:.5f} \t| median {median_y_street:.5f}')
     df_river = get_river_data(df)
     max_y_river = df_river['weighted_y_distance'].max()
     min_y_river = df_river['weighted_y_distance'].min()
     mean_y_river = df_river['weighted_y_distance'].mean()
     var_y_river = df_river['weighted_y_distance'].var()
+    median_y_river = df_river['weighted_y_distance'].median()
     print('River:')
-    print(f'Range: [{min_y_river:.5f}, {max_y_river:.5f}] \t| mean {mean_y_river:.5f} with var {var_y_river:.5f}')
+    print(
+        f'Range: [{min_y_river:.5f}, {max_y_river:.5f}] \t| mean {mean_y_river:.5f} with var {var_y_river:.5f} \t| median {median_y_river:.5f}')
 
     print('\nt-test:')
     print(
@@ -678,45 +680,72 @@ def plot_gaze_y_position_relative_to_player():
 
 def calc_weighted_x_distance(game_df):
     total_fix_duration = game_df['fix_duration'].sum()
-    x_distance = game_df['fix_x'] - game_df['player_x']
+    x_distance = game_df['fix_x_field'] - game_df['player_x_field']
     return x_distance * game_df['fix_duration'] / total_fix_duration
 
 
-def plot_gaze_x_position_relative_to_player_per_lane():
+def plot_gaze_x_position_relative_to_player():
     # load data
     df = load_fixations()
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance)
+    df['region'] = df['player_y_field'].apply(get_region_from_field)
+    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
 
-    # Initialize the figure with a logarithmic x axis
-    f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    print('\n ----------------- X Fix Position Relative to player')
+    max_x = df['weighted_x_distance'].max()
+    min_x = df['weighted_x_distance'].min()
+    mean_x = df['weighted_x_distance'].mean()
+    var_x = df['weighted_x_distance'].var()
+    median_x = df['weighted_x_distance'].median()
+    print('\nGeneral:')
+    print(f'Range: [{min_x:.5f}, {max_x:.5f}] \t| mean {mean_x:.5f} with var {var_x:.5f} \t| median {median_x:.5f}')
 
-    # Plot the orbital period with horizontal boxes
+    df_street = get_street_data(df)
+    max_x_street = df_street['weighted_x_distance'].max()
+    min_x_street = df_street['weighted_x_distance'].min()
+    mean_x_street = df_street['weighted_x_distance'].mean()
+    var_x_street = df_street['weighted_x_distance'].var()
+    median_x_street = df_street['weighted_x_distance'].median()
+    print('\nStreet:')
+    print(
+        f'Range: [{min_x_street:.5f}, {max_x_street:.5f}] \t| mean {mean_x_street:.5f} with var {var_x_street:.5f} \t| median {median_x_street:.5f}')
+    df_river = get_river_data(df)
+    max_x_river = df_river['weighted_x_distance'].max()
+    min_x_river = df_river['weighted_x_distance'].min()
+    mean_x_river = df_river['weighted_x_distance'].mean()
+    var_x_river = df_river['weighted_x_distance'].var()
+    median_x_river = df_river['weighted_x_distance'].median()
+    print('River:')
+    print(
+        f'Range: [{min_x_river:.5f}, {max_x_river:.5f}] \t| mean {mean_x_river:.5f} with var {var_x_river:.5f} \t| median {median_x_river:.5f}')
+
+    print('\nt-test:')
+    print(
+        'H0: Relative Fixation in x is equal for street and river section | H1: Relative Fixation in x on river is greater than relative fixation on street')
+    ttest_result = scipy.stats.ttest_ind(df_river['weighted_x_distance'], df_street['weighted_x_distance'], alternative='greater')
+    print('Test in Weighted Manhattan Distances')
+    print(ttest_result)
+    print('dof=', df_street['weighted_x_distance'].shape[0] - 1 + df_river['weighted_x_distance'].shape[0] - 1)
+
+    # TODO this also for target position
+
+    # boxplot per lane
     sns.boxplot(x='weighted_x_distance', y='player_y_field', data=df)
-
-    # Add in points to show each observation
-    sns.stripplot(x='weighted_x_distance', y='player_y_field', data=df)
-
     plt.savefig('./imgs/gaze/fixations/weighted_x_gaze_relative_to_player_per_row.png')
     plt.tight_layout()
     plt.show()
 
+    # histogram over x for regions
+    ax = sns.histplot(data=df, x='weighted_x_distance', hue='region', stat='proportion', multiple='stack')
+    ax.set_xlabel('Weighted Fixation Distance in x relative to player')
+    # ax.set_xlim((-20, 20)) TODO
+    plt.savefig('./imgs/gaze/fixations/weighted_x_gaze_relative_to_player_hist.png')
+    plt.tight_layout()
+    plt.show()
 
-def plot_gaze_x_position_relative_to_player_per_region():
-    # load data
-    df = load_fixations()
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance)
-
-    # Initialize the figure with a logarithmic x axis
-    f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-
-    # Plot the orbital period with horizontal boxes
-    sns.boxplot(x='weighted_x_distance', y='region', data=df)
-
-    # Add in points to show each observation
-    sns.stripplot(x='weighted_x_distance', y='region', data=df)
-
-    plt.savefig('./imgs/gaze/fixations/weighted_x_gaze_relative_to_player_per_region.png')
+    ax = sns.violinplot(data=df, x='weighted_x_distance', y='region')
+    # ax.set_xlim((-20, 20)) TODO
+    ax.set_xlabel('Weighted Fixation Distance in x relative to player')
+    plt.savefig('./imgs/gaze/fixations/weighted_x_gaze_relative_to_player_violin.png')
     plt.tight_layout()
     plt.show()
 
@@ -724,11 +753,52 @@ def plot_gaze_x_position_relative_to_player_per_region():
 def plot_weighted_fixations_relative_to_player():
     # load data
     df = load_fixations()
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance)
-    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).reset_index()
+    df['region'] = df['player_y_field'].apply(get_region_from_field)
+    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
+    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+
+    # todo jetzt nochmal in schön für alle statements von zuvor zusammen:
+    lim = 0.2
+    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
+    g.refline(x=0, y=0)
+    g.plot_joint(sns.kdeplot, levels=15)
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
+    g.ax_marg_x.set_xlim(-lim, lim)
+    g.ax_marg_y.set_ylim(-lim, lim)
+    g.set_axis_labels('x', 'y')
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty.png')
+    plt.show()
+
+    # street only
+    g = sns.JointGrid(data=df[df['region'] == 'street'], x="weighted_x_distance", y="weighted_y_distance", space=0)
+    g.refline(x=0, y=0)
+    g.plot_joint(sns.kdeplot, fill=True, cmap="viridis")
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack', stat='proportion')
+    g.ax_marg_x.set_xlim(-lim, lim)
+    g.ax_marg_y.set_ylim(-lim, lim)
+    plt.suptitle('Street section')
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty_street.png')
+    plt.show()
+
+    # river only
+    g = sns.JointGrid(data=df[df['region'] == 'river'], x="weighted_x_distance", y="weighted_y_distance", space=0)
+    g.refline(x=0, y=0)
+    g.plot_joint(sns.kdeplot, fill=True, cmap="viridis")
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack', stat='proportion')
+    g.ax_marg_x.set_xlim(-lim, lim)
+    g.ax_marg_y.set_ylim(-lim, lim)
+    plt.suptitle('River section')
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty_river.png')
+    plt.show()
 
     f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.kdeplot(df, x='weighted_x_distance', y='weighted_y_distance', cmap='mako')
+    sns.kdeplot(df, x='weighted_x_distance', y='weighted_y_distance', fill=True, palette='mako')
     plt.axvline(x=0)
     plt.axhline(y=0)
 
@@ -743,7 +813,7 @@ def plot_weighted_fixations_relative_to_player():
     plt.axvline(x=0)
     plt.axhline(y=0)
 
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player.png')
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_street.png')
     plt.tight_layout()
     plt.show()
 
@@ -754,7 +824,7 @@ def plot_weighted_fixations_relative_to_player():
     plt.axvline(x=0)
     plt.axhline(y=0)
 
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player.png')
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_river.png')
     plt.tight_layout()
     plt.show()
 
@@ -776,11 +846,11 @@ if __name__ == '__main__':
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 
-    plot_gaze_y_position_relative_to_player()
-
     # TODO
-    plot_gaze_x_position_relative_to_player_per_lane()
+    # plot_gaze_y_position_relative_to_player()
     plot_weighted_fixations_relative_to_player()
+    plot_gaze_x_position_relative_to_player()
+
     # # and for every subject:
     # for subject_id in get_all_subjects():
     #     print('For Subject ', subject_id)
