@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 from analysis import paper_plot_utils
 from analysis.data_utils import get_river_data, get_street_data, read_data
@@ -123,7 +124,7 @@ def plot_blink_rate_over_score():
     y = df['blink_rate']
     sem = df['br_sem']
     std = df['br_std']
-    res = scipy.stats.linregress(x, y, alternative='less')  # TODO alternative
+    res = scipy.stats.linregress(x, y, alternative='less')
 
     print('Linear Regression for avg blinking rate per score:')
     print(f'R-squared: {res.rvalue ** 2}')
@@ -154,7 +155,7 @@ def plot_blink_rate_over_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
@@ -162,13 +163,76 @@ def plot_blink_rate_over_score():
     plt.ylabel('blinking rate [$s^{-1}$]')
     plt.legend()
     plt.tight_layout()
-    plt.savefig('./imgs/blinks/blinking_rate_per_score_w_lin_reg.png')
+    plt.savefig('./imgs/blinks/blink_rate_per_score_w_lin_reg.png')
+    plt.show()
+
+
+def plot_blink_rate_over_level_score():
+    blink_rates = pd.read_csv('../data/blink_rates.csv')
+    scores = pd.read_csv('../data/level_scores.csv')
+    df = blink_rates.merge(scores, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
+
+    # only won games
+    df = df[df['standardized_level_score'] > 200]
+
+    # remove nan blink rates
+    df = df.dropna(subset=['blink_rate'])
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    # plt.scatter(x, y, label='data')
+    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', hue='subject_id', ax=ax)
+    plt.legend([], [], frameon=False)
+    plt.tight_layout()
+    plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg_per_subject.png')
+    plt.show()
+
+    # linear regression:
+    x = df['standardized_level_score']
+    y = df['blink_rate']
+    res = scipy.stats.linregress(x, y, alternative='greater')
+
+    print('\n\nLinear Regression for avg blinking rate per standardized level score:')
+    print(f'R-squared: {res.rvalue ** 2}')
+    print(f'p value: {res.pvalue}')
+
+    # calc 95% CI for slope
+    dof = x.shape[0] - 1
+    tinv = lambda p, df: abs(scipy.stats.t.ppf(p / 2, dof))
+    ts = tinv(0.05, len(x) - 2)
+    slope_ci_upper = res.slope + ts * res.stderr
+    slope_ci_lower = res.slope - ts * res.stderr
+    intercept_ci_upper = res.intercept + ts * res.intercept_stderr
+    intercept_ci_lower = res.intercept - ts * res.intercept_stderr
+
+    # calculate
+    steps = 1000
+    xlim = (x.min() - 10, x.max() + 10)
+    xx = np.arange(xlim[0], xlim[1], steps)
+    possible_bounds = np.zeros((4, xx.shape[0]))
+    for i, (slope, intercept) in enumerate(product([slope_ci_lower, slope_ci_upper], [intercept_ci_lower, intercept_ci_upper])):
+        possible_bounds[i] = intercept + xx * slope
+
+    bounds_max = np.max(possible_bounds, axis=0)
+    bounds_min = np.min(possible_bounds, axis=0)
+
+    print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
+    print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    # plt.scatter(x, y, label='data')
+    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', ax=ax)
+    ax.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    # ax.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    plt.legend([], [], frameon=False)
+    plt.tight_layout()
+    plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg.png')
     plt.show()
 
 
 if __name__ == '__main__':
     # save_blink_rates()
     plot_blink_rate_over_score()
+    plot_blink_rate_over_level_score()
     # plot_blink_rates()
     # ttest_blink_rate_street_river()
     # kstest_blink_rate_distance_street_river()

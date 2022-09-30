@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
 
-from analysis.data_utils import read_data
+from analysis.data_utils import read_data, subject2letter
 from analysis.gaze.events.event_detection import try_blink_detection
 
 
@@ -63,7 +63,11 @@ def save_blinks_and_IBIs():
 
 def plot_IBI_per_subject():
     ibi_data = pd.read_csv('../data/ibi.csv')
-    bin_width = 1000
+    level_scores = pd.read_csv('../data/level_scores.csv')[['subject_id', 'score']].drop_duplicates()
+
+    ibi_data = ibi_data.merge(level_scores, on=['subject_id'], how='left')
+
+    bin_width = 250
     ibi_data = ibi_data[ibi_data['ibi'] < 8_000]
 
     sns.histplot(data=ibi_data, x='ibi', binwidth=bin_width, stat='proportion')
@@ -75,7 +79,22 @@ def plot_IBI_per_subject():
     plt.savefig('./imgs/blinks/ibi/subject_ibi.png')
     plt.show()
 
+    g = sns.FacetGrid(ibi_data, col='score', col_wrap=4)
+    g.map_dataframe(sns.histplot, 'ibi', binwidth=bin_width, stat='proportion')
+    plt.savefig('./imgs/blinks/ibi/score_ibi_hist.png')
+    plt.show()
+
+    order = ibi_data[['subject_id', 'score']].drop_duplicates().sort_values(by='score')
+    ax = sns.boxplot(ibi_data, x='subject_id', y='ibi', order=order['subject_id'])
+
+    # rename subject IDs
+    xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
+    ax.set_xticklabels(xlabels)
+    plt.tight_layout()
+    plt.savefig('./imgs/blinks/ibi/score_ibi_box.png')
+    plt.show()
+
 
 if __name__ == '__main__':
-    save_blinks_and_IBIs()
-    # plot_IBI_per_subject()
+    # save_blinks_and_IBIs()
+    plot_IBI_per_subject()
