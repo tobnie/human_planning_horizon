@@ -1,6 +1,9 @@
 import numpy as np
+from tqdm import tqdm
 
-from analysis.analysis_utils import OBJECT_TO_INT, states_to_feature_maps
+from analysis.analysis_utils import OBJECT_TO_INT
+from analysis.data_utils import create_state_from_string
+from data.preprocessing import create_feature_map_from_state
 
 
 def invert_feature_map(feature_map):
@@ -58,17 +61,6 @@ def get_feature_map_distribution_for_avoidance(feature_map):
     return avoidance_fm
 
 
-def get_avoidance_distribution_around_player_from_state_dict(state_dict, radius=1):
-    return {key: get_avoidance_distribution_around_player_from_state_list(states, radius=radius) for key, states in state_dict.items()}
-
-
-def get_avoidance_distribution_around_player_from_state_list(states, radius=1):
-    fms = states_to_feature_maps(states)
-    fms_around_player = get_area_around_player(fms, None, None, radius=radius)  # TODO
-    avoidance_map = get_feature_map_distribution_for_avoidance(fms_around_player)
-    return avoidance_map
-
-
 def get_player_position_in_map(feature_map):
     """ Returns the position of the player in the feature map as (x, y)-tuple."""
     player_fm = get_feature_map_for_player(feature_map)
@@ -93,8 +85,9 @@ def get_area_around_field(feature_map, x, y, radius=1, pad_sides=True):
     return area_around_field
 
 
-def get_area_around_player(feature_map, player_x, player_y, radius=1):
+def get_area_around_player(feature_map, radius=1):
     """ Returns the area around the player in the feature map (preserves depth)"""
+    player_x, player_y = get_player_position_in_map(feature_map)
     area_around_player = get_area_around_field(feature_map, player_x, player_y, radius)
     return area_around_player
 
@@ -129,3 +122,47 @@ def filter_fms_for_player_position(fms, row):
 
     filtered_fms = fms[filter_array == 1]
     return filtered_fms
+
+
+def classify_situation(situation):
+    """ Adds a unique identifier to the given situation. A situation is an avoidance map around the player."""
+    # flatten array for turning into string
+    flattened_array = situation.flatten()
+
+    # TODO can skip the "astype(int)" if the given situation already is an single layer array with only ones and zeroes
+    situation_identifier = (flattened_array > 0).astype(int).astype(str)
+
+    # delete center element bc it is the player
+    center_idx = situation_identifier.shape[0] // 2
+    situation_identifier = np.delete(situation_identifier, center_idx)
+
+    # concat to string
+    situation_identifier = ''.join(situation_identifier)
+
+    return situation_identifier
+
+
+def classify_states_in_df(df, situation_radius=2):
+    # creating states from df
+    print('Creating States from df...')
+    states = [create_state_from_string(state_string) for state_string in tqdm(df['state'])]
+
+    print('\nConverting States to Feature Maps...')
+    print('Creating single layer fms...')
+    state_fms = [create_feature_map_from_state(state) for state in tqdm(states)]
+
+    avoidance_maps = [get_avoidance_map(state_fm) for state_fm in state_fms]
+
+    print('Extracting Situations...')
+    situations = [get_area_around_player(avoidance_map, situation_radius) for avoidance_map in tqdm(avoidance_maps)]
+
+    print('Classifying Situations...')
+    situation_identifiers = [classify_situation(situation) for situation in tqdm(situations)]
+
+    # TODO test
+    df['situation'] = situation_identifiers
+    return df
+
+
+if __name__ == '__main__':
+    pass
