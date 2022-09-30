@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from remodnav import EyegazeClassifier
 
+import config
 from analysis.data_utils import read_data
 from analysis.gaze.adaptiveIDT.data_filtering import PIX2DEG
 
@@ -103,7 +104,7 @@ def add_mfa_to_remodnav(df):
     return df
 
 
-def save_remodnav_fixations():
+def save_remodnav_fixations(drop_offscreen_samples=True):
     missing_threshold = -30000
     df = read_data()
     results = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(run_remodnav).reset_index().drop(columns='level_3')
@@ -135,6 +136,11 @@ def save_remodnav_fixations():
     fixations = fixations.drop_duplicates()
 
     fixations.rename(columns={'duration': 'fix_duration'}, inplace=True)
+
+    if drop_offscreen_samples:
+        mask = (fixations['fix_x'] <= config.DISPLAY_WIDTH_PX) & (fixations['fix_x'] >= 0) & (fixations['fix_y'] >= 0) & (
+                    fixations['fix_y'] <= config.DISPLAY_HEIGHT_PX)
+        fixations = fixations[mask]
 
     fixations.to_csv('../data/fixations_remodnav.csv', index=False)
 

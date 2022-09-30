@@ -13,6 +13,7 @@ from analysis import paper_plot_utils
 from analysis.data_utils import get_street_data, get_river_data, subject2letter, read_data
 from analysis.gaze.events.event_detection import try_fixation_detection
 from analysis.gaze.vector_utils import calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
+from analysis.player.player_position_heatmap import coords2fieldsx
 
 
 def load_fixations(remodnav=True):
@@ -22,9 +23,7 @@ def load_fixations(remodnav=True):
     else:
         df = pd.read_csv('../data/fixations.csv')
 
-    # remove fixations outside of screen:
-    mask = (df['fix_x'] >= 0) & (df['fix_x'] <= config.DISPLAY_WIDTH_PX) & (df['fix_y'] >= 0) & (df['fix_y'] <= config.DISPLAY_HEIGHT_PX)
-    return df[mask]
+    return df
 
 
 def get_fixation_dataframe(df):
@@ -64,7 +63,6 @@ def join_fixation_df_and_general_df(df, fixation_df):
 
 
 def add_fixation_distance_and_angle(df):
-    # TODO check whether -32768 samples are dropped for euclidean calculation --> if not, change it!
     df['fix_distance_euclidean'] = df.apply(lambda x: calc_euclidean_distance(x['player_x'], x['player_y'], x['fix_x'], x['fix_y']), axis=1)
     df['fix_distance_manhattan'] = df.apply(
         lambda x: calc_manhattan_distance(x['player_x_field'], x['player_y_field'], x['fix_x_field'], x['fix_y_field']), axis=1)
@@ -73,22 +71,80 @@ def add_fixation_distance_and_angle(df):
     return df
 
 
+def attribute_fixation(row, radius):
+    """ Attributes a fixation to the player or target if the fixation is on player or target or near_{player/target} if the fixation is
+    within the radius of player or target, otherwise to the world.
+    If the fixation is within the vicinity of the player and the target, attribute the fixation to the nearer object in px by the
+    euclidean norm."""
+
+    # get player position
+    p_x = int(row['player_x_field'])
+    p_y = int(row['player_y_field'])
+    p_range_x = range(p_x - radius, p_x + radius + 1)
+    p_range_y = range(p_y - radius, p_y + radius + 1)
+
+    # get target position
+    target_x = row['target_position']
+
+    target_field_x = int(coords2fieldsx(target_x))
+    target_field_y = config.N_LANES - 1
+    target_range_x = range(target_field_x - radius, target_field_x + radius + 1)
+    target_range_y = range(target_field_y - radius, config.N_LANES - 1)
+
+    # get fixation
+    f_x = int(row['fix_x_field'])
+    f_y = int(row['fix_y_field'])
+
+    # check if in range
+    if f_x == p_x and f_y == p_y:
+        row['fixation_on'] = 'player'
+    elif f_x == target_field_x and f_y == target_field_y:
+        row['fixation_on'] = 'target'
+    elif f_x in p_range_x and f_y in p_range_y and f_x in target_range_x and f_y in target_range_y:
+        # if it is in range of target and player, attribute to nearer object in pixels instead of fields
+        fix_pos = np.array([row['fix_x'], row['fix_y']])
+        player_pos = np.array([row['player_x'], row['player_y']])
+        target_y = config.DISPLAY_HEIGHT_PX - config.FIELD_HEIGHT / 2
+        target_pos = np.array([target_x, target_y])
+        dist_to_player = np.linalg.norm(fix_pos - player_pos)
+        dist_to_target = np.linalg.norm(fix_pos - target_pos)
+        if dist_to_player < dist_to_target:
+            row['fixation_on'] = 'near_player'
+        else:
+            row['fixation_on'] = 'near_target'
+    elif f_x in p_range_x and f_y in p_range_y:
+        row['fixation_on'] = 'near_player'
+    elif f_x in target_range_x and f_y in target_range_y:
+        row['fixation_on'] = 'near_target'
+    else:
+        row['fixation_on'] = 'world'
+
+    return row
+
+
+def attribute_fixations_in_df(df, radius=1):
+    """ Attributes the fixation to the player, the target position or the game objects by considering a radius around the fixated field."""
+    df = df.apply(lambda x: attribute_fixation(x, radius), axis=1)
+    return df
+
+
 def save_fixations():
     df = read_data()
     df = add_fixation_info_to_df(df)
+    df = attribute_fixations_in_df(df)  # TODO test and then plots
     df.to_csv('fixations.csv', index=False)
     print('Saved Fixation Information')
     return df
 
 
-def add_fixation_info_to_df(df):
+def add_fixation_info_to_df(df, drop_offscreen_samples=True):
     fixation_df = get_fixation_dataframe(df)
     df = join_fixation_df_and_general_df(df, fixation_df)
     df = add_fixation_distance_and_angle(df)
 
     # add weighted distance
     df = df.copy()
-    df['fix_distance_euclidean_time'] = df['fix_distance_euclidean'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
+    # df['fix_distance_euclidean_time'] = df['fix_distance_euclidean'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
     df['fix_distance_manhattan_time'] = df['fix_distance_manhattan'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
     df['fix_angle_time'] = df['fix_angle'].mul(df['fix_duration']).replace([np.inf, -np.inf], np.nan)
 
@@ -96,9 +152,9 @@ def add_fixation_info_to_df(df):
         'fix_duration'].agg(fix_duration_sum='sum').reset_index()
 
     # for euclidean distances
-    summed_fixation_durations['fix_distance_euclidean_time_sum'] = \
-        df.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'])[
-            'fix_distance_euclidean_time'].agg(sum='sum').reset_index()['sum']
+    # summed_fixation_durations['fix_distance_euclidean_time_sum'] = \
+    #     df.groupby(['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'])[
+    #         'fix_distance_euclidean_time'].agg(sum='sum').reset_index()['sum']
 
     # for manhattan distances
     summed_fixation_durations['fix_distance_manhattan_time_sum'] = \
@@ -111,8 +167,8 @@ def add_fixation_info_to_df(df):
             'fix_angle_time'].agg(sum='sum').reset_index()['sum']
 
     # calculate final weighted value
-    summed_fixation_durations['weighted_fix_distance_euclidean'] = summed_fixation_durations['fix_distance_euclidean_time_sum'].div(
-        summed_fixation_durations['fix_duration_sum'])
+    # summed_fixation_durations['weighted_fix_distance_euclidean'] = summed_fixation_durations['fix_distance_euclidean_time_sum'].div(
+    #     summed_fixation_durations['fix_duration_sum'])
     summed_fixation_durations['mfd'] = summed_fixation_durations['fix_distance_manhattan_time_sum'].div(
         summed_fixation_durations['fix_duration_sum'])
     summed_fixation_durations['mfa'] = summed_fixation_durations['fix_angle_time_sum'].div(
@@ -122,13 +178,19 @@ def add_fixation_info_to_df(df):
     df = df.merge(summed_fixation_durations, on=['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field'],
                   how='left')
     df = df[
-        ['subject_id', 'game_difficulty', 'world_number', 'time', 'player_x', 'player_y', 'player_x_field', 'player_y_field', 'score',
-         'weighted_fix_distance_euclidean',
+        ['subject_id', 'game_difficulty', 'world_number', 'time', 'target_position', 'player_x', 'player_y', 'player_x_field',
+         'player_y_field', 'score',
          'mfd', 'mfa', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
-         'fix_distance_manhattan',
-         'fix_distance_euclidean', 'fix_angle', 'fix_duration']].drop_duplicates()
+         'fix_distance_manhattan', 'fix_angle', 'fix_duration']].drop_duplicates()
 
-    df = df[df['weighted_fix_distance_euclidean'].notna()]
+    df = df[df['mfd'].notna()]
+
+    # drop fixations not within the screen limits
+    if drop_offscreen_samples:
+        mask = (df['fix_x'] <= config.DISPLAY_WIDTH_PX) & (df['fix_x'] >= 0) & (df['fix_y'] >= 0) & (
+                df['fix_y'] <= config.DISPLAY_HEIGHT_PX)
+        df = df[mask]
+
     return df
 
 
@@ -332,8 +394,6 @@ def get_region_from_field(y_field):
 def plot_fixation_distance_hist_per_region(df):
     directory_path = './imgs/gaze/fixations/fixations_per_position/'
 
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
-
     fig, ax = plt.subplots()
     # multiple{“layer”, “dodge”, “stack”, “fill”}
     n_bins = 20
@@ -357,8 +417,6 @@ def plot_fixation_distance_hist_per_region(df):
 
 def plot_fixation_distance_box_per_region(df):
     directory_path = './imgs/gaze/fixations/fixations_per_position/'
-
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
 
     edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
     box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
@@ -626,7 +684,6 @@ def calc_weighted_y_distance(game_df):
 
 def plot_gaze_y_position_relative_to_player():
     df = load_fixations()
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
 
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
     ax = sns.histplot(data=df, y='weighted_y_distance', hue='region', stat='proportion', multiple='stack')
@@ -687,7 +744,6 @@ def calc_weighted_x_distance(game_df):
 def plot_gaze_x_position_relative_to_player():
     # load data
     df = load_fixations()
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
     df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
 
     print('\n ----------------- X Fix Position Relative to player')
@@ -753,7 +809,6 @@ def plot_gaze_x_position_relative_to_player():
 def plot_weighted_fixations_relative_to_player():
     # load data
     df = load_fixations()
-    df['region'] = df['player_y_field'].apply(get_region_from_field)
     df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
 
