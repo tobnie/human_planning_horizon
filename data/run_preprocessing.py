@@ -4,7 +4,7 @@ from analysis.gaze.events.run_remodnav import save_remodnav_fixations
 from analysis.gaze.fixations import save_fixations
 from analysis.gaze.saccades import save_saccades
 from analysis.performance.performances import save_game_durations, save_level_scores, save_performance_stats
-from data.preprocessing import run_preprocessing
+from data.preprocessing import run_preprocessing, save_world_direction_types
 
 run_preprocessing()
 
@@ -17,3 +17,6 @@ save_saccades()
 save_performance_stats()
 save_game_durations()
 save_level_scores()
+
+# TODO run
+save_world_direction_types()
