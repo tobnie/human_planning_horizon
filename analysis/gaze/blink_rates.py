@@ -180,7 +180,7 @@ def plot_blink_rate_over_level_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', hue='subject_id', ax=ax)
+    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', hue='subject_id', ax=ax)   # TODO investigate exponential relation? --> single scatter plots for each subject?
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg_per_subject.png')

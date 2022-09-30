@@ -61,6 +61,7 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
     player_y_field = trial_df.loc[idx_closest_time]['player_y_field']
     state = trial_df.loc[idx_closest_time]['state']
     score = trial_df.loc[idx_closest_time]['score']
+    target_position = trial_df.loc[idx_closest_time]['target_position']
 
     remodnav_new = {
         'time': time,
@@ -75,7 +76,8 @@ def add_values_for_closest_time(time, trial_df, remodnav_results):
         'end_x': remodnav_row['end_x'].values[0],
         'end_y': remodnav_row['end_y'].values[0],
         'score': score,
-        'state': state
+        'state': state,
+        'target_position': target_position
     }
 
     return remodnav_new

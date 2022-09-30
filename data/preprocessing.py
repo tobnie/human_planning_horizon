@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 
 import numpy as np
@@ -220,6 +221,38 @@ def get_target_position_for_world(diff, world):
     dummy_subject = get_all_subjects()[0]
     world_properties = get_world_properties(dummy_subject, diff, world)
     return int(world_properties['target_position'])
+
+
+def save_world_direction_types():
+    """ Returns either 'L' or 'R', depending if the first lane in the world is directed left or right."""
+    world_base_dir = '../game/levels/'
+
+    diff_list = []
+    world_number_list = []
+    world_types = []
+
+    for diff in ['easy', 'normal', 'hard']:
+        world_diff_dir = world_base_dir + diff + '/'
+
+        for i in range(20):
+            world_file = world_diff_dir + 'world_{}.json'.format(i)
+
+            with open(world_file, 'r', encoding='utf-8') as f:
+                world_dict = json.load(f)
+
+            lane_info = world_dict['lanes']
+            first_street_lane = lane_info[-2]
+            first_street_lane_direction = first_street_lane['direction']
+            world_type = 'R' if first_street_lane_direction > 0 else 'L'
+
+            diff_list.append(diff)
+            world_number_list.append(i)
+            world_types.append(world_type)
+
+    world_type_dict = {'game_difficulty': diff_list, 'world_number': world_number_list, 'world_type': world_types}
+    world_type_df = pd.DataFrame(world_type_dict)
+
+    world_type_df.to_csv('world_types.csv', index=False)
 
 
 def get_times_actions_states_samples(subject_id, diffs_and_worlds=None):
