@@ -1,12 +1,16 @@
+from itertools import product
+
 import numpy as np
 import pandas as pd
 import scipy
 from matplotlib import pyplot as plt
 
+from analysis import paper_plot_utils
 from analysis.data_utils import get_river_data, get_street_data, read_data
 
 
 def calc_blink_rate_per_game(game_df):
+    """ Calculate blink rates per game and for street and river section. If a section was not entered, the blink rate is assigned np.nan"""
     game_df['time_delta'] = game_df['time'].diff()
 
     street_df = get_street_data(game_df)
@@ -104,8 +108,67 @@ def kstest_blink_rate_distance_street_river():
     print(kstest_result)
 
 
+def plot_blink_rate_over_score():
+    blink_rates = pd.read_csv('../data/blink_rates.csv')
+    scores = pd.read_csv('../data/level_scores.csv')
+    df = blink_rates.merge(scores, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
+
+    # linear regression:
+    df = df[['subject_id', 'score', 'blink_rate']].groupby(['subject_id', 'score'])[
+        'blink_rate'].agg(['mean', 'sem', 'std'])
+    df.columns = ['blink_rate', 'br_sem', 'br_std']
+    df.reset_index(inplace=True)
+
+    x = df['score']
+    y = df['blink_rate']
+    sem = df['br_sem']
+    std = df['br_std']
+    res = scipy.stats.linregress(x, y, alternative='less')  # TODO alternative
+
+    print('Linear Regression for avg blinking rate per score:')
+    print(f'R-squared: {res.rvalue ** 2}')
+    print(f'p value: {res.pvalue}')
+
+    # calc 95% CI for slope
+    dof = x.shape[0] - 1
+    tinv = lambda p, df: abs(scipy.stats.t.ppf(p / 2, dof))
+    ts = tinv(0.05, len(x) - 2)
+    slope_ci_upper = res.slope + ts * res.stderr
+    slope_ci_lower = res.slope - ts * res.stderr
+    intercept_ci_upper = res.intercept + ts * res.intercept_stderr
+    intercept_ci_lower = res.intercept - ts * res.intercept_stderr
+
+    # calculate
+    steps = 1000
+    xlim = (x.min() - 1000, x.max() + 1000)
+    xx = np.arange(xlim[0], xlim[1], steps)
+    possible_bounds = np.zeros((4, xx.shape[0]))
+    for i, (slope, intercept) in enumerate(product([slope_ci_lower, slope_ci_upper], [intercept_ci_lower, intercept_ci_upper])):
+        possible_bounds[i] = intercept + xx * slope
+
+    bounds_max = np.max(possible_bounds, axis=0)
+    bounds_min = np.min(possible_bounds, axis=0)
+
+    print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
+    print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    # plt.scatter(x, y, label='data')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    plt.xlim(xlim)
+    plt.xlabel('score')
+    plt.ylabel('blinking rate [$s^{-1}$]')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('./imgs/blinks/blinking_rate_per_score_w_lin_reg.png')
+    plt.show()
+
+
 if __name__ == '__main__':
-    save_blink_rates()
+    # save_blink_rates()
+    plot_blink_rate_over_score()
     # plot_blink_rates()
     # ttest_blink_rate_street_river()
     # kstest_blink_rate_distance_street_river()
