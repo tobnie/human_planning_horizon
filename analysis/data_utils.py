@@ -59,11 +59,11 @@ def get_all_gazes(df=None):
     return df.loc[['gaze_x', 'gaze_y']]
 
 
-def return_status(time, player_y, player_x, target_position):
+def return_status(time, player_y, player_x, target_position, last_action):
     # player in last sample was in second to last row and player center was below target field
     x_win_range = (target_position - config.FIELD_WIDTH / 2, target_position + config.FIELD_WIDTH / 2)
     if x_win_range[0] <= player_x <= x_win_range[1] and player_y >= 13 * config.FIELD_HEIGHT:
-        if time < TIME_OUT_THRESHOLD:
+        if time < TIME_OUT_THRESHOLD and last_action == 'up':  # TODO games should have only been won if last move was up, right?
             return 'won'
         else:
             return 'timed_out'
@@ -78,7 +78,7 @@ def add_game_status_to_df(df):
     last_time_steps = get_last_time_steps_of_games(df).copy()
 
     last_time_steps['game_status'] = last_time_steps.apply(
-        lambda x: return_status(x['time'], x['player_y'], x['player_x'], x['target_position']), axis=1)
+        lambda x: return_status(x['time'], x['player_y'], x['player_x'], x['target_position'], x['last_action']), axis=1)
     df_filtered = last_time_steps[['subject_id', 'game_difficulty', 'world_number', 'game_status']]
     df_merged = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
     return df_merged
@@ -101,13 +101,13 @@ def get_last_time_steps_of_games(df=None, n_time_steps=1):
         df = read_data()
 
     # get indices of last dataframe row of each game
-    last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(n_time_steps)
+    last_time_steps = df.groupby(['subject_id', 'game_difficulty', 'world_number']).tail(n_time_steps).copy()
     last_time_steps['action'].replace('nan', np.nan, inplace=True)
 
     actions = df.groupby(['subject_id', 'game_difficulty', 'world_number'])['action']
     last_action = actions.apply(lambda x: x[x.last_valid_index()] if x.last_valid_index() is not None else np.nan)
 
-    last_time_steps['last_action'] = last_action.values  # TODO use that to improve estimation of game status
+    last_time_steps['last_action'] = last_action.values
     return last_time_steps
 
 
