@@ -5,6 +5,7 @@ from remodnav import EyegazeClassifier
 import config
 from analysis.data_utils import read_data
 from analysis.gaze.adaptiveIDT.data_filtering import PIX2DEG
+from analysis.gaze.fixations import attribute_fixations_in_df
 
 from analysis.player.player_position_heatmap import coords2fieldsx, coords2fieldsy
 
@@ -142,6 +143,7 @@ def save_remodnav_fixations(drop_offscreen_samples=True):
                     fixations['fix_y'] <= config.DISPLAY_HEIGHT_PX)
         fixations = fixations[mask]
 
+    fixations = attribute_fixations_in_df(fixations)
     fixations.to_csv('../data/fixations_remodnav.csv', index=False)
 
 
