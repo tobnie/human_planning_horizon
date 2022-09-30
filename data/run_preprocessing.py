@@ -18,5 +18,4 @@ save_performance_stats()
 save_game_durations()
 save_level_scores()
 
-# TODO run
 save_world_direction_types()
