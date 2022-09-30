@@ -125,14 +125,9 @@ def transform_target_pos_to_string(df):
     return df
 
 
-def position2field(x, y):
-    field_x = int(round(x / config.FIELD_WIDTH))
-    field_y = int(round(y / config.FIELD_HEIGHT))
-    return field_x, field_y
-
-
 def assign_position_to_fields(x, y, width):
-    field_x_start, field_y = position2field(x, y)
+    field_x_start = coords2fieldsx(x)
+    field_y = coords2fieldsy(y)
     field_width = int(width // config.FIELD_WIDTH)
     return field_x_start, field_y, field_width
 
@@ -150,3 +145,11 @@ def subject2letter(subject_id):
         if subject_id == subj_id:
             return string.ascii_uppercase[i]
     return None
+
+
+def coords2fieldsx(x):
+    return int(min(config.N_FIELDS_PER_LANE - 1, max(x // config.FIELD_WIDTH, 0)))
+
+
+def coords2fieldsy(y):
+    return int(y // config.FIELD_HEIGHT)

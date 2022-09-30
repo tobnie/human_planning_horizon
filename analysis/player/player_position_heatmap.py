@@ -1,19 +1,8 @@
-import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-import config
-from analysis.data_utils import read_data
-
-
-def coords2fieldsx(x):
-    # TODO check if this is okay with missing samples at -32768
-    return min(config.N_FIELDS_PER_LANE - 1, max(x // config.FIELD_WIDTH, 0))
-
-
-def coords2fieldsy(y):
-    return y // config.FIELD_HEIGHT
+from analysis.data_utils import coords2fieldsx, coords2fieldsy, read_data
 
 
 def add_player_position_in_field_coordinates(df):

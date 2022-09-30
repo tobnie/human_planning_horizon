@@ -3,11 +3,9 @@ import pandas as pd
 from remodnav import EyegazeClassifier
 
 import config
-from analysis.data_utils import read_data
+from analysis.data_utils import coords2fieldsx, coords2fieldsy, read_data
 from analysis.gaze.adaptiveIDT.data_filtering import PIX2DEG
 from analysis.gaze.fixations import attribute_fixations_in_df
-
-from analysis.player.player_position_heatmap import coords2fieldsx, coords2fieldsy
 
 
 def run_remodnav_as_method(data):

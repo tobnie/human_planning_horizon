@@ -9,6 +9,8 @@ import config
 
 from game.world_generation.generation_config import GameDifficulty
 
+# TODO DELETE FILE? most methods should have been moved to data_utils
+
 OBJECT_TO_INT = {
     'player': 0,
     'vehicle': 1,

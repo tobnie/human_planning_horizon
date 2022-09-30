@@ -10,10 +10,9 @@ import matplotlib as mpl
 
 import config
 from analysis import paper_plot_utils
-from analysis.data_utils import get_street_data, get_river_data, subject2letter, read_data
+from analysis.data_utils import coords2fieldsx, get_street_data, get_river_data, subject2letter, read_data
 from analysis.gaze.events.event_detection import try_fixation_detection
 from analysis.gaze.vector_utils import calc_manhattan_distance, calc_euclidean_distance, calc_angle_relative_to_front
-from analysis.player.player_position_heatmap import coords2fieldsx
 
 
 def load_fixations(remodnav=True):

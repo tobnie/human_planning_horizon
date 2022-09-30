@@ -9,9 +9,10 @@ import config
 from itertools import product
 import pandas as pd
 
-from analysis.data_utils import get_all_subjects, assign_position_to_fields, add_game_status_to_df
+from analysis.data_utils import coords2fieldsx, coords2fieldsy, get_all_subjects, assign_position_to_fields, add_game_status_to_df, \
+    read_data
 from analysis.gaze.fixations import get_region_from_field
-from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates, coords2fieldsx, coords2fieldsy
+from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates
 from analysis.pupil_size.pupil_size import add_pupil_size_z_score
 from analysis.sosci_utils import add_experience_to_df
 from analysis.score_utils import add_max_score_to_df
@@ -291,7 +292,7 @@ def create_feature_map_from_state(state):
 
     # object types are Player: 0, Vehicle: 1, LilyPad: 2
     for obj_type, x, y, width in state:
-        x_start, y, width = assign_position_to_fields(x, y, width)
+        x_start, y, width = assign_position_to_fields(x, y, width)  # test if this is still correct
 
         # correct player width
         if obj_type == 0:
@@ -323,11 +324,45 @@ def add_region_info(df):
     return df
 
 
+def get_lane_type(world_type, player_y):
+    """ Expect type of world (L or R) and the current player position in fields and
+    returns the type of the lane the player is on currently."""
+
+    # return nan for start, middle and finish lane
+    if player_y == 0 or player_y == 7 or player_y == config.N_LANES - 1:
+        return np.nan
+
+    # since middle lane is not considered for alternating L R directions in lanes, shift by one for river section
+    if player_y > 7:
+        player_y -= 1
+
+    # return L or R for lane type
+    if player_y % 2 == 1 and world_type == 'L':
+        return 'L'
+    elif player_y % 2 == 0 and world_type == 'L':
+        return 'R'
+    if player_y % 2 == 1 and world_type == 'R':
+        return 'R'
+    elif player_y % 2 == 0 and world_type == 'R':
+        return 'L'
+
+    raise NotImplementedError(
+        f'Unknown situation for determining lane type encountered. Player was at {player_y} in {world_type}-type world')
+
+
+def add_lane_type_to_df(df):
+    """ Adds the lane type to each row of the df. L for left moving lanes, R for right moving lanes."""
+
+    world_type_df = pd.read_csv('world_types.csv')
+    df = df.merge(world_type_df, on=['game_difficulty', 'world_number'], how='left')
+    df['lane_type'] = df.apply(lambda x: get_lane_type(x['world_type'], x['player_y_field']), axis=1)
+    df.drop(['world_type'], axis=1, inplace=True)  # remove world type col from world types df
+    return df
+
+
 def run_preprocessing():
     # we want to save each row with:
     # subject_id, game_difficulty, world_number, time, gaze_x, gaze_y, pupil_size, player_x, player_y, action, state, (?)
-
-    # TODO information on left / right moving lane?
 
     # do for all subjects
     difficulties = ['easy', 'normal', 'hard']
@@ -437,6 +472,7 @@ def run_preprocessing():
         subject_df = add_experience_to_df(subject_df)
         subject_df = add_trial_numbers_to_df(subject_df)
         subject_df = add_max_score_to_df(subject_df)
+        subject_df = add_lane_type_to_df(subject_df)
 
         subject_df.to_csv(f'../data/compressed_data/{subject_id}_compressed.gzip', compression='gzip')
 
