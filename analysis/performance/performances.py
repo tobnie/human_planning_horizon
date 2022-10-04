@@ -1,4 +1,6 @@
 import itertools
+
+import numpy as np
 import pandas as pd
 import scipy
 from matplotlib import pyplot as plt
@@ -256,13 +258,47 @@ def ttest_mean_time_normal_hard():
 
 def plot_last_lanes_lost_games():
     # get last data from each game
-    last_time_steps = get_last_time_steps_of_games(n_time_steps=1).copy()
+    last_time_steps = get_last_time_steps_of_games().copy()
     last_time_steps = last_time_steps[last_time_steps['game_status'] != 'won']
 
     # TODO do something about deaths in zero lane --> consider last action before death or something like that?
+    last_time_steps['player_y']
+
     sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack')
 
     plt.savefig('imgs/performance/lost_games_last_lane.png')
+    plt.show()
+
+
+def classify_loss_cause(region, last_action):
+    if region == 'street':
+        if last_action == 'nop':
+            return 'inactive'  # = runover by car
+        elif last_action in ['left', 'right']:
+            return 'jumped_horiz'
+        else:
+            return 'jumped_vert'
+    elif region == 'river':
+        if last_action == 'nop':
+            return 'inactive'  # = carried out of bounds
+        elif last_action in ['left', 'right']:
+            return 'jumped_horiz'
+        else:
+            return 'jumped_vert'
+    elif np.isnan(region):
+        if last_action == 'nop':
+            raise RuntimeError('This should not be possible, should it?')
+        else:
+            return 'jumped_vert'
+
+
+def plot_causes_of_death():
+    last_time_steps = get_last_time_steps_of_games().copy()
+    lost_games = last_time_steps[last_time_steps['game_status'] != 'lost']
+    lost_games['cause'] = lost_games.apply(classify_loss_cause, axis=1)
+    sns.histplot(lost_games, x='cause', y='player_x', discrete=True, multiple='stack')  # TODO
+
+    plt.tight_layout()
     plt.show()
 
 
@@ -271,6 +307,7 @@ if __name__ == '__main__':
     # sns.set_style("whitegrid")
     # plot_performance_per_difficulty()
     # print_average_game_endings()
-    plot_last_lanes_lost_games()
+    plot_causes_of_death()  # TODO run
+    # plot_last_lanes_lost_games()  # TODO lane 0
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()

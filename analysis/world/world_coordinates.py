@@ -1,8 +1,8 @@
 from matplotlib import pyplot as plt
 
 import config
-from analysis.plotting import plotting_utils
-from analysis.plotting.plotting_utils import plot_rect
+from analysis import plotting_utils
+from analysis.plotting_utils import plot_rect
 
 
 def plot_target_position(ax, target_position):
@@ -13,7 +13,7 @@ def plot_target_position(ax, target_position):
 def plot_water(ax):
     water_width = config.DISPLAY_WIDTH_PX
     water_height = config.N_WATER_LANES * config.ROW_HEIGHT
-    water_y = config.DISPLAY_HEIGHT_PX - (config.ROW_HEIGHT + water_height) + 1
+    water_y = (config.N_STREET_LANES + 2) * config.ROW_HEIGHT
     plot_rect(ax, 0, water_y, water_width, water_height, color='lightblue')
 
 
@@ -25,17 +25,17 @@ def plot_street(ax):
 
 
 def plot_lilypad(ax, x, y, width):
-    plot_rect(ax, x, config.DISPLAY_HEIGHT_PX - y - config.ROW_HEIGHT, width, config.ROW_HEIGHT,
+    plot_rect(ax, x, y, width, config.ROW_HEIGHT,
               color='green')
 
 
 def plot_vehicle(ax, x, y, width):
-    plot_rect(ax, x, config.DISPLAY_HEIGHT_PX - y - config.ROW_HEIGHT, width, config.ROW_HEIGHT,
+    plot_rect(ax, x, y, width, config.ROW_HEIGHT,
               color='red')
 
 
 def plot_player(ax, x, y):
-    plot_rect(ax, x, config.DISPLAY_HEIGHT_PX - y - config.PLAYER_HEIGHT, config.PLAYER_WIDTH, config.PLAYER_HEIGHT,
+    plot_rect(ax, x, y, config.PLAYER_WIDTH, config.PLAYER_HEIGHT,
               color='purple')
 
 

@@ -9,8 +9,7 @@ import config
 from itertools import product
 import pandas as pd
 
-from analysis.data_utils import coords2fieldsx, coords2fieldsy, get_all_subjects, assign_position_to_fields, add_game_status_to_df, \
-    read_data
+from analysis.data_utils import coords2fieldsx, coords2fieldsy, get_all_subjects, add_game_status_to_df
 from analysis.gaze.fixations import get_region_from_field
 from analysis.player.player_position_heatmap import add_player_position_in_field_coordinates
 from analysis.pupil_size.pupil_size import add_pupil_size_z_score
@@ -285,32 +284,6 @@ def get_times_actions_states_samples(subject_id, diffs_and_worlds=None):
 
         t_a_s_s.append((time, action, state, samples_for_state))
     return t_a_s_s
-
-
-def create_feature_map_from_state(state):
-    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 3))
-
-    # object types are Player: 0, Vehicle: 1, LilyPad: 2
-    for obj_type, x, y, width in state:
-        x_start, y, width = assign_position_to_fields(x, y, width)  # test if this is still correct
-
-        # correct player width
-        if obj_type == 0:
-            width = 1
-
-        # correct for partially visible obstacles
-        if x_start < 0:
-            width = width + x_start
-            x_start = 0
-
-        if x_start + width > config.N_FIELDS_PER_LANE:
-            width = config.N_FIELDS_PER_LANE - x_start
-
-        feature_map[x_start:x_start + width, y, obj_type] = 1
-
-    feature_map = np.rot90(feature_map)
-
-    return feature_map
 
 
 def add_gaze_position_in_field_coordinates(df):

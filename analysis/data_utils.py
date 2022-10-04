@@ -125,11 +125,62 @@ def transform_target_pos_to_string(df):
     return df
 
 
-def assign_position_to_fields(x, y, width):
-    field_x_start = coords2fieldsx(x)
+def assign_player_position_to_field(x, y):
+    field_x_start = coords2fieldsx(x + config.PLAYER_WIDTH / 2)
     field_y = coords2fieldsy(y)
-    field_width = int(width // config.FIELD_WIDTH)
-    return field_x_start, field_y, field_width
+    return field_x_start, field_y
+
+
+def assign_object_position_to_fields(x, y, width):
+    field_x_start = coords2fieldsx(
+        x + config.FIELD_WIDTH / 2, clipped=False)  # plus half field width because which is occupied by the object by at least 50%
+    field_x_end = coords2fieldsx(x + width + config.FIELD_WIDTH / 2, clipped=False)
+    field_y = coords2fieldsy(y)
+    return field_x_start, field_x_end, field_y
+
+
+def assign_object_position_to_fields_street(object_x_start, y, width, player_x_start):
+    player_x_end = player_x_start + config.PLAYER_WIDTH
+    object_x_end = object_x_start + width
+
+    field_x_start = coords2fieldsx(object_x_start, clipped=False)
+    field_x_end = coords2fieldsx(object_x_end, clipped=False)
+
+    player_x_start_rest = player_x_start % config.FIELD_WIDTH
+    player_x_end_rest = player_x_end % config.FIELD_WIDTH
+
+    object_x_start_rest = object_x_start % config.FIELD_WIDTH
+    object_x_end_rest = object_x_end % config.FIELD_WIDTH
+
+    if object_x_start_rest > player_x_end_rest:
+        field_x_start += 1
+
+    if player_x_start_rest > object_x_end_rest:
+        field_x_end -= 1
+
+    field_y = coords2fieldsy(y)
+    return field_x_start, field_x_end + 1, field_y
+
+
+def assign_object_position_to_fields_water(object_x_start, y, width, player_x_center):
+    object_x_end = object_x_start + width
+
+    field_x_start = coords2fieldsx(object_x_start, clipped=False)
+    field_x_end = coords2fieldsx(object_x_end, clipped=False)
+
+    player_x_rest = player_x_center % config.FIELD_WIDTH
+
+    object_x_start_rest = object_x_start % config.FIELD_WIDTH
+    object_x_end_rest = object_x_end % config.FIELD_WIDTH
+
+    if object_x_start_rest > player_x_rest:
+        field_x_start += 1
+
+    if player_x_rest > object_x_end_rest:
+        field_x_end -= 1
+
+    field_y = coords2fieldsy(y)
+    return field_x_start, field_x_end + 1, field_y
 
 
 def field2screen(field_coords):
@@ -147,8 +198,11 @@ def subject2letter(subject_id):
     return None
 
 
-def coords2fieldsx(x):
-    return int(min(config.N_FIELDS_PER_LANE - 1, max(x // config.FIELD_WIDTH, 0)))
+def coords2fieldsx(x, clipped=True):
+    if clipped:
+        return int(min(config.N_FIELDS_PER_LANE - 1, max(x // config.FIELD_WIDTH, 0)))
+    else:
+        return int(min(config.N_FIELDS_PER_LANE, max(x // config.FIELD_WIDTH, 0)))
 
 
 def coords2fieldsy(y):

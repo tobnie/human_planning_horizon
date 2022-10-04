@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from analysis.data_utils import read_data, create_state_from_string
-from data.preprocessing import create_feature_map_from_state
+from analysis.world.feature_maps import create_feature_map_from_state
 from neural_network.single_layer_feature_map import create_single_layer_feature_map_from_state
 
 
@@ -19,7 +19,7 @@ def run_create_IO_data_for_NN(subject_id=None):
         df = df[df['subject_id'] == subject_id]
 
     df = df[['weighted_fix_distance_euclidean',
-             'weighted_fix_distance_manhattan', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
+             'mfd', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field', 'fix_distance_manhattan',
              'fix_distance_euclidean']]
 
     # creating states from df
@@ -36,7 +36,7 @@ def run_create_IO_data_for_NN(subject_id=None):
     # outputs
     gaze_pos = df[['fix_x', 'fix_y']].to_numpy()
     gaze_pos_fields = df[['fix_x_field', 'fix_y_field']].to_numpy()
-    weighted_distance_manhattan = df['weighted_fix_distance_manhattan'].to_numpy()
+    weighted_distance_manhattan = df['mfd'].to_numpy()
     weighted_distance_euclidean = df['weighted_fix_distance_euclidean'].to_numpy()
 
     # save all data
@@ -63,13 +63,13 @@ def run_create_IO_data_for_recurrent_NN(timesteps=5, stride=5):
     # get data
     df = read_data()
     fix_df = pd.read_csv('../data/fixations.csv')
-    fix_df = fix_df[['subject_id', 'game_difficulty', 'world_number', 'time', 'weighted_fix_distance_manhattan', 'state']]
+    fix_df = fix_df[['subject_id', 'game_difficulty', 'world_number', 'time', 'mfd', 'state']]
     merged_df = df.merge(fix_df, on=['subject_id', 'game_difficulty', 'world_number', 'time', 'state'], how='left')
-    df = merged_df[['time', 'weighted_fix_distance_manhattan', 'state']]
+    df = merged_df[['time', 'mfd', 'state']]
 
     # position of NaN values in terms of index
-    non_null_indices = df.loc[~pd.isna(df['weighted_fix_distance_manhattan']), :].index
-    # non_null_indices = (~df['weighted_fix_distance_manhattan'].isna()).index
+    non_null_indices = df.loc[~pd.isna(df['mfd']), :].index
+    # non_null_indices = (~df['mfd'].isna()).index
     non_null_indices = list(non_null_indices)
 
     index_ranges = [list(range(i - stride * (timesteps - 1), i + 1, stride)) if i - stride * (timesteps - 1) > 0 else [] for i in
@@ -127,8 +127,8 @@ def run_create_IO_data_for_recurrent_NN(timesteps=5, stride=5):
 if __name__ == '__main__':
     # run_create_IO_data_for_NN(subject_id='ED06RA')
 
-    stride = [20, 10, 5]
-    prev_timesteps = reversed([5, 20, 50, 100])
+    stride = reversed([20, 10, 5])
+    prev_timesteps = [5, 20]  # TODO , 50, 100])
 
     for s, t_steps in tqdm(product(stride, prev_timesteps)):
         print(f'Running with stride={s}, time_steps={t_steps}')

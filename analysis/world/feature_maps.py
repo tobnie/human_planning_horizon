@@ -1,7 +1,11 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
-from analysis.data_utils import create_state_from_string, read_data
-from data.preprocessing import create_feature_map_from_state
+import config
+from analysis.data_utils import assign_object_position_to_fields, assign_object_position_to_fields_street, \
+    assign_object_position_to_fields_water, \
+    assign_player_position_to_field, create_state_from_string, read_data
+from analysis.world.world_coordinates import plot_state
 
 
 def invert_feature_map(feature_map):
@@ -114,10 +118,6 @@ def classify_situation(situation):
 
     situation_identifier = flattened_array.astype(int).astype(str)
 
-    # delete center element bc it is the player
-    center_idx = situation_identifier.shape[0] // 2
-    situation_identifier = np.delete(situation_identifier, center_idx)
-
     # concat to string
     situation_identifier = ''.join(situation_identifier)
 
@@ -134,11 +134,42 @@ def convert_state_to_fm_and_classify(state_from_df, radius=1):
     return situation_identifier
 
 
+def get_avoidance_map_from_state_identifier(identifier):
+    n = int(np.sqrt(len(identifier)))
+    avoidance_map = np.fromstring(identifier, dtype='u1') - ord('0')
+    avoidance_map = avoidance_map.reshape((n, n))
+    return avoidance_map
+
+
 def save_states_with_identifiers():
     df = read_data()
-    df = df[['subject_id', 'game_difficulty', 'world_number', 'time', 'action', 'state', 'player_x_field', 'player_y_field', 'region']]
+    df = df[['subject_id', 'game_difficulty', 'world_number', 'time', 'action', 'state', 'player_x_field', 'player_y_field', 'region',
+             'lane_type']]
 
-    df['state_identifier_3x3'] = df['state'].apply(lambda x: convert_state_to_fm_and_classify(x, radius=1))
-    df['state_identifier_5x5'] = df['state'].apply(lambda x: convert_state_to_fm_and_classify(x, radius=2))
+    df['state_identifier'] = df['state'].apply(lambda x: convert_state_to_fm_and_classify(x, radius=3))
 
+    df.drop(columns=['state'], inplace=True)
     df.to_csv('../data/situations.csv')
+
+
+def create_feature_map_from_state(state):
+    feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES, 3))
+
+    # object types are Player: 0, Vehicle: 1, LilyPad: 2
+    _, player_x_start, _, _ = state[0]
+    player_x_center = player_x_start + config.PLAYER_WIDTH / 2
+    for obj_type, x, y, width in state:
+
+        if obj_type == 0:
+            x_start, y = assign_player_position_to_field(x, y)
+            x_end = x_start + 1
+        elif obj_type == 1:
+            x_start, x_end, y = assign_object_position_to_fields_street(x, y, width, player_x_start)
+        else:
+            x_start, x_end, y = assign_object_position_to_fields_water(x, y, width, player_x_center)
+
+        feature_map[x_start:x_end, y, obj_type] = 1
+
+    feature_map = np.rot90(feature_map)
+
+    return feature_map
