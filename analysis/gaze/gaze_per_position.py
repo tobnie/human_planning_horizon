@@ -7,7 +7,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 import config
-from analysis.data_utils import read_data, read_subject_data, get_all_subjects, get_only_onscreen_data, position2field
+from analysis.data_utils import read_data, read_subject_data, get_all_subjects, get_only_onscreen_data
 
 
 def calculate_gaze_distance(gaze_x, gaze_y, player_x, player_y, metric='euclidean'):
@@ -204,8 +204,6 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
         plt.savefig('./imgs/gaze/gaze_per_position/gaze_density_per_position.png')
     plt.close(plt.gcf())
 
-
-# TODO plot gaze distance (manhattan)
 
 def run_gaze_per_position_plots():
     # TODO run for all subjects

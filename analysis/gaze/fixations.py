@@ -178,7 +178,7 @@ def add_fixation_info_to_df(df, drop_offscreen_samples=True):
                   how='left')
     df = df[
         ['subject_id', 'game_difficulty', 'world_number', 'time', 'target_position', 'player_x', 'player_y', 'player_x_field',
-         'player_y_field', 'score',
+         'player_y_field', 'region', 'score',
          'mfd', 'mfa', 'state', 'fix_x', 'fix_y', 'fix_x_field', 'fix_y_field',
          'fix_distance_manhattan', 'fix_angle', 'fix_duration']].drop_duplicates()
 
@@ -382,10 +382,14 @@ def plot_mfd_per_level_score(subfolder=''):
 
 
 def get_region_from_field(y_field):
-    if 1 <= y_field <= 7:
+    if 0 == y_field:
+        return 'start'
+    if 1 <= y_field <= 6:
         return 'street'
-    elif 9 <= y_field <= 13:
+    elif 8 <= y_field <= 13:
         return 'river'
+    elif 7 == y_field:
+        return 'middle'
     else:
         return np.nan
 
@@ -811,7 +815,6 @@ def plot_weighted_fixations_relative_to_player():
     df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
 
-    # todo jetzt nochmal in schön für alle statements von zuvor zusammen:
     lim = 0.2
     g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
@@ -822,65 +825,102 @@ def plot_weighted_fixations_relative_to_player():
     g.set_axis_labels('x', 'y')
 
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty.png')
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde.png')
     plt.show()
 
-    # street only
-    g = sns.JointGrid(data=df[df['region'] == 'street'], x="weighted_x_distance", y="weighted_y_distance", space=0)
+    # do it for every target position
+    g = sns.displot(data=df, x='weighted_x_distance', y='weighted_y_distance', hue='region', kind='kde', col='target_position')
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_per_target_position.png')
+    plt.show()
+
+
+def plot_weighted_fixations_relative_to_player_per_fixated_object():
+    # load data
+    all_df = load_fixations()
+    df = all_df[all_df['fixation_on'] == 'world'].copy()
+    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
+    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+
+    lim = 1
+    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
-    g.plot_joint(sns.kdeplot, fill=True, cmap="viridis")
-    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack', stat='proportion')
+    g.plot_joint(sns.kdeplot, levels=15)
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
     g.ax_marg_x.set_xlim(-lim, lim)
     g.ax_marg_y.set_ylim(-lim, lim)
-    plt.suptitle('Street section')
+    g.set_axis_labels('x', 'y')
 
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty_street.png')
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_world_only.png')
     plt.show()
 
-    # river only
-    g = sns.JointGrid(data=df[df['region'] == 'river'], x="weighted_x_distance", y="weighted_y_distance", space=0)
+    df = all_df[(all_df['fixation_on'] == 'near_target') | (all_df['fixation_on'] == 'target')].copy()
+    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
+    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+
+    lim = 2.5
+    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
-    g.plot_joint(sns.kdeplot, fill=True, cmap="viridis")
-    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack', stat='proportion')
+    g.plot_joint(sns.kdeplot, levels=15)
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
     g.ax_marg_x.set_xlim(-lim, lim)
     g.ax_marg_y.set_ylim(-lim, lim)
-    plt.suptitle('River section')
+    g.set_axis_labels('x', 'y')
 
     plt.tight_layout()
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_pretty_river.png')
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_target_only.png')
     plt.show()
 
-    f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.kdeplot(df, x='weighted_x_distance', y='weighted_y_distance', fill=True, palette='mako')
-    plt.axvline(x=0)
-    plt.axhline(y=0)
+    df = all_df[(all_df['fixation_on'] == 'near_player') | (all_df['fixation_on'] == 'player')].copy()
+    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
+    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
 
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player.png')
+    lim = 0.2
+    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
+    g.refline(x=0, y=0)
+    g.plot_joint(sns.kdeplot, levels=15)
+    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
+    g.ax_marg_x.set_xlim(-lim, lim)
+    g.ax_marg_y.set_ylim(-lim, lim)
+    g.set_axis_labels('x', 'y')
+
     plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_player_only.png')
     plt.show()
 
-    # for street
-    f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    street_df = get_street_data(df)
-    sns.kdeplot(street_df, x='weighted_x_distance', y='weighted_y_distance', cmap='mako')
-    plt.axvline(x=0)
-    plt.axhline(y=0)
 
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_street.png')
-    plt.tight_layout()
-    plt.show()
+def print_fixations_on_target_for_region():
+    df = load_fixations()
+    street_df = df[df['region'] == 'street']
+    river_df = df[df['region'] == 'river']
 
-    # for river
-    f, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    river_df = get_river_data(df)
-    sns.kdeplot(river_df, x='weighted_x_distance', y='weighted_y_distance', cmap='mako')
-    plt.axvline(x=0)
-    plt.axhline(y=0)
+    print('\nNumber | Ratio of fixations on target in street section:')
+    target_street_df = street_df[(street_df['fixation_on'] == 'near_target') | (street_df['fixation_on'] == 'target')]
+    n_all_street = street_df.shape[0]
+    n_target_street = target_street_df.shape[0]
+    print(f'{n_target_street}/{n_all_street} | {n_target_street/n_all_street * 100} %')
 
-    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_river.png')
-    plt.tight_layout()
-    plt.show()
+    print('Number | Ratio of fixations on target in river section:')
+    target_river_df = river_df[(river_df['fixation_on'] == 'near_target') | (river_df['fixation_on'] == 'target')]
+    n_all_river = river_df.shape[0]
+    n_target_river = target_river_df.shape[0]
+    print(f'{n_target_river}/{n_all_river} | {n_target_river / n_all_river * 100} %')
+
+    print('\nAverage MFD when fixating on target in river section:')
+    river_target_mfd = target_river_df["mfd"]
+    print(f'{river_target_mfd.mean()} with var {river_target_mfd.var()} | median={river_target_mfd.median()}')
+    print(f'Range: {river_target_mfd.min()} to {river_target_mfd.max()}')
+    
+    print(f'\nTarget Fixations per Lane:')
+    print(df['player_y_field'].value_counts().sort_index(ascending=False))
+    # TODO we have no target fixations on the first river lane, did they look at the target excessively before when on the middle lane?
+
+    print('\nFixations when in middle lane:')
+    print(df[df['region'] == 'middle']['fixation_on'].value_counts())
+
+    print('\nFixations when in start lane:')
+    print(df[df['region'] == 'start']['fixation_on'].value_counts())
 
 
 if __name__ == '__main__':
@@ -900,8 +940,9 @@ if __name__ == '__main__':
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 
-    # TODO
     # plot_gaze_y_position_relative_to_player()
+    print_fixations_on_target_for_region()
+    # plot_weighted_fixations_relative_to_player_per_fixated_object()  # TODO run
     plot_weighted_fixations_relative_to_player()
     plot_gaze_x_position_relative_to_player()
 

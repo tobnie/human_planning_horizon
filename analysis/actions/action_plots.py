@@ -16,7 +16,7 @@ def plot_action_distribution(ax, actions, title='Distribution of actions'):
     ax.set_title(title)
 
 
-def plot_and_save_action_distributions():
+def plot_action_distributions():
     df = read_data()
     for subject in df.subject_id.unique():
         fig, ax = plt.subplots()
@@ -64,5 +64,5 @@ def plot_actions_situation_heatmaps():
 
 
 if __name__ == '__main__':
-    # plot_and_save_action_distributions()
+    plot_action_distributions()
     plot_actions_situation_heatmaps()

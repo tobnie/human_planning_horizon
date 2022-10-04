@@ -55,6 +55,11 @@ def plot_player_position_heatmap(df=None):
     plt.close(plt.gcf())
 
 
+def plot_player_position_heatmap_per_target_position():
+    # TODO
+    pass
+
+
 def _plot_heatmap(*args, **kwargs):
     data = kwargs.pop('data')
     data_pivot = pd.crosstab(data['player_y_field'], data['player_x_field'])
@@ -79,6 +84,6 @@ def plot_position_heatmap_per_player(df=None):
 
 
 if __name__ == '__main__':
-    df = read_data()
-    plot_player_position_heatmap(df)
-    plot_position_heatmap_per_player(df)
+    plot_player_position_heatmap()
+    plot_player_position_heatmap_per_target_position()
+    # plot_position_heatmap_per_player()

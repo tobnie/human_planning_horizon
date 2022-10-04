@@ -60,8 +60,6 @@ def plot_pupil_size_over_time(ax, samples):
 
 
 def create_gaze_and_path_plots():
-
-
     for subject_id in get_all_subjects():
         print("Creating plots for subject:", subject_id)
         for y_subplot, difficulty_enum in enumerate(GameDifficulty):
