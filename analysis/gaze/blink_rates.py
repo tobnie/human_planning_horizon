@@ -164,6 +164,7 @@ def plot_blink_rate_over_score():
     plt.legend()
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_score_w_lin_reg.png')
+    plt.savefig('../thesis/3experts_vs_novices/blink_rate_per_score_w_lin_reg.png')
     plt.show()
 
 
@@ -184,6 +185,7 @@ def plot_blink_rate_over_level_score():
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg_per_subject.png')
+    plt.savefig('../thesis/3experts_vs_novices/blink_rate_per_level_score_w_lin_reg_per_subject.png')
     plt.show()
 
     # linear regression:
@@ -226,6 +228,7 @@ def plot_blink_rate_over_level_score():
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg.png')
+    plt.savefig('../thesis/3experts_vs_novices/blink_rate_per_level_score_w_lin_reg.png')
     plt.show()
 
 

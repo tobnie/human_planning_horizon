@@ -23,15 +23,15 @@ def plot_player_position_heatmap(df=None):
     # df.loc[n, 'player_x_field'] = 5
     # df.loc[n, 'player_y_field'] = 14
 
-    ax = heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'])
-    sns.heatmap(heatmap_df)
+    heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'])
+    ax = sns.heatmap(heatmap_df)
     ax.invert_yaxis()
     plt.tight_layout()
     plt.title('player position heatmap')
     plt.savefig('./imgs/player_position/player_position_heatmap.png')
     plt.close(plt.gcf())
 
-    # again with player start position set to zero
+    # again with player start 2position set to zero
     heatmap_df.iloc[0, 9] = 0
     ax = sns.heatmap(heatmap_df)
     ax.invert_yaxis()
@@ -46,17 +46,19 @@ def plot_player_position_heatmap(df=None):
     position_df_won.dropna(inplace=True)  # TODO when does NaN occur?
 
     heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'])
-    heatmap_df.iloc[0, 9] = 0  # set start position to zero
+    heatmap_df.iloc[0, 9] = 0  # set start 2position to zero
     ax = sns.heatmap(heatmap_df)
     ax.invert_yaxis()
     plt.title('only won games')
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero_only_won_games.png')
+    plt.savefig('../thesis/1descriptive/2position/player_position_heatmap.png')
     plt.close(plt.gcf())
 
 
 def plot_player_position_heatmap_per_target_position():
     # TODO
+    plt.savefig('../thesis/1descriptive/2position/player_position_heatmap_by_target.png')
     pass
 
 

@@ -56,7 +56,7 @@ class FinishLane(Lane):
 
     def draw_lane(self, screen):
         super().draw_lane(screen)
-        # draw target position
+        # draw target 2position
         target_field = self.fields[self.target_position]
 
         # draw star on target field
@@ -143,7 +143,7 @@ class DirectedLane(Lane, ABC):
         self.non_player_sprites.draw(screen)
 
     def update(self) -> None:
-        """ Updates the position of all obstacles in the lane. """
+        """ Updates the 2position of all obstacles in the lane. """
         for obstacle in self.non_player_sprites:
             obstacle.update()
 

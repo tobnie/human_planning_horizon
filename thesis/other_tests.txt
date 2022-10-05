@@ -1,0 +1,80 @@
+
+---- t-test for fixation distances between different scoring groups ----
+Scoring groups split at 15104.5 which is 25.0% percentile
+Split Ratio 3/9
+H0: Same Means | H1: Mean Weighted Distance for Low Scorers less than for High Scorers
+Ttest_indResult(statistic=-19.456599866640484, pvalue=2.0873833647672757e-84)
+dof= 73528
+
+---- Kolmogorov Smirnov for fixation distances between different scoring groups ----
+Scoring groups split at 15104.5 which is 25.0% percentile
+Split Ratio 3/9
+H0: Same Distributions | H1: Different Distributions for weighted distances of Low Scorers and of High Scorers
+KstestResult(statistic=0.08047379425170065, pvalue=2.8049602213460522e-71)
+
+
+
+
+---- t-test for fixation distances river / street ----
+H0: Mean fixations distances are equal | H1: Mean fixations distances on river are greater than mean fixation distances on street
+Ttest_indResult(statistic=46.13169893529509, pvalue=0.0)
+dof= 38119
+
+---- Kolmogorov Smirnov for fixation distances river / street ----
+H0: Distributions for fixation distances are equal | H1: Distributions for fixation distances are different for river and street
+KstestResult(statistic=0.2724955515828864, pvalue=0.0)
+
+
+
+
+---- t-test for blink rates river / street ----
+H0: Blink rates are equal | H1: Blink rates on river are greater than blink rates on street
+Ttest_indResult(statistic=9.981697715463834, pvalue=6.2039089049894e-23)
+dof= 1258
+
+---- Kolmogorov Smirnov for blink rates river / street ----
+H0: Distributions for blink rates are equal | H1: Distributions for blink rates are different for street and river
+KstestResult(statistic=0.4894419306184012, pvalue=8.46962430951846e-68)
+
+
+
+
+---- t-test for pupil size river / street ----
+H0: Pupil sizes are equal | H1: Pupil sizes on street are greater than pupil sizes on river
+Ttest_indResult(statistic=843.0870336441045, pvalue=0.0)
+dof= 1161183
+
+---- Kolmogorov Smirnov for pupil size river / street ----
+H0: Distributions for pupil sizes are equal | H1: Distributions for pupil sizes are different for street and river
+KstestResult(statistic=0.6312728124722303, pvalue=0.0)
+
+
+
+
+---- ANOVA for mean score per level ----
+H0: Means for score per level are equal | H1: Means are different for each subject
+F_onewayResult(statistic=1.7221275504642772, pvalue=0.06453795935452851)
+dof= 11
+
+
+
+
+---- t-test for mean time per level easy / normal ----
+H0: Same Means | H1: Mean Game Durations for easy levels less than for medium levels
+Ttest_indResult(statistic=-2.7844918237074237, pvalue=0.0027869326463727377)
+dof= 478
+
+---- t-test for mean time per level normal / hard ----
+H0: Same Means | H1: Mean Game Durations for medium levels less than for hard levels
+Ttest_indResult(statistic=1.5230489600040902, pvalue=0.9357961350036148)
+dof= 478
+
+
+
+
+---- t-test for mean score per level high-scorer / low-scorer ----
+Scoring groups split at 15104.5 which is 25.0% percentile
+Split Ratio 3/9
+H0: Same Means | H1: Mean Score per Level for Low Scorers is less than for High Scorers
+Ttest_indResult(statistic=-2.813006191525852, pvalue=0.0025210951922638343)
+dof= 718

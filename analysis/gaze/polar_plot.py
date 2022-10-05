@@ -10,8 +10,8 @@ from analysis.world.world_coordinates import get_center_of_player
 
 
 def calc_angles_between_player_and_gaze(player_positions, gaze_positions):
-    """Calculates the angle between the player and the gaze position"""
-    # TODO maybe need to transform player and gaze y coordinates by HEIGHT - y?
+    """Calculates the angle between the player and the 3gaze 2position"""
+    # TODO maybe need to transform player and 3gaze y coordinates by HEIGHT - y?
     return np.arctan2(player_positions[:, 0] - gaze_positions[:, 0], player_positions[:, 1] - gaze_positions[:, 1])
     # return np.arctan2(gaze_positions[:, 1] - player_positions[:, 1], gaze_positions[:, 0] - player_positions[:, 0])
 
@@ -63,10 +63,10 @@ def plot_polar_gaze_angles(subject, difficulty, world_number):
         return
     gaze_pos = samples[:, 1:3]
 
-    # remove player positions where time does not match gaze position
+    # remove player positions where time does not match 3gaze 2position
     player_pos = np.array([player_pos[i] for i in range(len(player_pos)) if times[i] in samples[:, 0]])
 
-    # TODO plot gaze angles from player relative to angle to target position
+    # TODO plot 3gaze angles from player relative to angle to target 2position
     world_props = get_world_properties(subject, difficulty, world_name)
     target_position = int(world_props['target_position'])
 

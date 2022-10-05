@@ -1,6 +1,6 @@
 import pandas as pd
 import seaborn as sns
-import scipy.stats
+import scipy
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 
@@ -13,7 +13,7 @@ def get_fixations_with_scores():
 
 
 def add_scoring_group_information_to_df(df, percent_split=0.25):
-    performance_stats = pd.read_csv('../data/performance_stats.csv', index_col=0)
+    performance_stats = pd.read_csv('../data/performance_stats.csv').reset_index()
 
     scores_only = performance_stats[['subject_id', 'score']].drop_duplicates()
 
@@ -165,27 +165,13 @@ def ttest_fixation_distance_scoring_groups():
     # get weighted fixation distances
     df_high_scorers = df[df['scoring_group'] == 'high']
     df_low_scorers = df[df['scoring_group'] == 'low']
-    fix_distances_high_scorers = df_high_scorers['weighted_fix_distance_euclidean']
-    fix_distances_low_scorers = df_low_scorers['weighted_fix_distance_euclidean']
 
     print('H0: Same Means | H1: Mean Weighted Distance for Low Scorers less than for High Scorers')
-
-    # perform (Welch's) t-test
-    # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers,
-                                         alternative='less')  # use equal_var=False bc of different sample sizes
-    print('Test in Weighted Euclidean Distances')
-    print(ttest_result)
-    print('dof=', len(fix_distances_low_scorers) - 1 + len(fix_distances_high_scorers) - 1)
-
     fix_distances_high_scorers = df_high_scorers['mfd']
     fix_distances_low_scorers = df_low_scorers['mfd']
 
-    # perform (Welch's) t-test
     # t test manhattan distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers,
-                                         alternative='less')  # use equal_var=False bc of different sample sizes
-    print('Test in Weighted Manhattan Distances')
+    ttest_result = scipy.stats.ttest_ind(fix_distances_low_scorers, fix_distances_high_scorers, alternative='less')
     print(ttest_result)
     print('dof=', len(fix_distances_low_scorers) - 1 + len(fix_distances_high_scorers) - 1)
 
@@ -195,33 +181,16 @@ def kstest_fixation_distance_scoring_groups():
     df = get_fixations_with_scores()
     df = add_scoring_group_information_to_df(df)
 
-    # fixations_df = pd.read_csv('../data/fixations.csv')[
-    #     ['subject_id', 'game_difficulty', 'world_number', 'player_x_field', 'player_y_field', 'weighted_fix_distance_euclidean',
-    #      'mfd']]
-    #
-    # df = fixations_df.merge(df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
-
     # get weighted fixation distances
     df_high_scorers = df[df['scoring_group'] == 'high']
     df_low_scorers = df[df['scoring_group'] == 'low']
-    fix_distances_high_scorers = df_high_scorers['weighted_fix_distance_euclidean']
-    fix_distances_low_scorers = df_low_scorers['weighted_fix_distance_euclidean']
 
     print('H0: Same Distributions | H1: Different Distributions for weighted distances of Low Scorers and of High Scorers')
-
-    # perform (Welch's) t-test
-    # t test euclidean distances:
-    kstest_result = scipy.stats.kstest(fix_distances_low_scorers, fix_distances_high_scorers, alternative='two-sided')
-    print('Test in Weighted Euclidean Distances')
-    print(kstest_result)
-
     fix_distances_high_scorers = df_high_scorers['mfd']
     fix_distances_low_scorers = df_low_scorers['mfd']
 
-    # perform (Welch's) t-test
-    # t test manhattan distances:
+    # ks test manhattan distances:
     kstest_result = scipy.stats.kstest(fix_distances_low_scorers, fix_distances_high_scorers, alternative='two-sided')
-    print('Test in Weighted Manhattan Distances')
     print(kstest_result)
 
 

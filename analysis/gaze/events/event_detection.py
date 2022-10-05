@@ -23,7 +23,7 @@
 # Reads files as produced by PyTribe (https://github.com/esdalmaijer/PyTribe),
 # and performs a very crude fixation and blink detection: every sample that
 # is invalid (usually coded '0.0') is considered to be part of a blink, and
-# every sample in which the gaze movement velocity is below a threshold is
+# every sample in which the 3gaze movement velocity is below a threshold is
 # considered to be part of a fixation. For optimal event detection, it would be
 # better to use a different algorithm, e.g.:
 # Nystrom, M., & Holmqvist, K. (2010). An adaptive algorithm for fixation,
@@ -247,7 +247,7 @@ def saccade_detection(x, y, time, missing=-32768, minlen=5, maxvel=40, maxacc=34
         # detect saccade starts
         sacstarts = numpy.where((vel[1 + t0i:] > maxvel).astype(int) + (acc[t0i:] > maxacc).astype(int) >= 1)[0]
         if len(sacstarts) > 0:
-            # timestamp for starting position
+            # timestamp for starting 2position
             t1i = t0i + sacstarts[0] + 1
             if t1i >= len(time) - 1:
                 t1i = len(time) - 2
@@ -259,7 +259,7 @@ def saccade_detection(x, y, time, missing=-32768, minlen=5, maxvel=40, maxacc=34
             # detect saccade endings
             sacends = numpy.where((vel[1 + t1i:] < maxvel).astype(int) + (acc[t1i:] < maxacc).astype(int) == 2)[0]
             if len(sacends) > 0:
-                # timestamp for ending position
+                # timestamp for ending 2position
                 t2i = sacends[0] + 1 + t1i + 2
                 if t2i >= len(time):
                     t2i = len(time) - 1

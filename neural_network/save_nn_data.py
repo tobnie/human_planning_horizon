@@ -67,7 +67,7 @@ def run_create_IO_data_for_recurrent_NN(timesteps=5, stride=5):
     merged_df = df.merge(fix_df, on=['subject_id', 'game_difficulty', 'world_number', 'time', 'state'], how='left')
     df = merged_df[['time', 'mfd', 'state']]
 
-    # position of NaN values in terms of index
+    # 2position of NaN values in terms of index
     non_null_indices = df.loc[~pd.isna(df['mfd']), :].index
     # non_null_indices = (~df['mfd'].isna()).index
     non_null_indices = list(non_null_indices)

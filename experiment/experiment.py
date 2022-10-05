@@ -407,7 +407,7 @@ class Experiment:
         """
         Shows message on psychopy window
 
-        :param x: position of the textbox
+        :param x: 2position of the textbox
         :param width: width of the textbox
         :param alignment: alignment of text
         :param font_size: size of the font to show the message

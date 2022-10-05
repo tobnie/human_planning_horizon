@@ -109,7 +109,7 @@ class WorldGenerator:
         world_dict['middle_lanes'] = n_middle_lanes
         world_dict['water_lanes'] = n_water_lanes
 
-        # starting position
+        # starting 2position
         if config.N_FIELDS_PER_LANE % 2 == 0:
             starting_position_x = width // 2 - 1
         else:
@@ -117,7 +117,7 @@ class WorldGenerator:
         starting_position_y = height - 1
         world_dict['starting_position'] = (starting_position_x, starting_position_y)
 
-        # target position
+        # target 2position
         target_position = self._draw(GameParameter.TargetPosition)
         world_dict['target_position'] = target_position
         lanes = []

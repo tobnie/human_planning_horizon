@@ -298,7 +298,7 @@ def add_region_info(df):
 
 
 def get_lane_type(world_type, player_y):
-    """ Expect type of world (L or R) and the current player position in fields and
+    """ Expect type of world (L or R) and the current player 2position in fields and
     returns the type of the lane the player is on currently."""
 
     # return nan for start, middle and finish lane
@@ -382,7 +382,7 @@ def run_preprocessing():
                     gaze_ys_i.append(gaze_y)
                     pupil_sizes_i.append(sample[3])
 
-                    # target position
+                    # target 2position
                     target_position_screen_coords = config.FIELD_WIDTH * target_position + config.FIELD_WIDTH / 2
                     target_positions_i.append(target_position_screen_coords)
 
@@ -407,7 +407,7 @@ def run_preprocessing():
                         # state_fm = create_feature_map_from_state(state)
                         # state_fms.append(state_fm)
 
-                        # player position
+                        # player 2position
                         player_pos = state[0, 1:3]
                         player_width = state[0, 3]
                         player_height = config.PLAYER_HEIGHT

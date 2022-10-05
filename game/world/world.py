@@ -46,10 +46,10 @@ class World:
         self.player_list = pygame.sprite.Group()
         self.player_list.add(self.player)
 
-        # start position
+        # start 2position
         starting_lane: StartLane = self.starting_lanes.sprites()[0]
 
-        # correct player position because of reduced player size for player to be in center
+        # correct player 2position because of reduced player size for player to be in center
         margin_x = (1 - config.PLAYER_WIDTH_TO_FIELD_WIDTH_RATIO) / 2
         margin_y = (1 - config.PLAYER_HEIGHT_TO_FIELD_HEIGHT_RATIO) / 2
 
@@ -126,7 +126,7 @@ class World:
         starting_position_y = config.N_LANES - 1
 
         starting_lane = StartLane(self, row, starting_position=(starting_position_x, starting_position_y))
-        print(f"starting position = {starting_lane.starting_position}")
+        print(f"starting 2position = {starting_lane.starting_position}")
         self.starting_lanes.add(starting_lane)
         self.lanes.add(starting_lane)
         row -= 1
@@ -219,7 +219,7 @@ class World:
                 raise Exception("Unknown lane type: {}".format(lane_info['type']))
 
     def get_target_position(self):
-        """ Returns the target position of the finish lane. """
+        """ Returns the target 2position of the finish lane. """
         return self.finish_lanes.sprites()[0].target_position
 
     def get_world_state(self):

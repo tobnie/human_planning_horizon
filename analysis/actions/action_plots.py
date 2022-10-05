@@ -37,7 +37,7 @@ def get_avoidance_map_distribution(group_df, size=7):
     avoidance_map_distribution = np.mean(avoidance_maps, axis=0)
 
     if size == 7:
-        return avoidance_map_distribution  # TODO there seems to be an error in creation of feature maps, since sometimes player position is occupied
+        return avoidance_map_distribution  # TODO there seems to be an error in creation of feature maps, since sometimes player 2position is occupied
     else:
         # reshape and return then
         avoidance_map_distribution = avoidance_map_distribution.reshape((size, size))

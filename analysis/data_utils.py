@@ -42,7 +42,7 @@ def read_subject_data(subject_id):
 
 
 def get_only_onscreen_data(df):
-    """ Returns the df, but only rows where the gaze was on screen"""
+    """ Returns the df, but only rows where the 3gaze was on screen"""
     gaze_on_screen_mask = (0.0 <= df['gaze_x']) & (df['gaze_x'] <= config.DISPLAY_WIDTH_PX) & (0.0 <= df['gaze_y']) & (
             df['gaze_y'] <= config.DISPLAY_HEIGHT_PX)
     return df[gaze_on_screen_mask]
@@ -59,11 +59,11 @@ def get_all_gazes(df=None):
     return df.loc[['gaze_x', 'gaze_y']]
 
 
-def return_status(time, player_y, player_x, target_position, last_action):
+def return_status(time, player_y, player_x, target_position):
     # player in last sample was in second to last row and player center was below target field
     x_win_range = (target_position - config.FIELD_WIDTH / 2, target_position + config.FIELD_WIDTH / 2)
     if x_win_range[0] <= player_x <= x_win_range[1] and player_y >= 13 * config.FIELD_HEIGHT:
-        if time < TIME_OUT_THRESHOLD and last_action == 'up':  # TODO games should have only been won if last move was up, right?
+        if time < TIME_OUT_THRESHOLD:
             return 'won'
         else:
             return 'timed_out'
@@ -78,7 +78,7 @@ def add_game_status_to_df(df):
     last_time_steps = get_last_time_steps_of_games(df).copy()
 
     last_time_steps['game_status'] = last_time_steps.apply(
-        lambda x: return_status(x['time'], x['player_y'], x['player_x'], x['target_position'], x['last_action']), axis=1)
+        lambda x: return_status(x['time'], x['player_y'], x['player_x'], x['target_position']), axis=1)
     df_filtered = last_time_steps[['subject_id', 'game_difficulty', 'world_number', 'game_status']]
     df_merged = df.merge(df_filtered, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
     return df_merged

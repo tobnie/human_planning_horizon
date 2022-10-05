@@ -49,7 +49,7 @@ class MyEyeTracker:
         return self.tracker.connected()
 
     def get_sample(self):
-        """ Gets the latest sample and returns it as (time, gaze, pupil_size). """
+        """ Gets the latest sample and returns it as (time, 3gaze, pupil_size). """
         sample_time = self.get_time()
         gaze = self.tracker.sample()
         pupil_size = self.tracker.pupil_size()

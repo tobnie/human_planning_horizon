@@ -1,47 +1,64 @@
-from analysis.actions.action_plots import plot_action_distributions, plot_actions_situation_heatmaps
-from analysis.data_utils import get_river_data, get_street_data
+import sys
+import traceback
+
 from analysis.gaze.blink_rates import plot_blink_rate_over_level_score, plot_blink_rate_over_score, plot_blink_rates
-from analysis.gaze.blinks import plot_IBI_per_subject
-from analysis.gaze.fixations import load_fixations, plot_avg_fixation_distance_per_subject, plot_fixation_angle_per_position, \
-    plot_fixation_distance_box_per_region, plot_fixation_distance_per_meta_data, plot_fixation_distance_per_position, plot_fixations_kde, \
-    plot_gaze_x_position_relative_to_player, \
-    plot_gaze_y_position_relative_to_player, \
-    plot_mfd_per_level_score, \
-    plot_polar_hist_for_fixations_per_position, plot_weighted_fixations_relative_to_player, \
-    plot_weighted_fixations_relative_to_player_per_fixated_object, \
-    print_fixations_on_target_for_region
+from analysis.gaze.fixations import load_fixations, plot_MFD_diff_river_street_over_score, plot_fixation_KDE_relative_to_player, \
+    plot_mfd_heatmap, plot_mfd_per_level_score, plot_mfd_per_region, plot_mfd_per_subject_score, print_fixations_on_target_for_region
 from analysis.performance.experts_vs_novices import print_fixation_distances_per_group
-from analysis.performance.performances import histogram_over_avg_trial_times, plot_causes_of_death, plot_last_lanes_lost_games, \
+from analysis.performance.performances import histogram_over_avg_trial_times, plot_last_lanes_lost_games, \
     plot_mean_score_per_level, plot_performance_per_difficulty, \
     print_average_game_endings
 from analysis.player.player_position_heatmap import plot_player_position_heatmap, plot_player_position_heatmap_per_target_position
 from analysis.player.river_section_entrance import plot_entrance_of_river_section
-from analysis.pupil_size.pupil_size import plot_pupil_size, plot_pupil_size_for_each_game
+from analysis.pupil_size.pupil_size import plot_pupil_size
+from analysis.run_statistical_tests import run_tests
 
 
 def try_except_plot(func):
     try:
         func()
-    except Exception as err:
+    except Exception:
         print(f'Plot {func} failed with the following error:\n')
-        print(err)
+        print(traceback.format_exc())
 
 
 if __name__ == '__main__':
-    # performance
-    try_except_plot(plot_performance_per_difficulty)
+    # 1performance
+    try_except_plot(plot_performance_per_difficulty)  # TODO error
+
+    # redirect prints to file:
+    orig_stdout = sys.stdout
+    f = open('../thesis/1descriptive/1performance/performances.txt', 'w+')
+    sys.stdout = f
     try_except_plot(print_average_game_endings)
-    try_except_plot(plot_causes_of_death)  # TODO
-    try_except_plot(plot_last_lanes_lost_games)  # TODO lane 0
+    sys.stdout = orig_stdout
+    f.close()
+
+    try_except_plot(plot_last_lanes_lost_games)  # TODO lane 0 + 7
+    f = open('../thesis/1descriptive/1performance/trial_times.txt', 'w+')
+    sys.stdout = f
     try_except_plot(histogram_over_avg_trial_times)
+    sys.stdout = orig_stdout
+    f.close()
+
+    f = open('../thesis/1descriptive/1performance/score_per_level.txt', 'w+')
+    sys.stdout = f
     try_except_plot(plot_mean_score_per_level)
+    sys.stdout = orig_stdout
+    f.close()
 
     # experts vs novices
+    f = open('../thesis/3experts_vs_novices/mfd_per_group.txt', 'w+')
+    sys.stdout = f
     try_except_plot(print_fixation_distances_per_group)
+    sys.stdout = orig_stdout
+    f.close()
 
-    # actions
-    try_except_plot(plot_action_distributions)
-    try_except_plot(plot_actions_situation_heatmaps)
+    f = open('../thesis/3experts_vs_novices/mfd_per_level_score.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(plot_mfd_per_level_score)
+    sys.stdout = orig_stdout
+    f.close()
 
     # player position
     try_except_plot(plot_player_position_heatmap)
@@ -49,42 +66,65 @@ if __name__ == '__main__':
     try_except_plot(plot_entrance_of_river_section)
 
     # blinks
+    f = open('../thesis/3experts_vs_novices/blink_rate_over_score_lin_reg.txt', 'w+')
+    sys.stdout = f
     try_except_plot(plot_blink_rate_over_score)
-    try_except_plot(plot_blink_rate_over_level_score)
-    try_except_plot(plot_blink_rates)
+    sys.stdout = orig_stdout
+    f.close()
 
-    # ibi
-    try_except_plot(plot_IBI_per_subject)
+    f = open('../thesis/3experts_vs_novices/blink_rate_over_level_score_lin_reg.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(plot_blink_rate_over_level_score)
+    sys.stdout = orig_stdout
+    f.close()
+
+    f = open('../thesis/3experts_vs_novices/blink_rate_per_score.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(plot_blink_rates)
+    sys.stdout = orig_stdout
+    f.close()
 
     # pupil size
+    f = open('../thesis/2river_vs_street/pupil_size.txt', 'w+')
+    sys.stdout = f
     try_except_plot(plot_pupil_size)
-    try_except_plot(plot_pupil_size_for_each_game)
+    sys.stdout = orig_stdout
+    f.close()
 
     # fixations
-    try_except_plot(plot_avg_fixation_distance_per_subject)
+    # TODO Heatmap for fixations on fields (weighted by duration)
+    f = open('../thesis/3experts_vs_novices/mfd_per_level_score_lin_reg.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(plot_mfd_per_subject_score)
+    sys.stdout = orig_stdout
+    f.close()
 
-    try_except_plot(plot_fixations_kde)
+    f = open('../thesis/3experts_vs_novices/mfd_diff_per_score_lin_reg.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(plot_MFD_diff_river_street_over_score)
+    sys.stdout = orig_stdout
+    f.close()
 
-    try_except_plot(plot_polar_hist_for_fixations_per_position)
+    try_except_plot(plot_mfd_heatmap)
+    try_except_plot(plot_mfd_per_region)  # TODO error
 
-    try_except_plot(plot_avg_fixation_distance_per_subject)
-    try_except_plot( plot_mfd_per_level_score)
+    f = open('../thesis/2river_vs_street/fixations_on_target.txt', 'w+')
+    sys.stdout = f
+    try_except_plot(print_fixations_on_target_for_region)  # TODO maybe also make bar plot / maybe was aus KDE rausrechnen?
+    sys.stdout = orig_stdout
+    f.close()
+    try_except_plot(plot_fixation_KDE_relative_to_player)  # TODO error
 
-    df = load_fixations()
-    plot_fixation_angle_per_position(df)
-    plot_fixation_distance_per_position(df)
-    plot_fixation_distance_box_per_region(df)
+    # other statistical tests
+    f = open('../thesis/other_tests.txt', 'w+')
+    sys.stdout = f
+    run_tests()
+    sys.stdout = orig_stdout
+    f.close()
 
-    try_except_plot(plot_gaze_y_position_relative_to_player)
-    try_except_plot(print_fixations_on_target_for_region)
-    try_except_plot(plot_weighted_fixations_relative_to_player_per_fixated_object)  # TODO run
-    try_except_plot(plot_weighted_fixations_relative_to_player)
-    try_except_plot(plot_gaze_x_position_relative_to_player)
+    # TODO blink rate vs score plot
+    # TODO blink rate vs score test
+    # TODO pupil size vs score plot
+    # TODO pupil size vs score test
 
-    plot_fixation_distance_per_meta_data(df)
 
-    df_street = get_street_data(df)
-    plot_fixation_distance_per_meta_data(df_street, subfolder='street/')
-
-    df_river = get_river_data(df)
-    plot_fixation_distance_per_meta_data(df_street, subfolder='river/')

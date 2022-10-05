@@ -21,7 +21,7 @@ def joint_gaze_plot(gaze_points, xlim=(0, config.DISPLAY_WIDTH_PX), ylim=(0, con
     sns.kdeplot(y=y, fill=True, ax=g.ax_marg_y, color="dimgrey")
 
     # TODO do we want that?
-    # # scatter gaze points
+    # # scatter 3gaze points
     # g.ax_joint.scatter(x, y, color='lightgray')
 
     g.fig.colorbar(g.ax_joint.collections[0], ax=[g.ax_joint, g.ax_marg_y, g.ax_marg_x], use_gridspec=True, orientation='horizontal')

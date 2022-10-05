@@ -5,7 +5,8 @@ from analysis.performance.experts_vs_novices import ttest_fixation_distance_scor
 from analysis.performance.performances import anova_mean_level_score, ttest_mean_time_easy_normal, ttest_mean_time_normal_hard
 from analysis.pupil_size.pupil_size import ttest_pupil_size_street_river, kstest_pupil_size_street_river
 
-if __name__ == '__main__':
+
+def run_tests():
     print('\n---- t-test for fixation distances between different scoring groups ----')
     ttest_fixation_distance_scoring_groups()
     print('\n---- Kolmogorov Smirnov for fixation distances between different scoring groups ----')
@@ -48,3 +49,7 @@ if __name__ == '__main__':
 
     print('\n---- t-test for mean score per level high-scorer / low-scorer ----')
     ttest_mean_level_score_high_scorer_low_scorer()
+
+
+if __name__ == '__main__':
+    run_tests()

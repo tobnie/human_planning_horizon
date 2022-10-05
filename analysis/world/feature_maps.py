@@ -50,7 +50,7 @@ def get_feature_map_distribution_for_avoidance(feature_map):
 
 
 def get_player_position_in_map(feature_map):
-    """ Returns the position of the player in the feature map as (x, y)-tuple."""
+    """ Returns the 2position of the player in the feature map as (x, y)-tuple."""
     player_fm = get_feature_map_for_player(feature_map)
     indices = np.where(player_fm == 1)
     return indices[0][0], indices[1][0]

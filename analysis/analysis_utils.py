@@ -431,7 +431,7 @@ def transform_times_actions_states_samples_to_fm(time_action_state_samples):
 
 
 def get_player_position_from_state(state):
-    """ Returns the position of the player in the given state"""
+    """ Returns the 2position of the player in the given state"""
     return state[:, :, 0]
 
 

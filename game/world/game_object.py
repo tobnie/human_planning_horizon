@@ -34,14 +34,14 @@ class GameObject(pygame.sprite.Sprite, ABC):
             self.rect = pygame.Rect(x * config.FIELD_WIDTH, y * config.FIELD_HEIGHT, width * config.FIELD_WIDTH,
                                     height * config.FIELD_HEIGHT)
 
-        # internal position (int)
+        # internal 2position (int)
         self.x: float = 0
         self.y: float = 0
         self.highest_visited_lane = 0
         self.set_position((x, y))
 
     def set_position(self, pos: (float, float)):
-        """ Sets the current position of the player sprite rect given as (x, y)-tuple."""
+        """ Sets the current 2position of the player sprite rect given as (x, y)-tuple."""
 
         self.x = pos[0]
         self.y = pos[1]
@@ -101,7 +101,7 @@ class Obstacle(DynamicObject):
         self.image.set_colorkey(colors.WHITE)
 
     def update(self) -> None:
-        """Updates the position of the obstacle."""
+        """Updates the 2position of the obstacle."""
         new_x = self.x + self.delta_x
         self.set_position((new_x, self.y))
 
@@ -129,13 +129,13 @@ class LilyPad(Obstacle):
 
     def update(self) -> None:
         """Calls the super method as usual but also checks if the player is on the lilypad and if so,
-        the player's position is also updated accordingly"""
+        the player's 2position is also updated accordingly"""
 
-        # super call needs to be last, because otherwise the new position of the lilypad is already used
+        # super call needs to be last, because otherwise the new 2position of the lilypad is already used
         old_x = self.x
         super().update()
 
-        # also update player position if on lilypad
+        # also update player 2position if on lilypad
         player = self.world.player
         if player.rect.colliderect(self.rect):
             # only if lilypad moved in this step

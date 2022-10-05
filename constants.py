@@ -1,7 +1,7 @@
 ## This file is part of PyGaze - the open-source toolbox for eye tracking
 ##
-##    PyGaze is a Python module for easily creating gaze contingent experiments
-##    or other software (as well as non-gaze contingent experiments/software)
+##    PyGaze is a Python module for easily creating 3gaze contingent experiments
+##    or other software (as well as non-3gaze contingent experiments/software)
 ##    Copyright (C) 2012-2013  Edwin S. Dalmaijer
 ##
 ##    This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 
 
 # MAIN
-DUMMYMODE = False# False for gaze contingent display, True for dummy mode (using mouse or joystick)
+DUMMYMODE = False# False for 3gaze contingent display, True for dummy mode (using mouse or joystick)
 LOGFILENAME = 'default' # logfilename, without path
 LOGFILE = LOGFILENAME[:] # .txt; adding path before logfilename is optional; logs responses (NOT eye movements, these are stored in an EDF file!)
 

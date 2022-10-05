@@ -103,7 +103,7 @@ class Player(DynamicObject):
             self.world.player.is_dead = True
 
     def update(self) -> None:
-        """Updates the object's position by adding the current deltas to the current position.
+        """Updates the object's 2position by adding the current deltas to the current 2position.
         The player is constrained by their movement boundaries."""
 
         self.set_rotated_sprite_img()
@@ -128,7 +128,7 @@ class Player(DynamicObject):
 
         # check bounds in y-direction
         if new_y <= self.movement_bounds_y[0] + config.FIELD_HEIGHT:
-            # only update y if the player will end on the target position
+            # only update y if the player will end on the target 2position
             target_x = self.world.finish_lanes.sprites()[0].target_position * config.FIELD_WIDTH
             new_center_x = new_x + self.rect.width / 2
             if target_x <= new_center_x <= target_x + config.FIELD_WIDTH:

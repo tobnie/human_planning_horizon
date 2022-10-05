@@ -1,0 +1,5 @@
+Linear Regression for avg blinking rate per score:
+R-squared: 0.23832650101376052
+p value: 0.0536724553464675
+slope (95%): -0.000025 +/- 0.000032
+intercept (95%): 0.647581 +/- 0.554078

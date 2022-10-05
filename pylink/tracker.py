@@ -115,22 +115,22 @@ class EyelinkMessage(EyeLinkAddress):
 ## Sample data for left and right eye.
 #
 #  The \c getRightEye() or \c getLeftEye() functions returns an instance of SampleData class, which contains the current 
-#  sample position (raw, HREF, or gaze) and pupil size information of the desired eye. The following methods can 
+#  sample 2position (raw, HREF, or 3gaze) and pupil size information of the desired eye. The following methods can
 #  be used to retrieve the attributes of an instance of the SampleData class.  
 #
-#  For example, the x gaze position of the left eye for a given sample can be retrieved as:
+#  For example, the x 3gaze 2position of the left eye for a given sample can be retrieved as:
 #
 #	\code
 #	newSample = getEYELINK().getFloatData()
-#	gaze = newSample.getLeftEye().getGaze()
-#	left_eye_gaze_x = gaze[0]
+#	3gaze = newSample.getLeftEye().getGaze()
+#	left_eye_gaze_x = 3gaze[0]
 #	\endcode
 #
 #  If certain property information not sent for this sample, the value \c MISSING_DATA (or \c 0, depending on the field) 
 #  will be returned, and the corresponding bit in the flags field will be zero (see eye_data.h for a list of bits).  
 #  Data may be missing because of the tracker configuration (set by commands sent at the start of the experiment, 
 #  from the Set Options screen of the EyeLink II tracker and newer eye tracker models, or from the default configuration set by the DATA.INI file 
-#  for the EyeLink I tracker).  Eye position data may also be set to \c MISSING_VALUE during a blink.	
+#  for the EyeLink I tracker).  Eye 2position data may also be set to \c MISSING_VALUE during a blink.
 class SampleData:
 	def __init__(self,px, py,hx, hy,pa,gx, gy):
 		self.__pupil__ =(px, py) 
@@ -138,10 +138,10 @@ class SampleData:
 		self.__area__ = pa
 		self.__gaze__ = (gx,gy)
 
-	## Display gaze position (in pixel coordinates set by the
+	## Display 3gaze 2position (in pixel coordinates set by the
 	#  \c screen_pixel_coords command). The first and second
-	#  item of the tuple store the x- and y- coordinate gaze
-	#  position respectively.
+	#  item of the tuple store the x- and y- coordinate 3gaze
+	#  2position respectively.
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getGaze(self):
@@ -177,11 +177,11 @@ class SampleData:
 #  different platforms such as Windows, Linux and macOS. You will need to know these classes to read the 
 #  examples and to write your own experiments. In this documentation, the common data classes are: Sample class, 
 #  Eye Event Classes, MessageEvent Class, and IOEvent Class. You only need to read this section if you are 
-#  planning to use real-time link data for gaze-contingent displays or gaze-controlled interfaces, or to use data 
+#  planning to use real-time link data for 3gaze-contingent displays or 3gaze-controlled interfaces, or to use data
 #  playback. 
 #
-#  The EyeLink tracker measures eye position 250 or 2000 times per second depending on the tracking hardware and the tracker mode you are 
-#  working with, and computes true gaze position on the display using the head camera data. This data is stored 
+#  The EyeLink tracker measures eye 2position 250 or 2000 times per second depending on the tracking hardware and the tracker mode you are
+#  working with, and computes true 3gaze 2position on the display using the head camera data. This data is stored
 #  in the EDF file, and made available through the link in as little as 3 milliseconds after a physical eye movement.
 #
 #  Samples can be read from the link by \c getFloatData() or \c getNewestSample() method of the EyeLink/EyeLinkLisenter 
@@ -259,7 +259,7 @@ class Sample:
 	def getType(self):
 		return self.__type__
 		
-	## Angular resolution at current gaze position in screen pixels
+	## Angular resolution at current 3gaze 2position in screen pixels
 	#  per visual degree. The first item of the tuple stores the x-coordinate
 	#  resolution and the second item of the tuple
 	#  stores the y-coordinate resolution.
@@ -462,7 +462,7 @@ def newRawSample(time, left_raw_pupil_x,  left_raw_pupil_y, left_raw_cr_x, left_
 #  placing corresponding events into the data stream.  These include eye-data events (blinks, saccades, 
 #  and fixations), button events, input-port events, and messages.  Several classes have been created to 
 #  holds eye event data (start/end of fixation, start/end of saccade, start/end of blink, fixation update) 
-#  information.  Start events contain only the start time, and optionally the start eye or gaze position.  
+#  information.  Start events contain only the start time, and optionally the start eye or 3gaze 2position.
 #  End events contain the start and end time, plus summary data on saccades and fixations.
 #
 #  It is important to remember that data sent over the link does not arrive in strict time sequence.  
@@ -579,16 +579,16 @@ class StartNonBlinkEvent(EyeEvent):
 		self.__startVelocity__ = svel
 		self.__startUpd__  = (supd_x, supd_y)
 		
-	## Gaze position at the start of the event (in pixel coordinates
+	## Gaze 2position at the start of the event (in pixel coordinates
 	#  set by the \c screen_pixel_coords command). The first and
-	#  second items of the tuple store the x- and y- gaze position
+	#  second items of the tuple store the x- and y- 3gaze 2position
 	#  respectively.
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getStartGaze(self):
 		return self.__startGaze__
 	
-	## HEADREF position at the start of the event. The first and
+	## HEADREF 2position at the start of the event. The first and
 	#  second items of the tuple store the x- and y- HREF data
 	#  respectively.
 	#  @return
@@ -707,16 +707,16 @@ class EndNonBlinkEvent:
 	def getEndTime(self):
 		return self.__endTime__
 
-	## Gaze position at the end of the event (in pixel coordinates 
+	## Gaze 2position at the end of the event (in pixel coordinates
 	#  set by the \c screen_pixel_coords command).  The first and 
-	#  second items of the returned tuple store the x- and y- gaze position 
+	#  second items of the returned tuple store the x- and y- 3gaze 2position
 	#  respectively.
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getEndGaze(self):
 		return self.__endGaze__
 
-	## HEADREF position at the end of the event.  The first and 
+	## HEADREF 2position at the end of the event.  The first and
 	#  second items of the returned tuple store the x- and y- coordinate HREF data 
 	#  respectively.
 	#  @return
@@ -730,13 +730,13 @@ class EndNonBlinkEvent:
 	def getEndVelocity(self):
 		return self.__endVelocity__
 
-	## Average gaze velocity during event (in visual degrees per second).		
+	## Average 3gaze velocity during event (in visual degrees per second).
 	#  @return
 	#	Float.
 	def getAverageVelocity(self):
 		return self.__avgVelocity__
 
-	## Peak gaze velocity during event (in visual degrees per second).	
+	## Peak 3gaze velocity during event (in visual degrees per second).
 	#  @return
 	# 	Float.
 	def getPeakVelocity(self):
@@ -813,14 +813,14 @@ class EndFixationEvent(StartFixationEvent, EndNonBlinkEvent):
 		self.__ena__=ena
 		self.__ava__=ava
 
-	## The average gaze position during the fixation period (in
+	## The average 3gaze 2position during the fixation period (in
 	#  pixel coordinates set by the \c screen_pixel_coords command).
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getAverageGaze(self):
 		return self.__avgGaze__
 
-	## Average HEADREF position during the fixation period.
+	## Average HEADREF 2position during the fixation period.
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getAverageHREF(self):
@@ -861,14 +861,14 @@ class FixUpdateEvent(StartNonBlinkEvent, EndNonBlinkEvent):
 	def getStartPupilSize(self):
 		return self.__sta__
 	
-	## The average gaze position during the fixation period (in
+	## The average 3gaze 2position during the fixation period (in
 	#  pixel coordinates set by the \c screen_pixel_coords command).
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getAverageGaze(self):
 		return self.__avgGaze__
 				
-	## Average HEADREF position during the fixation period.
+	## Average HEADREF 2position during the fixation period.
 	#  @return
 	#	Two-item tuple in the format of (float, float).
 	def getAverageHREF(self):
@@ -1143,7 +1143,7 @@ class ILinkData:
 	def getSampleDivisor(self): 
 		return self._samdiv
 	
-	## Amount to divide gaze x,y,res by.
+	## Amount to divide 3gaze x,y,res by.
 	#  Equivalent field in ILINKDATA "C": prescaler.
 	def getPrescaler(self):     
 		return self._prescaler
@@ -1606,10 +1606,10 @@ class EyeLinkCustomDisplay:
 	#  This function should draw a line from (x1,y1) to (x2,y2). The x and y values
 	#  are relative to the width and height of the image, given at \c setup_image_display().
 	#
-	#  @param x1 Starting x position.
-	#  @param y1 Starting y position.
-	#  @param x2 Ending x position.
-	#  @param y2 Ending y position.
+	#  @param x1 Starting x 2position.
+	#  @param y1 Starting y 2position.
+	#  @param x2 Ending x 2position.
+	#  @param y2 Ending y 2position.
 	#  @param colorindex Color id of the line.
 	#  	Possible value for colorindex are:
 	#	\arg CR_HAIR_COLOR=1
@@ -1626,8 +1626,8 @@ class EyeLinkCustomDisplay:
 	#  are relative to the width and height of the image, given at \c setup_image_display().
 	# 
 	#  @remark This function is not used at the moment.
-	#  @param x Starting x position.
-	#  @param y Starting y position.
+	#  @param x Starting x 2position.
+	#  @param y Starting y 2position.
 	#  @param width  bounding width
 	#  @param height bounding height
 	#  @param colorindex Color id of the ellipse.

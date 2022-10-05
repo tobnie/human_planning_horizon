@@ -1,4 +1,4 @@
-# todo where was river section entered depending on target position. Did they consider the target position even before entering the section?
+# todo where was river section entered depending on target 2position. Did they consider the target 2position even before entering the section?
 import seaborn as sns
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -37,6 +37,7 @@ def plot_entrance_of_river_section():
     sns.histplot(data=x, x='player_x_field', hue='target_position', multiple='stack', discrete=True)
 
     plt.savefig('./imgs/player_position/entrances_river_x_by_target_position.png')
+    plt.savefig('../thesis/1descriptive/2position/river_entrances_OPT.png')
     plt.tight_layout()
     plt.show()
 

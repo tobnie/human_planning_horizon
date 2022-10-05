@@ -76,13 +76,13 @@ def attribute_fixation(row, radius):
     If the fixation is within the vicinity of the player and the target, attribute the fixation to the nearer object in px by the
     euclidean norm."""
 
-    # get player position
+    # get player 2position
     p_x = int(row['player_x_field'])
     p_y = int(row['player_y_field'])
     p_range_x = range(p_x - radius, p_x + radius + 1)
     p_range_y = range(p_y - radius, p_y + radius + 1)
 
-    # get target position
+    # get target 2position
     target_x = row['target_position']
 
     target_field_x = int(coords2fieldsx(target_x))
@@ -122,7 +122,7 @@ def attribute_fixation(row, radius):
 
 
 def attribute_fixations_in_df(df, radius=1):
-    """ Attributes the fixation to the player, the target position or the game objects by considering a radius around the fixated field."""
+    """ Attributes the fixation to the player, the target 2position or the game objects by considering a radius around the fixated field."""
     df = df.apply(lambda x: attribute_fixation(x, radius), axis=1)
     return df
 
@@ -206,7 +206,9 @@ def _plot_heatmap(*args, **kwargs):
     ax.invert_yaxis()
 
 
-def plot_fixation_distance_per_position(df, subject_id=None):
+def plot_mfd_heatmap(subject_id=None):
+    df = read_data()
+
     if subject_id:
         df = df[df['subject_id'] == subject_id]
 
@@ -246,8 +248,9 @@ def plot_fixation_distance_per_position(df, subject_id=None):
     ax.set_yticklabels(ylabels)
 
     plt.tight_layout()
-    plt.savefig(directory_path + 'weighted_fixation_per_position.png')
-    plt.savefig('../paper/fixation_distance_per_position.svg', format='svg')
+    plt.savefig(directory_path + 'mfd_per_position.png')
+    plt.savefig('../thesis/2river_vs_street/mfd_per_position.png')
+    plt.savefig('../paper/mfd_per_position.svg', format='svg')
     plt.show()
 
 
@@ -367,6 +370,7 @@ def plot_mfd_per_level_score(subfolder=''):
 
     sns.scatterplot(mfd_and_score_df, x='level_score', y='mfd', hue='game_difficulty')
     plt.tight_layout()
+    plt.savefig('../thesis/3experts_vs_novices/mfd_by_level_score.png')
     plt.savefig(directory_path + 'weighted_fixation_distance_by_level_score.png')
     plt.show()
 
@@ -418,7 +422,8 @@ def plot_fixation_distance_hist_per_region(df):
     plt.show()
 
 
-def plot_fixation_distance_box_per_region(df):
+def plot_mfd_per_region():
+    df = read_data()
     directory_path = './imgs/gaze/fixations/fixations_per_position/'
 
     edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
@@ -458,6 +463,7 @@ def plot_fixation_distance_box_per_region(df):
     ax.set_xlabel('')
     ax.set_ylabel('Fixation distance [fields]')
     plt.savefig(directory_path + 'fixation_distance_per_region_box.png')
+    plt.savefig('../thesis/2river_vs_street/fixation_distance_per_region_box.png')
     plt.savefig('../paper/fixation_distance_per_region_box.svg', format="svg")
     plt.show()
 
@@ -468,28 +474,14 @@ def ttest_fixation_distance_street_river():
     # get weighted fixation distances
     df_river = get_river_data(df)
     df_street = get_street_data(df)
-    fix_distances_river = df_river['weighted_fix_distance_euclidean']
-    fix_distances_street = df_street['weighted_fix_distance_euclidean']
-
     print(
         'H0: Mean fixations distances are equal | H1: Mean fixations distances on river are greater than mean fixation distances on street')
-
-    # perform (Welch's) t-test
-    # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street,
-                                         alternative='greater')  # use equal_var=False bc of different sample sizes
-    print('Test in Weighted Euclidean Distances')
-    print(ttest_result)
-    print('dof=', len(fix_distances_river) - 1 + len(fix_distances_street) - 1)
 
     fix_distances_river = df_river['mfd']
     fix_distances_street = df_street['mfd']
 
-    # perform (Welch's) t-test
     # t test manhattan distances:
-    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street,
-                                         alternative='greater')  # use equal_var=False bc of different sample sizes
-    print('Test in Weighted Manhattan Distances')
+    ttest_result = scipy.stats.ttest_ind(fix_distances_river, fix_distances_street, alternative='greater')
     print(ttest_result)
     print('dof=', len(fix_distances_river) - 1 + len(fix_distances_street) - 1)
 
@@ -500,29 +492,19 @@ def kstest_fixation_distance_street_river():
     # get weighted fixation distances
     df_river = get_river_data(df)
     df_street = get_street_data(df)
-    fix_distances_river = df_river['weighted_fix_distance_euclidean']
-    fix_distances_street = df_street['weighted_fix_distance_euclidean']
 
     print(
         'H0: Distributions for fixation distances are equal | H1: Distributions for fixation distances are different for river and street')
 
-    # perform (Welch's) t-test
-    # t test euclidean distances:
-    kstest_result = scipy.stats.kstest(fix_distances_river, fix_distances_street, alternative='two-sided')
-    print('Test in Weighted Euclidean Distances')
-    print(kstest_result)
-
     fix_distances_river = df_river['mfd']
     fix_distances_street = df_street['mfd']
 
-    # perform (Welch's) t-test
-    # t test manhattan distances:
+    # ks test manhattan distances:
     kstest_result = scipy.stats.kstest(fix_distances_river, fix_distances_street, alternative='two-sided')
-    print('Test in Weighted Manhattan Distances')
     print(kstest_result)
 
 
-def plot_avg_fixation_distance_per_subject():
+def plot_mfd_per_subject_score():
     df = load_fixations()
 
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
@@ -532,9 +514,11 @@ def plot_avg_fixation_distance_per_subject():
 
     xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
     ax.set_xticklabels(xlabels)
+    ax.set_xlabel('subject score')
     plt.tight_layout()
 
     plt.savefig('./imgs/gaze/fixations/mfd_per_score.png')
+    plt.savefig('../thesis/3experts_vs_novices/mfd_per_score.png')
     plt.show()
 
     # linear regression:
@@ -552,7 +536,7 @@ def plot_avg_fixation_distance_per_subject():
     std = df['mfd_std']
     res = scipy.stats.linregress(x, y, alternative='greater')
 
-    print('Linear Regression for avg Fixation Distance per Level Score:')
+    print('Linear Regression for MFD per Score:')
     print(f'R-squared: {res.rvalue ** 2}')
     print(f'p value: {res.pvalue}')
 
@@ -585,11 +569,12 @@ def plot_avg_fixation_distance_per_subject():
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
-    plt.xlabel('level score')
+    plt.xlabel('subject score')
     plt.ylabel('MFD')
     plt.legend()
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/mfd_per_score_w_lin_reg.png')
+    plt.savefig('../thesis/3experts_vs_novices/mfd_per_score_lin_reg.png')
     plt.show()
 
 
@@ -608,7 +593,7 @@ def plot_fixation_kde(df, axes):
     sns.kdeplot(df, x='fix_x', y='fix_y', weights='fix_duration', ax=ax, fill=True, cmap='mako')
     sns.scatterplot(df, x='fix_x', y='fix_y', size='fix_duration', ax=ax, alpha=0.5, color='white')
 
-    # add player position
+    # add player 2position
     rect = patches.Rectangle((player_x * config.FIELD_WIDTH, player_y * config.FIELD_HEIGHT), config.FIELD_WIDTH, config.FIELD_HEIGHT,
                              fill=True, color='r', alpha=0.5)
     ax.add_patch(rect)
@@ -785,7 +770,7 @@ def plot_gaze_x_position_relative_to_player():
     print(ttest_result)
     print('dof=', df_street['weighted_x_distance'].shape[0] - 1 + df_river['weighted_x_distance'].shape[0] - 1)
 
-    # TODO this also for target position
+    # TODO this also for target 2position
 
     # boxplot per lane
     sns.boxplot(x='weighted_x_distance', y='player_y_field', data=df)
@@ -809,9 +794,10 @@ def plot_gaze_x_position_relative_to_player():
     plt.show()
 
 
-def plot_weighted_fixations_relative_to_player():
+def plot_fixation_KDE_relative_to_player():
     # load data
     df = load_fixations()
+    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
     df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
 
@@ -826,11 +812,13 @@ def plot_weighted_fixations_relative_to_player():
 
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde.png')
+    plt.savefig('../thesis/2river_vs_street/weighted_gaze_position_relative_to_player_kde.png')
     plt.show()
 
-    # do it for every target position
+    # do it for every target 2position
     g = sns.displot(data=df, x='weighted_x_distance', y='weighted_y_distance', hue='region', kind='kde', col='target_position')
     plt.tight_layout()
+
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_per_target_position.png')
     plt.show()
 
@@ -838,11 +826,12 @@ def plot_weighted_fixations_relative_to_player():
 def plot_weighted_fixations_relative_to_player_per_fixated_object():
     # load data
     all_df = load_fixations()
-    df = all_df[all_df['fixation_on'] == 'world'].copy()
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
-    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+    all_df['weighted_x_distance'] = all_df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
+    all_df['weighted_y_distance'] = all_df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+    df = all_df[(all_df['region'] == 'street') | (all_df['region'] == 'river')]
+    df = df[df['fixation_on'] == 'world'].copy()
 
-    lim = 1
+    lim = 0.35
     g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
     g.plot_joint(sns.kdeplot, levels=15)
@@ -851,15 +840,13 @@ def plot_weighted_fixations_relative_to_player_per_fixated_object():
     g.ax_marg_y.set_ylim(-lim, lim)
     g.set_axis_labels('x', 'y')
 
+    plt.suptitle('fix on world only')
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_world_only.png')
     plt.show()
 
     df = all_df[(all_df['fixation_on'] == 'near_target') | (all_df['fixation_on'] == 'target')].copy()
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
-    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
-
-    lim = 2.5
+    lim = 0.5
     g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
     g.plot_joint(sns.kdeplot, levels=15)
@@ -868,15 +855,15 @@ def plot_weighted_fixations_relative_to_player_per_fixated_object():
     g.ax_marg_y.set_ylim(-lim, lim)
     g.set_axis_labels('x', 'y')
 
+    plt.suptitle('fix on target only')
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_target_only.png')
     plt.show()
 
     df = all_df[(all_df['fixation_on'] == 'near_player') | (all_df['fixation_on'] == 'player')].copy()
-    df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
-    df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
+    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
 
-    lim = 0.2
+    lim = 0.15
     g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
     g.refline(x=0, y=0)
     g.plot_joint(sns.kdeplot, levels=15)
@@ -885,8 +872,18 @@ def plot_weighted_fixations_relative_to_player_per_fixated_object():
     g.ax_marg_y.set_ylim(-lim, lim)
     g.set_axis_labels('x', 'y')
 
+    plt.suptitle('fix on player only')
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_player_only.png')
+    plt.show()
+
+    g = sns.displot(data=all_df, x="weighted_x_distance", y="weighted_y_distance", col='region', kind="kde", col_wrap=2)
+    g.refline(x=0, y=0)
+    # TODO format plot (lims for each ax)
+    plt.xlim((-0.25, 0.25))
+
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde_per_region.png')
     plt.show()
 
 
@@ -899,7 +896,7 @@ def print_fixations_on_target_for_region():
     target_street_df = street_df[(street_df['fixation_on'] == 'near_target') | (street_df['fixation_on'] == 'target')]
     n_all_street = street_df.shape[0]
     n_target_street = target_street_df.shape[0]
-    print(f'{n_target_street}/{n_all_street} | {n_target_street/n_all_street * 100} %')
+    print(f'{n_target_street}/{n_all_street} | {n_target_street / n_all_street * 100} %')
 
     print('Number | Ratio of fixations on target in river section:')
     target_river_df = river_df[(river_df['fixation_on'] == 'near_target') | (river_df['fixation_on'] == 'target')]
@@ -911,16 +908,92 @@ def print_fixations_on_target_for_region():
     river_target_mfd = target_river_df["mfd"]
     print(f'{river_target_mfd.mean()} with var {river_target_mfd.var()} | median={river_target_mfd.median()}')
     print(f'Range: {river_target_mfd.min()} to {river_target_mfd.max()}')
-    
+
     print(f'\nTarget Fixations per Lane:')
-    print(df['player_y_field'].value_counts().sort_index(ascending=False))
-    # TODO we have no target fixations on the first river lane, did they look at the target excessively before when on the middle lane?
+    print(df[(df['fixation_on'] == 'near_target') | (df['fixation_on'] == 'target')]['player_y_field'].value_counts().sort_index(
+        ascending=False))
 
     print('\nFixations when in middle lane:')
     print(df[df['region'] == 'middle']['fixation_on'].value_counts())
 
     print('\nFixations when in start lane:')
     print(df[df['region'] == 'start']['fixation_on'].value_counts())
+
+
+def plot_MFD_diff_river_street_over_score():
+    df = load_fixations()
+
+    mfd_river = df[df['region'] == 'river'].groupby('subject_id')['mfd'].mean()
+    mfd_street = df[df['region'] == 'street'].groupby('subject_id')['mfd'].mean()
+    mfd_diff = (mfd_river - mfd_street).reset_index().rename(columns={'mfd': 'mfd_diff'})
+    mfd_diff = mfd_diff.merge(df[['subject_id', 'score']].drop_duplicates(), on='subject_id', how='left')
+
+    order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.pointplot(data=mfd_diff, ax=ax, x='subject_id', y='mfd_diff', join=False, order=order_df['subject_id'])
+
+    xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
+    ax.set_xticklabels(xlabels)
+    plt.tight_layout()
+
+    plt.savefig('./imgs/gaze/fixations/mfd_diff_per_score.png')
+    plt.savefig('../thesis/3experts_vs_novices/mfd_diff_per_score.png')
+    plt.show()
+
+    # linear regression:
+
+    mfd_diff = mfd_diff[['subject_id', 'score', 'mfd_diff']].groupby(['subject_id', 'score'])[
+        'mfd_diff'].agg(['mean', 'sem', 'std'])
+    mfd_diff.columns = ['mfd_diff', 'mfd_diff_sem', 'mfd_diff_std']
+    mfd_diff.reset_index(inplace=True)
+
+    x = mfd_diff['score']
+    y = mfd_diff['mfd_diff']
+    sem = mfd_diff['mfd_diff_sem']
+    std = mfd_diff['mfd_diff_std']
+    res = scipy.stats.linregress(x, y, alternative='greater')
+
+    print('Linear Regression for MFD diff per score:')
+    print(f'R-squared: {res.rvalue ** 2}')
+    print(f'p value: {res.pvalue}')
+
+    # calc 95% CI for slope
+    dof = x.shape[0] - 1
+    tinv = lambda p, df: abs(scipy.stats.t.ppf(p / 2, dof))
+    ts = tinv(0.05, len(x) - 2)
+    slope_ci_upper = res.slope + ts * res.stderr
+    slope_ci_lower = res.slope - ts * res.stderr
+    intercept_ci_upper = res.intercept + ts * res.intercept_stderr
+    intercept_ci_lower = res.intercept - ts * res.intercept_stderr
+
+    # calculate
+    steps = 1000
+    xlim = (x.min() - 1000, x.max() + 1000)
+    xx = np.arange(xlim[0], xlim[1], steps)
+    possible_bounds = np.zeros((4, xx.shape[0]))
+    for i, (slope, intercept) in enumerate(product([slope_ci_lower, slope_ci_upper], [intercept_ci_lower, intercept_ci_upper])):
+        possible_bounds[i] = intercept + xx * slope
+
+    bounds_max = np.max(possible_bounds, axis=0)
+    bounds_min = np.min(possible_bounds, axis=0)
+
+    print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
+    print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    # plt.scatter(x, y, label='data')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    plt.xlim(xlim)
+    plt.xlabel('subject score')
+    plt.ylabel('MFD Diff River to Street')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('./imgs/gaze/fixations/mfd_diff_per_score_w_lin_reg.png')
+    plt.savefig('../thesis/3experts_vs_novices/mfd_diff_per_score_lin_reg.png')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -932,7 +1005,6 @@ if __name__ == '__main__':
 
     # plot_polar_hist_for_fixations_per_position()
 
-    # plot_avg_fixation_distance_per_subject()
     # plot_mfd_per_level_score()
 
     # df = load_fixations()
@@ -940,10 +1012,12 @@ if __name__ == '__main__':
     # plot_fixation_distance_per_position(df)
     # plot_fixation_distance_box_per_region(df)
 
+    plot_MFD_diff_river_street_over_score()
+
     # plot_gaze_y_position_relative_to_player()
     print_fixations_on_target_for_region()
-    # plot_weighted_fixations_relative_to_player_per_fixated_object()  # TODO run
-    plot_weighted_fixations_relative_to_player()
+    plot_weighted_fixations_relative_to_player_per_fixated_object()  # TODO run
+    plot_fixation_KDE_relative_to_player()
     plot_gaze_x_position_relative_to_player()
 
     # # and for every subject:

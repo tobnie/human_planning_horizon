@@ -23,7 +23,7 @@ def plot_performance_per_difficulty():
     plt.savefig('./imgs/performance/game_endings_per_subject_per_difficulty.png')
     plt.show()
 
-    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, ci=None,
+    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, errorbar=None,
                     aspect=.7)
     g.set(ylim=(0.0, 0.8), ylabel="Percentage of game outcomes",
           xlabel="Game Outcomes")
@@ -33,6 +33,7 @@ def plot_performance_per_difficulty():
         ax.set_title(ax.title.get_text().split('=')[-1])
 
     plt.savefig('./imgs/performance/game_endings_per_subject.png')
+    plt.savefig('../thesis/1descriptive/1performance/game_endings_per_subject.png')
     plt.show()
 
     # plot number of game outcomes per difficulty
@@ -45,16 +46,18 @@ def plot_performance_per_difficulty():
     # outcomes as stacked bar plot
     outcome_count = last_time_steps.groupby(['game_difficulty', 'game_status'])['game_difficulty'].count().reset_index(name='count')
     n_games = outcome_count['count'].sum()
-    # TODO ordering
+    # TODO ordering plus irgendwas ist hier kaputt
     ax = outcome_count.div(n_games).unstack('game_status').fillna(0).plot.barh(stacked=True)
     ax.set_xlabel('Trial outcomes [%]')
     ax.set_ylabel('Game difficulty')
     plt.savefig('./imgs/performance/game_endings_stacked.png')
+    plt.savefig('../thesis/1descriptive/1performance/game_endings_stacked.png')
 
     # plot average time
     g = sns.catplot(x="game_difficulty", hue="game_status", y='time', kind='bar', data=last_time_steps, height=4,
                     aspect=.7)
     plt.savefig('./imgs/performance/game_times.png')
+    plt.savefig('../thesis/1descriptive/1performance/game_times.png')
     plt.show()
 
 
@@ -151,6 +154,7 @@ def histogram_over_avg_trial_times():
     ax.set_xlabel('Time [s]')
     ax.set_ylabel('Count')
     plt.savefig('imgs/performance/trial_times_hist.png')
+    plt.savefig('../thesis/1descriptive/1performance/trial_times_hist.png')
     plt.savefig('../paper/trial_times_hist.svg', format="svg")
     plt.show()
 
@@ -180,6 +184,7 @@ def plot_mean_score_per_level():
 
     plt.tight_layout()
     plt.savefig('imgs/performance/score_per_level.png')
+    plt.savefig('../thesis/1descriptive/1performance/score_per_level.png')
     plt.savefig('../paper/score_per_level.svg', format="svg")
     plt.show()
 
@@ -267,6 +272,7 @@ def plot_last_lanes_lost_games():
     sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack')
 
     plt.savefig('imgs/performance/lost_games_last_lane.png')
+    plt.savefig('../thesis/1descriptive/1performance/lost_games_last_lane.png')
     plt.show()
 
 
@@ -292,22 +298,11 @@ def classify_loss_cause(region, last_action):
             return 'jumped_vert'
 
 
-def plot_causes_of_death():
-    last_time_steps = get_last_time_steps_of_games().copy()
-    lost_games = last_time_steps[last_time_steps['game_status'] != 'lost']
-    lost_games['cause'] = lost_games.apply(classify_loss_cause, axis=1)
-    sns.histplot(lost_games, x='cause', y='player_x', discrete=True, multiple='stack')  # TODO
-
-    plt.tight_layout()
-    plt.show()
-
-
 if __name__ == '__main__':
-    # save_performance_stats()
+    save_performance_stats()
     # sns.set_style("whitegrid")
     # plot_performance_per_difficulty()
     # print_average_game_endings()
-    plot_causes_of_death()  # TODO run
     # plot_last_lanes_lost_games()  # TODO lane 0
     # histogram_over_avg_trial_times()
     # plot_mean_score_per_level()

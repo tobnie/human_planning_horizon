@@ -98,7 +98,7 @@ class EyeLinkListener(EyeLinkCBind):
 	#	INT16 CALLTYPE set_draw_cal_target_hook(INT16 (CALLBACK * erase_cal_target_hook)(HDC hdc), INT16 options);
 	#	\endcode
 	#
-	#  @param position A tuple in the format of (x, y), passing along the position of drift correction target.  X and y are in screen pixels.
+	#  @param 2position A tuple in the format of (x, y), passing along the 2position of drift correction target.  X and y are in screen pixels.
 	def drawCalTarget(self, position):
 		if pylinkcg:
 			pylinkcg._drawCalTarget(position)
@@ -178,8 +178,8 @@ class EyeLinkListener(EyeLinkCBind):
 	#  	This will open the image file, convert to bitmap using PIL.Image and call bitmapBackdrop to send the image to host
 	#
 	# @param filename - full or relative path of the image file name 
-	# @param Xs - crop x position
-	# @param Ys - crop y position
+	# @param Xs - crop x 2position
+	# @param Ys - crop y 2position
 	# @param width - crop width
 	# @param height - crop height
 	# @param Xd - xposition - transfer
@@ -382,8 +382,8 @@ class EyeLink(EyeLinkListener):
 		if(self.isConnected()):
 			self.sendCommand("calibration_type=%s"%(type))
 		
-	## Locks the x part of gaze position data. Usually set to \c AUTO: this will use the last drift-correction 
-	#  target position when in \c H3 mode.
+	## Locks the x part of 3gaze 2position data. Usually set to \c AUTO: this will use the last drift-correction
+	#  target 2position when in \c H3 mode.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -391,13 +391,13 @@ class EyeLink(EyeLinkListener):
 	#	getEYELINK().sendCommand("x_gaze_constraint=%s"%(str(value)));
 	# 	\endcode
 	#
-	#  @param x_position x gaze coordinate, or \c AUTO.
+	#  @param x_position x 3gaze coordinate, or \c AUTO.
 	def setXGazeConstraint(self, x_position = "AUTO"):
 		if(self.isConnected()):
 			self.sendCommand("x_gaze_constraint=%s"%(str(x_position)))
 	
-	## Locks the y part of gaze position data. Usually set to \c AUTO: this will use the last drift-correction 
-	#  target position when in \c H3 mode.
+	## Locks the y part of 3gaze 2position data. Usually set to \c AUTO: this will use the last drift-correction
+	#  target 2position when in \c H3 mode.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -405,7 +405,7 @@ class EyeLink(EyeLinkListener):
 	#	getEYELINK().sendCommand("y_gaze_constraint=%s"%(str(value)));
 	# 	\endcode
 	#
-	#  @param y_position y gaze coordinate, or \c AUTO.
+	#  @param y_position y 3gaze coordinate, or \c AUTO.
 	def setYGazeConstraint(self, y_position = "AUTO"):
 		if(self.isConnected()):
 			self.sendCommand("y_gaze_constraint=%s"%(str(y_position)))
@@ -607,9 +607,9 @@ class EyeLink(EyeLinkListener):
 	#
 	#  @param list list of the following data types, separated by spaces or commas.
 	#		<table>
-	#		<tr><td>\c GAZE</td><td>screen x/y (gaze) position</td></tr>
+	#		<tr><td>\c GAZE</td><td>screen x/y (3gaze) 2position</td></tr>
 	#		<tr><td>\c GAZERES</td><td>units-per-degree screen resolution</td></tr>
-	#		<tr><td>\c HREF</td><td>head-referenced gaze</td></tr>
+	#		<tr><td>\c HREF</td><td>head-referenced 3gaze</td></tr>
 	#		<tr><td>\c PUPIL</td><td>raw eye camera pupil coordinates</td></tr>
 	#		<tr><td>\c AREA</td><td>pupil area</td></tr>
 	#		<tr><td>\c STATUS</td><td>warning and error flags</td></tr>
@@ -629,9 +629,9 @@ class EyeLink(EyeLinkListener):
 	#
 	#  @param list list of the following event data types, separated by spaces or commas.
 	#		<table>
-	#		<tr><td>\c GAZE</td><td>screen xy (gaze) position</td></tr>
+	#		<tr><td>\c GAZE</td><td>screen xy (3gaze) 2position</td></tr>
 	#		<tr><td>\c GAZERES</td><td>units-per-degree angular resolution</td></tr>
-	#		<tr><td>\c HREF</td><td>HREF gaze position</td></tr>
+	#		<tr><td>\c HREF</td><td>HREF 3gaze 2position</td></tr>
 	#		<tr><td>\c AREA</td><td>pupil area or diameter</td></tr>
 	#		<tr><td>\c VELOCITY</td><td>velocity of eye motion (avg, peak)</td></tr>
 	#		<tr><td>\c STATUS</td><td>warning and error flags for event</td></tr>
@@ -673,9 +673,9 @@ class EyeLink(EyeLinkListener):
 	#
 	#  @param list list of data types, separated by spaces or commas.
 	#		<table>
-	#		<tr><td>\c GAZE</td><td>screen xy (gaze) position</td></tr>
+	#		<tr><td>\c GAZE</td><td>screen xy (3gaze) 2position</td></tr>
 	#		<tr><td>\c GAZERES</td><td>units-per-degree screen resolution</td></tr>
-	#		<tr><td>\c HREF</td><td>head-referenced gaze</td></tr>
+	#		<tr><td>\c HREF</td><td>head-referenced 3gaze</td></tr>
 	#		<tr><td>\c PUPIL</td><td>raw eye camera pupil coordinates</td></tr>
 	#		<tr><td>\c AREA</td><td>pupil area</td></tr>
 	#		<tr><td>\c STATUS</td><td>warning and error flags</td></tr>
@@ -695,9 +695,9 @@ class EyeLink(EyeLinkListener):
 	#
 	#  @param list list of data types, separated by spaces or commas.
 	#		<table>
-	#		<tr><td>\c GAZE</td><td>screen xy (gaze) position</td></tr>
+	#		<tr><td>\c GAZE</td><td>screen xy (3gaze) 2position</td></tr>
 	#		<tr><td>\c GAZERES</td><td>units-per-degree angular resolution</td></tr>
-	#		<tr><td>\c HREF</td><td>HREF gaze position</td></tr>
+	#		<tr><td>\c HREF</td><td>HREF 3gaze 2position</td></tr>
 	#		<tr><td>\c AREA</td><td>pupil area or diameter</td></tr>
 	#		<tr><td>\c VELOCITY</td><td>velocity of eye motion (avg, peak)</td></tr>
 	#		<tr><td>\c STATUS</td><td>warning and error flags for event</td></tr>
@@ -781,7 +781,7 @@ class EyeLink(EyeLinkListener):
 		self.sendCommand("saccade_pursuit_fixup =  %d"%(maxvel))
 		
 	## Normally set to \c 0 to disable fixation update events.  Set to \c 50 or \c 100 milliseconds 
-	#  to produce updates for gaze-controlled interface applications.
+	#  to produce updates for 3gaze-controlled interface applications.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -794,8 +794,8 @@ class EyeLink(EyeLinkListener):
 		self.sendCommand("fixation_update_interval =  %d"%(time))
 
 	## Normally set to \c 0 to disable fixation update events.  Set to \c 50 or \c 100 milliseconds 
-	#  to produce updates for gaze-controlled interface applications.  Set to \c 4 to collect 
-	#  single sample rather than average position.
+	#  to produce updates for 3gaze-controlled interface applications.  Set to \c 4 to collect
+	#  single sample rather than average 2position.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -803,7 +803,7 @@ class EyeLink(EyeLinkListener):
 	#	getEYELINK().sendCommand("fixation_update_accumulate =  %d"%(time));
 	#	\endcode
 	#
-	#  @param time milliseconds to collect data before fixation update for average gaze position.	
+	#  @param time milliseconds to collect data before fixation update for average 3gaze 2position.
 	def setFixationUpdateAccumulate(self, time):
 		self.sendCommand("fixation_update_accumulate =  %d"%(time))
 
@@ -821,7 +821,7 @@ class EyeLink(EyeLinkListener):
 		
 	# methods to draw graphics to the tracker record screen
 	
-	## Draws text, coordinates are gaze-position display coordinates.
+	## Draws text, coordinates are 3gaze-2position display coordinates.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -831,9 +831,9 @@ class EyeLink(EyeLinkListener):
 	#	\endcode
 	#
 	#  @param text text to print in quotes.
-	#  @param pos Center point of text; Default position is (\c -1, \c -1).
+	#  @param pos Center point of text; Default 2position is (\c -1, \c -1).
 	def drawText(self, text, pos=(-1,-1)):
-		#  Prints text at current print position to tracker screen, gray on black only.
+		#  Prints text at current print 2position to tracker screen, gray on black only.
 		#  Coordinates are text row and column, similar to C gotoxy() function.  NOTE: row cannot be set higher than 25.  
 		#  Use draw_text command to print anywhere on the tracker display.
 		if(pos[0] >= 0 and pos[1] >= 0 and pos[0] <=25 and pos[1] <= 80):
@@ -852,7 +852,7 @@ class EyeLink(EyeLinkListener):
 	def clearScreen (self, color):
 		self.sendCommand("clear_screen %d"%(color))
 	
-	## Draws line, coordinates are gaze-position display coordinates.
+	## Draws line, coordinates are 3gaze-2position display coordinates.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -867,7 +867,7 @@ class EyeLink(EyeLinkListener):
 	def drawLine(self, firstPoint, secondPoint, color):
 		self.sendCommand("draw_line %d %d %d %d %d"%(firstPoint[0],firstPoint[1],secondPoint[0],secondPoint[1], color))
 	
-	## Draws an empty box, coordinates are gaze-position display coordinates.
+	## Draws an empty box, coordinates are 3gaze-2position display coordinates.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -883,7 +883,7 @@ class EyeLink(EyeLinkListener):
 	def drawBox(self, x,y, width, height, color):
 		self.sendCommand("draw_box %d %d %d %d %d"%(x,y,x+width,y+height,color))
 	
-	## Draws a solid block of color, coordinates are gaze-position display coordinates.
+	## Draws a solid block of color, coordinates are 3gaze-2position display coordinates.
 	#
 	#  @remarks
 	#	This function is equivalent to 
@@ -923,9 +923,9 @@ class EyeLink(EyeLinkListener):
 		self.__fixation_update_accumulate_=accumulate
 		self.sendCommand("fixation_update_accumulate = %d"%(accumulate))
 	
-	## Prints text at current print position to tracker screen, gray on black only.
+	## Prints text at current print 2position to tracker screen, gray on black only.
 	#  @param text text to print in quotes.
-	#  @param pos position of the text to display
+	#  @param pos 2position of the text to display
 	#  @remarks
 	#	This function is equivalent to 
 	#	\code
@@ -1171,7 +1171,7 @@ def setDriftCorrectSounds(*args):
 	return pylinkcg.setDriftCorrectSounds(*args)
 	
 ##	\ingroup graphics_functions
-#   Sets the camera position on the display computer.  Moves the top left hand corner of the camera position
+#   Sets the camera 2position on the display computer.  Moves the top left hand corner of the camera 2position
 #	to new location.
 #
 #	@param left X coordinate of upper-left corner of the camera image window.

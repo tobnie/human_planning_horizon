@@ -40,7 +40,7 @@ def calculate_avg_gaze_distance_per_field(df):
         lambda x: calculate_gaze_distance_in_fields(*x), axis=1)
     df['gaze_angle'] = df[['gaze_x', 'gaze_y', 'player_x', 'player_y']].apply(lambda x: calculate_gaze_angle_relative_to_player(*x), axis=1)
 
-    # TODO also do for manhattan distance?: then we would also need to assign a field to the gaze
+    # TODO also do for manhattan distance?: then we would also need to assign a field to the 3gaze
     # df['gaze_distance_manhattan'] = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].apply(lambda x: calculate_gaze_distance(*x, metric='manhattan'), axis=1)
 
     # group by field
@@ -82,9 +82,9 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
     angle_pivot = pd.pivot_table(df, values='gaze_angle', index='player_y_field', columns='player_x_field', aggfunc=np.mean, fill_value=0)
 
     if subject_id:
-        directory_path = './imgs/gaze/gaze_per_position/{}/'.format(subject_id)
+        directory_path = './imgs/3gaze/gaze_per_position/{}/'.format(subject_id)
     else:
-        directory_path = './imgs/gaze/gaze_per_position/'
+        directory_path = './imgs/3gaze/gaze_per_position/'
 
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
@@ -97,7 +97,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
         plt.savefig(directory_path + 'distance_per_position.png')
         plt.suptitle('Average Distance from Player to Gaze Sample - {}'.format(subject_id))
     else:
-        plt.savefig('./imgs/gaze/gaze_per_position/distance_per_position.png')
+        plt.savefig('./imgs/3gaze/gaze_per_position/distance_per_position.png')
         plt.suptitle('Average Distance from Player to Gaze Sample')
     plt.tight_layout()
     plt.show()
@@ -111,7 +111,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
         plt.savefig(directory_path + 'distance_per_position_by_target.png')
     else:
         plt.suptitle('Average Distance from Player to Gaze Sample')
-        plt.savefig('./imgs/gaze/gaze_per_position/distance_per_position_by_target.png')
+        plt.savefig('./imgs/3gaze/gaze_per_position/distance_per_position_by_target.png')
 
     plt.tight_layout()
     plt.show()
@@ -128,7 +128,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
     if subject_id:
         plt.savefig(directory_path + 'angle_per_position.png')
     else:
-        plt.savefig('./imgs/gaze/gaze_per_position/angle_per_position.png')
+        plt.savefig('./imgs/3gaze/gaze_per_position/angle_per_position.png')
 
     plt.show()
 
@@ -140,7 +140,7 @@ def plot_gaze_heatmap_per_position_of_player(df, subject_id=None):
         plt.savefig(directory_path + 'angle_per_position_by_target.png')
         plt.suptitle('Average Angle Of Gaze - {}'.format(subject_id))
     else:
-        plt.savefig('./imgs/gaze/gaze_per_position/angle_per_position_by_target.png')
+        plt.savefig('./imgs/3gaze/gaze_per_position/angle_per_position_by_target.png')
         plt.suptitle('Average Angle Of Gaze')
 
     plt.tight_layout()
@@ -152,8 +152,8 @@ def plot_kde_with_player_position(*args, **kwargs):
 
     ax = sns.kdeplot(data=data, x='gaze_x', y='gaze_y', shade=True, cmap="viridis")
 
-    # plot circle for player position
-    # TODO also plot player position. The below code always plotted the same position
+    # plot circle for player 2position
+    # TODO also plot player 2position. The below code always plotted the same 2position
     # player_x = data['player_x_field'].iloc[0]
     # player_y = data['player_y_field'].iloc[0]
 
@@ -162,7 +162,7 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
     if subject_id:
         df = df[df['subject_id'] == subject_id]
 
-    # only use gaze samples within screen:
+    # only use 3gaze samples within screen:
     df = df[['gaze_x', 'gaze_y', 'player_x_field', 'player_y_field']].copy()
     df = get_only_onscreen_data(df).copy()
     df = df.reset_index()
@@ -189,9 +189,9 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
     g.set_titles(row_template='{row_name}', col_template='{col_name}')
 
     if subject_id:
-        directory_path = './imgs/gaze/gaze_per_position/{}/'.format(subject_id)
+        directory_path = './imgs/3gaze/gaze_per_position/{}/'.format(subject_id)
     else:
-        directory_path = './imgs/gaze/gaze_per_position/'
+        directory_path = './imgs/3gaze/gaze_per_position/'
 
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
@@ -201,13 +201,13 @@ def plot_gaze_kde_per_player_position(df, subject_id=None):
         plt.savefig(directory_path + 'gaze_density_per_position.png'.format(subject_id))
     else:
         plt.suptitle('Gaze Density in the Level per Position')
-        plt.savefig('./imgs/gaze/gaze_per_position/gaze_density_per_position.png')
+        plt.savefig('./imgs/3gaze/gaze_per_position/gaze_density_per_position.png')
     plt.close(plt.gcf())
 
 
 def run_gaze_per_position_plots():
     # TODO run for all subjects
-    # print('Creating gaze per position plots for all data...')
+    # print('Creating 3gaze per 2position plots for all data...')
     # df = read_data()
     # df_gaze_info = calculate_avg_gaze_distance_per_field(df)
     #
@@ -219,7 +219,7 @@ def run_gaze_per_position_plots():
 
     df = read_data()
     df_gaze_info = calculate_avg_gaze_distance_per_field(df)
-    print('Creating gaze per position plots for each subject separately...')
+    print('Creating 3gaze per 2position plots for each subject separately...')
     for subject in tqdm(get_all_subjects()):
         try:
             plot_gaze_kde_per_player_position(df, subject_id=subject)

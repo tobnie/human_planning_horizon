@@ -87,7 +87,7 @@ def create_gaze_and_path_plots():
                 plot_player_path(ax, times_states, target_position)
                 plot_gaze(ax, filtered_samples)
                 plt.tight_layout()
-                plt.savefig('./imgs/gaze/{}_{}_world_{}.png'.format(subject_id, difficulty, i))
+                plt.savefig('./imgs/3gaze/{}_{}_world_{}.png'.format(subject_id, difficulty, i))
                 plt.close(fig)
         print('Done!')
 

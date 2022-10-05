@@ -16,7 +16,7 @@ def create_single_layer_feature_map_from_state(state, target_pos=None):
     """
     feature_map = np.zeros((config.N_FIELDS_PER_LANE, config.N_LANES))
 
-    # encode target position
+    # encode target 2position
     if target_pos is not None:
         x_target_pos = int(round(target_pos / config.FIELD_WIDTH))
         y_target_pos = config.N_LANES - 1

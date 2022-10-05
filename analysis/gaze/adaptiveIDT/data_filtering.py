@@ -26,8 +26,8 @@ def savitzky_golay_filter(gaze_x, gaze_y):
     """
     Performs Savitzky Golay Filtering with a window length of 2 (~33ms) with a polynomial order of 2. Calculates angular velocities and
     accelerations from the smoothed samples and returns these.
-    :param gaze_x: x coordinates of gaze samples
-    :param gaze_y: y coordinates of gaze samples
+    :param gaze_x: x coordinates of 3gaze samples
+    :param gaze_y: y coordinates of 3gaze samples
     :return: (angular velocities, angular accelerations)
     """
     # TODO how to choose. window would be next to 20ms with only 1 or 2 but that does not make a lot of sense. Anyway choose higher?
