@@ -1,9 +1,8 @@
 import os
 
-import numpy as np
 import pandas as pd
 
-from analysis.data_utils import get_all_subjects, read_subject_data
+from analysis.data_utils import get_all_subjects
 
 
 def load_trial_order_csv(path):

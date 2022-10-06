@@ -11,32 +11,3 @@ n = 3
 Mean: 2.574765392262419
 Variance: 3.1292869381372825
 Median: 2.177165354330709
-
-
-Euclidean Distance
------High Scorers-----
-n = 9
-Plot <function print_fixation_distances_per_group at 0x0000029E7B5AB040> failed with the following error:
-
-Traceback (most recent call last):
-  File "D:\anaconda3\envs\planning_horizon\lib\site-packages\pandas\core\indexes\base.py", line 3800, in get_loc
-    return self._engine.get_loc(casted_key)
-  File "pandas\_libs\index.pyx", line 138, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas\_libs\index.pyx", line 165, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas\_libs\hashtable_class_helper.pxi", line 5745, in pandas._libs.hashtable.PyObjectHashTable.get_item
-  File "pandas\_libs\hashtable_class_helper.pxi", line 5753, in pandas._libs.hashtable.PyObjectHashTable.get_item
-KeyError: 'weighted_fix_distance_euclidean'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "D:\source\human_planning_horizon\analysis\create_all_plots.py", line 19, in try_except_plot
-    func()
-  File "D:\source\human_planning_horizon\analysis\performance\experts_vs_novices.py", line 56, in print_fixation_distances_per_group
-    print('Mean:', df_high_scorers['weighted_fix_distance_euclidean'].mean())
-  File "D:\anaconda3\envs\planning_horizon\lib\site-packages\pandas\core\frame.py", line 3805, in __getitem__
-    indexer = self.columns.get_loc(key)
-  File "D:\anaconda3\envs\planning_horizon\lib\site-packages\pandas\core\indexes\base.py", line 3802, in get_loc
-    raise KeyError(key) from err
-KeyError: 'weighted_fix_distance_euclidean'
-

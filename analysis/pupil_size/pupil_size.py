@@ -1,8 +1,12 @@
+from itertools import product
+
 import numpy as np
 import scipy
 from matplotlib import pyplot as plt
+import seaborn as sns
 
-from analysis.data_utils import read_data
+from analysis import paper_plot_utils
+from analysis.data_utils import read_data, subject2letter
 
 
 def get_nan_idx(df, expand=2):
@@ -57,7 +61,8 @@ def set_gaze_information_nan(game_df):
 
 def add_pupil_size_z_score(subject_df):
     # drop zero pupil size and samples around them
-    subject_df = subject_df.groupby(['subject_id', 'game_difficulty', 'world_number'], group_keys=False).apply(set_gaze_information_nan).reset_index()
+    subject_df = subject_df.groupby(['subject_id', 'game_difficulty', 'world_number'], group_keys=False).apply(
+        set_gaze_information_nan).reset_index()
 
     # standardize for subject
     pupil_size = subject_df['pupil_size']
@@ -163,6 +168,84 @@ def kstest_pupil_size_street_river():
     # kstest
     kstest_result = scipy.stats.kstest(pupil_size_river, pupil_size_street, alternative='two-sided')
     print(kstest_result)
+
+
+def normalize_pupil_size_subject(subject_df):
+    return (subject_df - subject_df.min()) / (subject_df.max() - subject_df.min())
+
+
+def plot_pupil_size_over_score():
+    df = read_data()
+    df = df[['subject_id', 'score', 'pupil_size']].dropna(subset='pupil_size')
+
+    # normalize pupil size between 0 and 1
+    df['pupil_size_normalized'] = df.groupby(['subject_id', 'score']).apply(normalize_pupil_size_subject)
+
+    order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
+
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.pointplot(data=df, ax=ax, x='subject_id', y='pupil_size_normalized', join=False, order=order_df['subject_id'])
+
+    xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
+    ax.set_xticklabels(xlabels)
+    ax.set_xlabel('subject score')
+    ax.set_ylabel('normalized pupil size ')
+    plt.tight_layout()
+    plt.savefig('./imgs/pupil_size/pupil_size_over_score.png')
+    plt.savefig('../thesis/3experts_vs_novices/pupil_size_over_score.png')
+    plt.show()
+
+    # linear regression:
+
+    df = df[['subject_id', 'score', 'pupil_size_normalized']].groupby(['subject_id', 'score'])[
+        'pupil_size_normalized'].agg(['mean', 'sem', 'std'])
+    df.columns = ['pupil_size', 'pupil_size_sem', 'pupil_size_std']
+    df.reset_index(inplace=True)
+
+    x = df['score']
+    y = df['pupil_size']
+    sem = df['pupil_size_sem']
+    std = df['pupil_size_std']
+    res = scipy.stats.linregress(x, y, alternative='less')
+
+    print('Linear Regression for pupil size per score:')
+    print(f'R-squared: {res.rvalue ** 2}')
+    print(f'p value: {res.pvalue}')
+
+    # calc 95% CI for slope
+    dof = x.shape[0] - 1
+    tinv = lambda p, df: abs(scipy.stats.t.ppf(p / 2, dof))
+    ts = tinv(0.05, len(x) - 2)
+    slope_ci_upper = res.slope + ts * res.stderr
+    slope_ci_lower = res.slope - ts * res.stderr
+    intercept_ci_upper = res.intercept + ts * res.intercept_stderr
+    intercept_ci_lower = res.intercept - ts * res.intercept_stderr
+
+    # calculate
+    steps = 1000
+    xlim = (x.min() - 1000, x.max() + 1000)
+    xx = np.arange(xlim[0], xlim[1], steps)
+    possible_bounds = np.zeros((4, xx.shape[0]))
+    for i, (slope, intercept) in enumerate(product([slope_ci_lower, slope_ci_upper], [intercept_ci_lower, intercept_ci_upper])):
+        possible_bounds[i] = intercept + xx * slope
+
+    bounds_max = np.max(possible_bounds, axis=0)
+    bounds_min = np.min(possible_bounds, axis=0)
+
+    print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
+    print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
+
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linear regression')
+    # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    plt.xlim(xlim)
+    plt.xlabel('subject score')
+    plt.ylabel('normalized pupil size')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('./imgs/pupil_size/pupil_size_over_score_w_lin_reg.png')
+    plt.savefig('../thesis/3experts_vs_novices/pupil_size_over_score_w_lin_reg.png')
+    plt.show()
 
 
 if __name__ == '__main__':

@@ -49,21 +49,6 @@ def print_fixation_distances_per_group():
     print('Variance:', df_low_scorers['mfd'].var())
     print('Median:', df_low_scorers['mfd'].median())
 
-    print('\n\nEuclidean Distance')
-    print('-----High Scorers-----')
-    df_high_scorers = df[df['scoring_group'] == 'high']
-    print('n =', len(df_high_scorers['subject_id'].unique()))
-    print('Mean:', df_high_scorers['weighted_fix_distance_euclidean'].mean())
-    print('Variance:', df_high_scorers['weighted_fix_distance_euclidean'].var())
-    print('Median:', df_high_scorers['weighted_fix_distance_euclidean'].median())
-
-    print('-----Low Scorers-----')
-    df_low_scorers = df[df['scoring_group'] == 'low']
-    print('n =', len(df_low_scorers['subject_id'].unique()))
-    print('Mean:', df_low_scorers['weighted_fix_distance_euclidean'].mean())
-    print('Variance:', df_low_scorers['weighted_fix_distance_euclidean'].var())
-    print('Median:', df_low_scorers['weighted_fix_distance_euclidean'].median())
-
 
 def plot_fixation_distance_box_scoring_groups():
     # get data

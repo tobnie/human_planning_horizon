@@ -3,14 +3,15 @@ import traceback
 
 from analysis.gaze.blink_rates import plot_blink_rate_over_level_score, plot_blink_rate_over_score, plot_blink_rates
 from analysis.gaze.fixations import load_fixations, plot_MFD_diff_river_street_over_score, plot_fixation_KDE_relative_to_player, \
-    plot_mfd_heatmap, plot_mfd_per_level_score, plot_mfd_per_region, plot_mfd_per_subject_score, print_fixations_on_target_for_region
+    plot_fixation_heatmap, plot_mfd_heatmap, plot_mfd_per_level_score, plot_mfd_per_region, plot_mfd_per_score, \
+    print_fixations_on_target_for_region
 from analysis.performance.experts_vs_novices import print_fixation_distances_per_group
 from analysis.performance.performances import histogram_over_avg_trial_times, plot_last_lanes_lost_games, \
     plot_mean_score_per_level, plot_performance_per_difficulty, \
     print_average_game_endings
 from analysis.player.player_position_heatmap import plot_player_position_heatmap, plot_player_position_heatmap_per_target_position
 from analysis.player.river_section_entrance import plot_entrance_of_river_section
-from analysis.pupil_size.pupil_size import plot_pupil_size
+from analysis.pupil_size.pupil_size import plot_pupil_size, plot_pupil_size_over_score
 from analysis.run_statistical_tests import run_tests
 
 
@@ -23,8 +24,13 @@ def try_except_plot(func):
 
 
 if __name__ == '__main__':
-    # 1performance
-    try_except_plot(plot_performance_per_difficulty)  # TODO error
+    try_except_plot(plot_fixation_heatmap)
+
+    try_except_plot(plot_fixation_KDE_relative_to_player)
+
+    try_except_plot(plot_mfd_per_region)
+
+    try_except_plot(plot_performance_per_difficulty)
 
     # redirect prints to file:
     orig_stdout = sys.stdout
@@ -54,11 +60,7 @@ if __name__ == '__main__':
     sys.stdout = orig_stdout
     f.close()
 
-    f = open('../thesis/3experts_vs_novices/mfd_per_level_score.txt', 'w+')
-    sys.stdout = f
     try_except_plot(plot_mfd_per_level_score)
-    sys.stdout = orig_stdout
-    f.close()
 
     # player position
     try_except_plot(plot_player_position_heatmap)
@@ -92,10 +94,9 @@ if __name__ == '__main__':
     f.close()
 
     # fixations
-    # TODO Heatmap for fixations on fields (weighted by duration)
     f = open('../thesis/3experts_vs_novices/mfd_per_level_score_lin_reg.txt', 'w+')
     sys.stdout = f
-    try_except_plot(plot_mfd_per_subject_score)
+    try_except_plot(plot_mfd_per_score)
     sys.stdout = orig_stdout
     f.close()
 
@@ -106,14 +107,12 @@ if __name__ == '__main__':
     f.close()
 
     try_except_plot(plot_mfd_heatmap)
-    try_except_plot(plot_mfd_per_region)  # TODO error
 
     f = open('../thesis/2river_vs_street/fixations_on_target.txt', 'w+')
     sys.stdout = f
     try_except_plot(print_fixations_on_target_for_region)  # TODO maybe also make bar plot / maybe was aus KDE rausrechnen?
     sys.stdout = orig_stdout
     f.close()
-    try_except_plot(plot_fixation_KDE_relative_to_player)  # TODO error
 
     # other statistical tests
     f = open('../thesis/other_tests.txt', 'w+')
@@ -121,10 +120,3 @@ if __name__ == '__main__':
     run_tests()
     sys.stdout = orig_stdout
     f.close()
-
-    # TODO blink rate vs score plot
-    # TODO blink rate vs score test
-    # TODO pupil size vs score plot
-    # TODO pupil size vs score test
-
-

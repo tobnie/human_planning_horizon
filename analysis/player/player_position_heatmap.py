@@ -23,33 +23,38 @@ def plot_player_position_heatmap(df=None):
     # df.loc[n, 'player_x_field'] = 5
     # df.loc[n, 'player_y_field'] = 14
 
-    heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'])
-    ax = sns.heatmap(heatmap_df)
+    heatmap_df = pd.crosstab(position_df['player_y_field'], position_df['player_x_field'], normalize=True)
+    ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.1)
     ax.invert_yaxis()
+
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
     plt.tight_layout()
-    plt.title('player position heatmap')
     plt.savefig('./imgs/player_position/player_position_heatmap.png')
     plt.close(plt.gcf())
 
     # again with player start 2position set to zero
     heatmap_df.iloc[0, 9] = 0
-    ax = sns.heatmap(heatmap_df)
+    ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.1)
     ax.invert_yaxis()
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
     plt.title('start location set to zero for scaling of color')
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero.png')
     plt.close(plt.gcf())
 
-    # TODO also only with won games so mass is not distributed over first few rows primarily
     df_won_games = df.loc[df['game_status'] == 'won']
     position_df_won = df_won_games[['player_x_field', 'player_y_field']].copy()
     position_df_won.dropna(inplace=True)  # TODO when does NaN occur?
 
     heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'])
-    heatmap_df.iloc[0, 9] = 0  # set start 2position to zero
-    ax = sns.heatmap(heatmap_df)
+    heatmap_df.iloc[0, 9] = 0  # set start position to zero
+    ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.1)
     ax.invert_yaxis()
-    plt.title('only won games')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero_only_won_games.png')
     plt.savefig('../thesis/1descriptive/2position/player_position_heatmap.png')
@@ -58,7 +63,7 @@ def plot_player_position_heatmap(df=None):
 
 def plot_player_position_heatmap_per_target_position():
     # TODO
-    plt.savefig('../thesis/1descriptive/2position/player_position_heatmap_by_target.png')
+    # plt.savefig('../thesis/1descriptive/2position/player_position_heatmap_by_target.png')
     pass
 
 

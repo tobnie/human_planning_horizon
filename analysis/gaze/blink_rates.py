@@ -185,7 +185,6 @@ def plot_blink_rate_over_level_score():
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg_per_subject.png')
-    plt.savefig('../thesis/3experts_vs_novices/blink_rate_per_level_score_w_lin_reg_per_subject.png')
     plt.show()
 
     # linear regression:
@@ -223,8 +222,10 @@ def plot_blink_rate_over_level_score():
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
     sns.scatterplot(df, x='standardized_level_score', y='blink_rate', ax=ax)
-    ax.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    ax.plot(xx, res.intercept + res.slope * xx, 'r', label='linear regression')
     # ax.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
+    ax.set_xlabel('level score without difficulty multipliers')
+    ax.set_ylabel('blink rate')
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg.png')
