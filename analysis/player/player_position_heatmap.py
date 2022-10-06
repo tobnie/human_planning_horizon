@@ -2,6 +2,8 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
+import config
+from analysis import paper_plot_utils
 from analysis.data_utils import coords2fieldsx, coords2fieldsy, read_data
 
 
@@ -17,8 +19,7 @@ def plot_player_position_heatmap(df=None):
 
     position_df = df[['subject_id', 'player_x_field', 'player_y_field']].copy()
 
-    # TODO
-    # # add last row empty
+    # TODO add last row empty
     # n = df.shape[0]
     # df.loc[n, 'player_x_field'] = 5
     # df.loc[n, 'player_y_field'] = 14
@@ -47,7 +48,7 @@ def plot_player_position_heatmap(df=None):
 
     df_won_games = df.loc[df['game_status'] == 'won']
     position_df_won = df_won_games[['player_x_field', 'player_y_field']].copy()
-    position_df_won.dropna(inplace=True)  # TODO when does NaN occur?
+    position_df_won.dropna(inplace=True)
 
     heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'])
     heatmap_df.iloc[0, 9] = 0  # set start position to zero
@@ -62,9 +63,45 @@ def plot_player_position_heatmap(df=None):
 
 
 def plot_player_position_heatmap_per_target_position():
-    # TODO
-    # plt.savefig('../thesis/1descriptive/2position/player_position_heatmap_by_target.png')
-    pass
+    df = read_data()
+
+    position_df = df[['player_x_field', 'player_y_field', 'target_position']].copy()
+
+    position_df['target_position'] = position_df['target_position'].replace({448: 'left', 1216: 'center', 2112: 'right'})
+
+    # TODO add last row empty
+    # n = df.shape[0]
+    # df.loc[n, 'player_x_field'] = 5
+    # df.loc[n, 'player_y_field'] = 14
+
+    fig, axs = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
+    cbar_ax = fig.add_axes([.91, .3, .03, .4])  # TODO right subplot is smaller than first two
+    for i, target_pos in enumerate(position_df['target_position'].unique()):
+        ax = axs[i]
+        target_position_df = position_df[position_df['target_position'] == target_pos]
+        target_position_df.drop('target_position', axis='columns', inplace=True)
+        heatmap_df = pd.crosstab(target_position_df['player_y_field'], target_position_df['player_x_field'], normalize=True)
+
+        heatmap_df.iloc[0, 9] = 0  # set start position to zero
+        if i == 2:
+            sns.heatmap(heatmap_df, vmax=0.025, cbar_kws={'label': '% time on each field'}, cbar=cbar_ax, linewidths=.1, ax=ax)
+        else:
+            sns.heatmap(heatmap_df, vmax=0.025, cbar=None, linewidths=.1, ax=ax)
+        ax.invert_yaxis()
+        ax.set_xlabel('x')
+
+        if i == 0:
+            ax.set_ylabel('y')
+            ax.set_yticks(range(0, config.N_LANES))
+        else:
+            ax.set_ylabel('')
+            ax.set_yticks([])
+        ax.set_title(f'target={target_pos}')
+
+    fig.axes[-2].set_visible(False)
+    plt.tight_layout()
+    plt.savefig(f'../thesis/1descriptive/2position/player_position_heatmap_by_target_pos.png')
+    plt.show()
 
 
 def _plot_heatmap(*args, **kwargs):

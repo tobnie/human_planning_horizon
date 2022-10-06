@@ -1,8 +1,11 @@
 import sys
 import traceback
+import seaborn as sns
+
+sns.set_context(rc={'patch.linewidth': 0.7})
 
 from analysis.gaze.blink_rates import plot_blink_rate_over_level_score, plot_blink_rate_over_score, plot_blink_rates
-from analysis.gaze.fixations import load_fixations, plot_MFD_diff_river_street_over_score, plot_fixation_KDE_relative_to_player, \
+from analysis.gaze.fixations import plot_MFD_diff_river_street_over_score, plot_fixation_KDE_relative_to_player, \
     plot_fixation_heatmap, plot_mfd_heatmap, plot_mfd_per_level_score, plot_mfd_per_region, plot_mfd_per_score, \
     print_fixations_on_target_for_region
 from analysis.performance.experts_vs_novices import print_fixation_distances_per_group
@@ -11,7 +14,7 @@ from analysis.performance.performances import histogram_over_avg_trial_times, pl
     print_average_game_endings
 from analysis.player.player_position_heatmap import plot_player_position_heatmap, plot_player_position_heatmap_per_target_position
 from analysis.player.river_section_entrance import plot_entrance_of_river_section
-from analysis.pupil_size.pupil_size import plot_pupil_size, plot_pupil_size_over_score
+from analysis.pupil_size.pupil_size import plot_pupil_size
 from analysis.run_statistical_tests import run_tests
 
 
@@ -24,13 +27,14 @@ def try_except_plot(func):
 
 
 if __name__ == '__main__':
+
+    try_except_plot(plot_performance_per_difficulty)
+
     try_except_plot(plot_fixation_heatmap)
 
     try_except_plot(plot_fixation_KDE_relative_to_player)
 
     try_except_plot(plot_mfd_per_region)
-
-    try_except_plot(plot_performance_per_difficulty)
 
     # redirect prints to file:
     orig_stdout = sys.stdout
@@ -64,7 +68,8 @@ if __name__ == '__main__':
 
     # player position
     try_except_plot(plot_player_position_heatmap)
-    try_except_plot(plot_player_position_heatmap_per_target_position)  # TODO
+    try_except_plot(plot_player_position_heatmap_per_target_position)
+
     try_except_plot(plot_entrance_of_river_section)
 
     # blinks

@@ -21,35 +21,55 @@ def plot_performance_per_difficulty():
     # plot number of game outcomes
     g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
                     aspect=.7)
-    g.set(ylim=(0.0, 1.0))
+    g.set(ylim=(0.0, 1.0), ylabel="Percentage of trial outcomes", xlabel="Trial outcomes")
     g.set_xlabels('Trial outcomes')
     g.set_ylabels('Percentage of trial outcomes')
+
+    # set titles
+    for ax in g.axes:
+        ax.set_title('subject ' + subject2letter(ax.title.get_text().split('=')[-1]))
+
+    # legend title
+    g._legend.set_title('Trial outcome')
+    # replace labels
+    new_labels = ['Won', 'Timed out', 'Lost']
+    for t, l in zip(g._legend.texts, new_labels):
+        t.set_text(l)
 
     plt.savefig('./imgs/performance/game_endings_per_subject_per_difficulty.png')
     plt.show()
 
     g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, errorbar=None, palette=palette,
-                    hue_order=hue_order)
+                    hue_order=hue_order, edgecolor='k')
     g.set(ylim=(0.0, 0.8), ylabel="Percentage of trial outcomes", xlabel="Trial outcomes")
 
     # set titles
     for ax in g.axes:
-        ax.set_title(subject2letter(ax.title.get_text().split('=')[-1]))
+        ax.set_title('subject ' + subject2letter(ax.title.get_text().split('=')[-1]))
 
     plt.savefig('./imgs/performance/game_endings_per_subject.png')
     plt.savefig('../thesis/1descriptive/1performance/game_endings_per_subject.png')
     plt.show()
 
     # plot number of game outcomes per difficulty
-    g = sns.catplot(x="game_difficulty", hue="game_status", y='percentage', kind='bar', data=counts)
-    g.set(ylim=(0.0, 1.0))
+    g = sns.catplot(x="game_difficulty", hue="game_status", y='percentage', kind='bar', data=counts, palette=palette, hue_order=hue_order,
+                    edgecolor='k')
+    g.set(ylim=(0.0, 1.0), ylabel="Trial difficulty", xlabel="Trial outcomes")
+
+    # legend title
+    g._legend.set_title('Trial outcome')
+    # replace labels
+    new_labels = ['Won', 'Timed out', 'Lost']
+    for t, l in zip(g._legend.texts, new_labels):
+        t.set_text(l)
+
     plt.savefig('./imgs/performance/game_endings.png')
     plt.show()
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
 
     g = sns.displot(ax=ax, data=last_time_steps, y='game_difficulty', hue='game_status', stat='percent', multiple='stack', kind='hist',
-                    palette=palette, hue_order=hue_order)  # TODO bar size
+                    palette=palette, hue_order=hue_order, edgecolor='k')  # TODO bar size
     g.set_axis_labels('Trial outcomes', 'Trial difficulty')
 
     # legend title
@@ -66,7 +86,9 @@ def plot_performance_per_difficulty():
 
     # plot average time
     g = sns.catplot(x="game_difficulty", hue="game_status", y='time', kind='bar', data=last_time_steps,
-                    hue_order=hue_order, palette=palette)
+                    hue_order=hue_order, palette=palette, edgecolor='k')
+
+    # --- legend
     # legend title
     g._legend.set_title('Trial outcome')
     # replace labels
@@ -74,7 +96,6 @@ def plot_performance_per_difficulty():
     for t, l in zip(g._legend.texts, new_labels):
         t.set_text(l)
     plt.savefig('./imgs/performance/game_times.png')
-    plt.savefig('../thesis/1descriptive/1performance/game_times.png')
     plt.show()
 
 

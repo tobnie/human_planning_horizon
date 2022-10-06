@@ -191,6 +191,7 @@ def field2screen(field_coords):
 
 
 def subject2letter(subject_id):
+    subject_id = subject_id.strip()
     unique_subjects = get_all_subjects()
     for i, subj_id in enumerate(unique_subjects):
         if subject_id == subj_id:
