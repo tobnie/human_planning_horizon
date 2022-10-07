@@ -120,7 +120,7 @@ def plot_pupil_size():
     plt.boxplot([pupil_size_total, pupil_size_street, pupil_size_river], labels=['total', 'street', 'river'])
     plt.ylabel('pupil size z-score')
     plt.savefig('./imgs/pupil_size/pupil_sizes_box.png')
-    plt.savefig('../thesis/2river_vs_street/pupil_sizes_box.png')
+    plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_sizes_box.png')
     plt.show()
 
     # TODO position names
@@ -129,7 +129,7 @@ def plot_pupil_size():
     plt.ylabel('pupil size z-score')
     plt.ylim((-3, 5))
     plt.savefig('./imgs/pupil_size/pupil_sizes_violin.png')
-    plt.savefig('../thesis/2river_vs_street/pupil_sizes_violin.png')
+    plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_sizes_violin.png')
     plt.show()
 
 

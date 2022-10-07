@@ -27,6 +27,7 @@ def try_except_plot(func):
 
 
 if __name__ == '__main__':
+    plot_mfd_heatmap()
 
     try_except_plot(plot_performance_per_difficulty)
 

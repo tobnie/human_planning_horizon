@@ -79,6 +79,7 @@ def plot_blink_rates():
     plt.boxplot([blink_rates_total.values, blink_rates_street.values, blink_rates_river.values], labels=['total', 'street', 'river'])
     plt.ylabel('blink rate [blinks/s]')
     plt.savefig('./imgs/blinks/blink_rates_box.png')
+    plt.savefig('../thesis/2river_vs_street/3blink_rate/blink_rates_box.png')
     plt.show()
 
 

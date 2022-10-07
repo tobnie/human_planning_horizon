@@ -207,7 +207,7 @@ def _plot_heatmap(*args, **kwargs):
 
 
 def plot_mfd_heatmap(subject_id=None):
-    df = read_data()
+    df = load_fixations()
 
     if subject_id:
         df = df[df['subject_id'] == subject_id]
@@ -249,7 +249,7 @@ def plot_mfd_heatmap(subject_id=None):
 
     plt.tight_layout()
     plt.savefig(directory_path + 'mfd_per_position.png')
-    plt.savefig('../thesis/2river_vs_street/mfd_per_position.png')
+    plt.savefig('../thesis/2river_vs_street/1mfd/mfd_per_position.png')
     plt.savefig('../paper/mfd_per_position.svg', format='svg')
     plt.show()
 
