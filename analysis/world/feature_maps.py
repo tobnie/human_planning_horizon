@@ -1,11 +1,9 @@
 import numpy as np
-from matplotlib import pyplot as plt
+
 
 import config
-from analysis.data_utils import assign_object_position_to_fields, assign_object_position_to_fields_street, \
-    assign_object_position_to_fields_water, \
-    assign_player_position_to_field, create_state_from_string, read_data
-from analysis.world.world_coordinates import plot_state
+from analysis.data_utils import assign_object_position_to_fields_street, assign_object_position_to_fields_water, assign_player_position_to_field, create_state_from_string, read_data
+
 
 
 def invert_feature_map(feature_map):
@@ -32,8 +30,6 @@ def get_avoidance_map_water(feature_map):
 
 def get_avoidance_map(feature_map):
     """ Returns the feature map for the objects that should be avoided in the feature map."""
-    # TODO need to distinguish between street and water section, since in street section the player is standing still, while it is moving in the river section?
-
     # get feature maps
     vehicle_fm = get_avoidance_map_street(feature_map)
     water_fm = get_avoidance_map_water(feature_map)
@@ -149,7 +145,7 @@ def save_states_with_identifiers():
     df['state_identifier'] = df['state'].apply(lambda x: convert_state_to_fm_and_classify(x, radius=3))
 
     df.drop(columns=['state'], inplace=True)
-    df.to_csv('../data/situations.csv')
+    df.to_csv('../data/situations.csv', index=False)
 
 
 def create_feature_map_from_state(state):
