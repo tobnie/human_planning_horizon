@@ -59,7 +59,6 @@ def run_create_IO_data_for_NN(subject_id):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
-    # TODO input only player position (in fields), lane type, target position
     np.savez_compressed(dir_path + 'player_pos.npz', player_pos)
     np.savez_compressed(dir_path + 'single_layer_fm.npz', np.array(state_fms))
     np.savez_compressed(dir_path + 'multi_layer_fm.npz', np.array(state_fms_deep))
@@ -178,9 +177,9 @@ def run_create_IO_data_for_recurrent_NN(df, timesteps=5, stride=5):
 
 if __name__ == '__main__':
 
-    # print('NON-RECURRENT DATA')
-    # # data for 'normal' architectures
-    # create_IO_data_for_all_subjects()
+    print('NON-RECURRENT DATA')
+    # data for 'normal' architectures
+    create_IO_data_for_all_subjects()
 
     print('RECURRENT DATA')
     # data for recurrent architectures
