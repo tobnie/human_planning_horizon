@@ -26,7 +26,8 @@ def run_create_IO_data_for_NN(subject_id):
     # release memory
     del situations
 
-    df = df[['mfd', 'state', 'fix_x', 'fix_y', 'player_x_field', 'player_y_field', 'fix_x_field', 'fix_y_field', 'state_identifier', 'region']]
+    df = df[
+        ['mfd', 'state', 'fix_x', 'fix_y', 'player_x_field', 'player_y_field', 'fix_x_field', 'fix_y_field', 'state_identifier', 'region']]
 
     # creating states from df
     print('Creating States from df...')
@@ -88,7 +89,6 @@ def create_time_series_data_for_all_subjects(timesteps, stride):
         run_create_IO_data_for_recurrent_NN(df, timesteps, stride)
 
 
-
 def run_create_IO_data_for_recurrent_NN(df, timesteps=5, stride=5):
     subject_id = df['subject_id'].values[0]
 
@@ -118,18 +118,18 @@ def run_create_IO_data_for_recurrent_NN(df, timesteps=5, stride=5):
     indices = reduce(lambda lst, rnge: lst + rnge, index_ranges)
 
     indices = np.array(indices)
-    indices = indices[indices >= timesteps]
 
     five_tail = df.iloc[indices].reset_index(drop=True)
     five_tail_grouped = five_tail.groupby(five_tail.index // timesteps)
-    five_tail_groups_filtered = five_tail_grouped.filter(lambda sub_frame: sub_frame['time'].is_monotonic_increasing)
+    five_tail_groups_filtered = five_tail_grouped.filter(
+        lambda sub_frame: sub_frame['time'].is_monotonic_increasing and sub_frame['time'].shape[0] == timesteps)
     df = five_tail_groups_filtered.reset_index(drop=True)
     df_arr = df.to_numpy()
 
     # creating states from df
     print('Creating States from df...')
 
-    mfd = df_arr[timesteps-1::timesteps, 1].astype(float)
+    mfd = df_arr[timesteps - 1::timesteps, 1].astype(float)
     states = df_arr[:, 2]
     situations = df_arr[:, 3]
 
