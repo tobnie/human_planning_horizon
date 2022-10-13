@@ -53,7 +53,7 @@ def run_create_IO_data_for_NN(subject_id):
 
     # save all data
     print('Saving data...')
-    dir_path = f'../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/{subject_id}/'
+    dir_path = f'../../human_planning_horizon_nn/gaze_predictor/data/{subject_id}/'
 
     # create directory if non-existent
     if not os.path.exists(dir_path):
@@ -160,7 +160,7 @@ def run_create_IO_data_for_recurrent_NN(df, timesteps=5, stride=5):
 
     # # save all data
     print('Saving data...')
-    dir_path = f'../../human_planning_horizon_nn/gaze_predictor/gaze_predictor/data/{subject_id}/lstm/timesteps={timesteps}_stride={stride}/'
+    dir_path = f'../../human_planning_horizon_nn/gaze_predictor/data/{subject_id}/lstm/timesteps={timesteps}_stride={stride}/'
 
     # create directory if non-existent
     if not os.path.exists(dir_path):

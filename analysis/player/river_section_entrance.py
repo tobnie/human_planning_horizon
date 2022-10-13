@@ -1,4 +1,3 @@
-# todo where was river section entered depending on target 2position. Did they consider the target 2position even before entering the section?
 import seaborn as sns
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -8,7 +7,6 @@ from analysis.gaze.fixations import get_region_from_field
 
 
 def get_river_entrances_game(game_df):
-    # TODO this could be improved to return multiple xs if the river is entered multiple times
     river_df = game_df[game_df['region'] == 'river']
     if river_df.empty:
         return None

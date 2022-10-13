@@ -256,6 +256,10 @@ def plot_mfd_heatmap(subject_id=None):
 
 def plot_fixation_heatmap():
     fixations = load_fixations()
+    df = read_data()[['subject_id', 'game_difficulty', 'world_number', 'game_status']].drop_duplicates()
+
+    fixations = fixations.merge(df, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
+    fixations = fixations[fixations['game_status'] == 'won']
 
     fixations = fixations[['fix_x_field', 'fix_y_field', 'fix_duration']]
     fix_duration_sum = fixations['fix_duration'].sum()
@@ -263,7 +267,7 @@ def plot_fixation_heatmap():
     fixations_pivot = fixations.pivot(index='fix_y_field', columns='fix_x_field', values='fix_duration')
 
     # normalize pivot table
-    fixations_pivot = fixations_pivot.div(fix_duration_sum)
+    fixations_pivot = fixations_pivot.div(fix_duration_sum).fillna(0)
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     sns.heatmap(fixations_pivot, ax=ax, cbar_kws={'label': '% fixation duration of all fixations'}, linewidths=.1)
@@ -273,7 +277,7 @@ def plot_fixation_heatmap():
     ax.set_ylabel('y')
 
     plt.tight_layout()
-    plt.savefig('../thesis/1descriptive/fixations_heatmap.png')
+    plt.savefig('../thesis/1descriptive/3gaze/fixations_heatmap.png')
     plt.show()
 
 
@@ -446,7 +450,7 @@ def plot_fixation_distance_hist_per_region(df):
 
 def plot_mfd_per_region():
     df = load_fixations()
-    df = df[(df['region'] == 'street') |(df['region'] == 'river')]
+    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
     directory_path = './imgs/gaze/fixations/fixations_per_position/'
 
     edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
@@ -944,6 +948,39 @@ def print_fixations_on_target_for_region():
     print(df[df['region'] == 'start']['fixation_on'].value_counts())
 
 
+def plot_fixations_on_target_per_lane():
+    df = load_fixations()
+    target_fixations = df[(df['fixation_on'] == 'near_target') | (df['fixation_on'] == 'target')]
+
+    palette = {'near_target': paper_plot_utils.blue, 'target': paper_plot_utils.red}
+    ax = sns.histplot(target_fixations, y='player_y_field', hue='fixation_on', discrete=True, multiple='stack', stat='proportion',
+                      palette=palette)
+
+    y_lim_lower_offset = 0 - ax.get_ylim()[0]
+    ax.set_ylim((ax.get_ylim()[0], ax.get_ylim()[1] + y_lim_lower_offset))
+
+    plt.ylabel('y')
+    plt.xlabel('Proportion of fixations on target')
+    plt.legend(title='Fixation', loc='lower right', labels=['On target', 'Near target'], framealpha=1.0)
+
+    # add text
+    x_lim = ax.get_xlim()[1]
+    plt.axhline(y=7, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=7, x=x_lim / 2, s='middle lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    plt.axhline(y=0, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=0, x=x_lim / 2, s='start lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    plt.axhline(y=14, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=14, x=x_lim / 2, s='finish lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    plt.savefig('../thesis/1descriptive/3gaze/fixations_on_target.png')
+    plt.show()
+
+
 def plot_MFD_diff_river_street_over_score():
     df = load_fixations()
 
@@ -1021,6 +1058,8 @@ def plot_MFD_diff_river_street_over_score():
 
 
 if __name__ == '__main__':
+    plot_fixation_heatmap()
+    plot_fixations_on_target_per_lane()
     # save_fixations()
     #
     # plot_avg_fixation_distance_per_subject()

@@ -50,7 +50,7 @@ def plot_player_position_heatmap(df=None):
     position_df_won = df_won_games[['player_x_field', 'player_y_field']].copy()
     position_df_won.dropna(inplace=True)
 
-    heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'])
+    heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'], normalize=True)
     heatmap_df.iloc[0, 9] = 0  # set start position to zero
     ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.1)
     ax.invert_yaxis()
@@ -75,7 +75,7 @@ def plot_player_position_heatmap_per_target_position():
     # df.loc[n, 'player_y_field'] = 14
 
     fig, axs = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
-    cbar_ax = fig.add_axes([.91, .3, .03, .4])  # TODO right subplot is smaller than first two
+    cbar_ax = fig.add_axes([.91, .3, .03, .4])  # TODO right subplot is smaller than first two, maybe add cbar horizontally below plots
     for i, target_pos in enumerate(position_df['target_position'].unique()):
         ax = axs[i]
         target_position_df = position_df[position_df['target_position'] == target_pos]

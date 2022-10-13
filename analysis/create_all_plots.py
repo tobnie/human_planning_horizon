@@ -45,7 +45,7 @@ if __name__ == '__main__':
     sys.stdout = orig_stdout
     f.close()
 
-    try_except_plot(plot_last_lanes_lost_games)  # TODO lane 0 + 7
+    try_except_plot(plot_last_lanes_lost_games)
     f = open('../thesis/1descriptive/1performance/trial_times.txt', 'w+')
     sys.stdout = f
     try_except_plot(histogram_over_avg_trial_times)
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     f = open('../thesis/2river_vs_street/fixations_on_target.txt', 'w+')
     sys.stdout = f
-    try_except_plot(print_fixations_on_target_for_region)  # TODO maybe also make bar plot / maybe was aus KDE rausrechnen?
+    try_except_plot(print_fixations_on_target_for_region)
     sys.stdout = orig_stdout
     f.close()
 

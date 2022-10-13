@@ -54,8 +54,6 @@ def set_gaze_information_nan(game_df):
     idx = get_nan_idx(game_df, expand_around_na_samples)
     if len(idx) > 0:
         game_df['pupil_size'][idx] = np.nan
-        # game_df['gaze_x'][idx] = -32768 # TODO do that or not?
-        # game_df['gaze_y'][idx] = -32768
     return game_df
 
 
@@ -235,7 +233,7 @@ def plot_pupil_size_over_score():
     print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
     print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
 
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)

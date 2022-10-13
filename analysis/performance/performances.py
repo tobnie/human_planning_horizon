@@ -148,12 +148,12 @@ def print_average_game_endings():
     scores = df[['subject_id', 'percentage', 'game_status', 'score']].groupby(['subject_id', 'game_status', 'score']).agg(
         percentage_over_all=('percentage', 'mean')).reset_index()
     best_subject = scores.loc[scores['score'] == scores['score'].max()]
-    print('\n\n ---- Best Subject ----')
+    print(f'\n\n ---- Best Subject: {subject2letter(best_subject["subject_id"].values[0])} ----')
     print('Won Games: ', best_subject[best_subject['game_status'] == 'won']['percentage_over_all'].mean())
 
     # worst subject
     worst_subject = scores.loc[scores['score'] == scores['score'].min()]
-    print('\n\n ---- Worst Subject ----')
+    print(f'\n\n ---- Worst Subject: {subject2letter(worst_subject["subject_id"].values[0])} ----')
     print('Won Games: ', worst_subject[worst_subject['game_status'] == 'won']['percentage_over_all'].mean())
 
     # Variance and median of won games:
@@ -299,19 +299,39 @@ def ttest_mean_time_normal_hard():
     print('dof=', len(times_normal) - 1 + len(times_hard) - 1)
 
 
+def correct_player_y_in_last_step_of_game(player_y, last_action):
+    return player_y + int(last_action == 'up') - int(last_action == 'down')
+
+
 def plot_last_lanes_lost_games():
     # get last data from each game
     last_time_steps = get_last_time_steps_of_games().copy()
     last_time_steps = last_time_steps[last_time_steps['game_status'] != 'won']
 
-    # TODO do something about deaths in zero lane --> consider last action before death or something like that?
-    last_time_steps['player_y']
+    palette = {'timed_out': paper_plot_utils.blue, 'lost': paper_plot_utils.red}
+    ax = sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack', palette=palette)
 
-    ax = sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack')
+    y_lim_lower_offset = 0 - ax.get_ylim()[0]
+    ax.set_ylim((ax.get_ylim()[0], ax.get_ylim()[1] + y_lim_lower_offset))
 
-    ax.set_xlabel('proportion')
+    ax.set_xlabel('proportion of trial outcomes')
     ax.set_ylabel('y')
-    plt.legend(title='Trial outcome', loc='center right', labels=['Lost', 'Timed out'])
+    plt.legend(title='Trial outcome', loc='center right', labels=['Timed out', 'Lost'], framealpha=1.0)
+
+    # add text
+    x_lim = ax.get_xlim()[1]
+    plt.axhline(y=7, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=7, x=x_lim / 2, s='middle lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    plt.axhline(y=0, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=0, x=x_lim / 2, s='start lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    plt.axhline(y=14, color='black', linestyle="dashed", alpha=0.5)
+    plt.text(y=14, x=x_lim / 2, s='finish lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
+             bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
     plt.savefig('imgs/performance/lost_games_last_lane.png')
     plt.savefig('../thesis/1descriptive/1performance/lost_games_last_lane.png')
     plt.show()
@@ -340,7 +360,9 @@ def classify_loss_cause(region, last_action):
 
 
 if __name__ == '__main__':
-    save_performance_stats()
+    print_average_game_endings()
+    plot_last_lanes_lost_games()
+    # save_performance_stats()
     # sns.set_style("whitegrid")
     # plot_performance_per_difficulty()
     # print_average_game_endings()
