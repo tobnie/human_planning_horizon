@@ -2,6 +2,7 @@ from itertools import product
 
 import numpy as np
 import scipy
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 import seaborn as sns
 
@@ -121,13 +122,61 @@ def plot_pupil_size():
     plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_sizes_box.png')
     plt.show()
 
-    # TODO position names
     plt.violinplot(dataset=[pupil_size_total, pupil_size_street, pupil_size_river],
                    showextrema=False)  # , positions=['total', 'street', 'river'])
     plt.ylabel('pupil size z-score')
     plt.ylim((-3, 5))
     plt.savefig('./imgs/pupil_size/pupil_sizes_violin.png')
     plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_sizes_violin.png')
+    plt.show()
+
+def plot_pupil_size_per_region():
+    df = read_data()
+    df = df[['region', 'pupil_size_z']].dropna(subset='pupil_size_z')
+
+    df = df[df['pupil_size_z'] < 15]
+
+    # fancy pupil size plot (box plot and violin plot)
+    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
+    print(df['region'].value_counts())
+
+    edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
+    box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
+
+    # create boxplot
+    sns.set_style("whitegrid")
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.boxplot(data=df, ax=ax, y="pupil_size_z", x="region", width=0.2, linewidth=1.5,
+                showfliers=False,
+                # flierprops=dict(markersize=2),
+                showmeans=True, meanline=True,
+                boxprops={'zorder': 2})
+
+    # iterate over boxes
+    box_patches = [patch for patch in ax.patches if type(patch) == mpl.patches.PathPatch]
+    if len(box_patches) == 0:
+        box_patches = ax.artists
+    num_patches = len(box_patches)
+    lines_per_boxplot = len(ax.lines) // num_patches
+    for i, patch in enumerate(box_patches):
+        # Set the linecolor on the patch to the facecolor, and set the facecolor to None
+        patch.set_edgecolor('k')  # edge_colors[i])
+        patch.set_facecolor(box_colors[i])
+
+        # Each box has associated Line2D objects (to make the whiskers, fliers, etc.)
+        # Loop over them here, and use the same color as above
+        for line in ax.lines[i * lines_per_boxplot: (i + 1) * lines_per_boxplot]:
+            line.set_color('k')  # edge_colors[i])
+            line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
+            line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
+
+    sns.violinplot(data=df, ax=ax, y="pupil_size_z", x="region", size=0.5, scale='width', palette=box_colors, inner=None,
+                   saturation=0.5)
+
+    ax.set_xlabel('')
+    ax.set_ylabel('Pupil size z-score')
+    plt.savefig('./imgs/gaze/fixations/fixations_per_position/fixation_distance_per_region_box.png')
+    plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_size_per_region_box.png')
     plt.show()
 
 
@@ -247,6 +296,7 @@ def plot_pupil_size_over_score():
 
 
 if __name__ == '__main__':
+    plot_pupil_size_per_region()
     plot_pupil_size()
     ttest_pupil_size_street_river()
     kstest_pupil_size_street_river()

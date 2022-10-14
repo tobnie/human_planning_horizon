@@ -82,6 +82,49 @@ def plot_blink_rates():
     plt.savefig('../thesis/2river_vs_street/3blink_rate/blink_rates_box.png')
     plt.show()
 
+    # fancy blink rate plot (box plot and violin plot)
+    # TODO
+    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
+
+    edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
+    box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
+
+    # create boxplot
+    sns.set_style("whitegrid")
+    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
+    sns.boxplot(data=df, ax=ax, y="pupil_size_z", x="region", width=0.2, linewidth=1.5,
+                showfliers=False,
+                # flierprops=dict(markersize=2),
+                showmeans=True, meanline=True,
+                boxprops={'zorder': 2})
+
+    # iterate over boxes
+    box_patches = [patch for patch in ax.patches if type(patch) == mpl.patches.PathPatch]
+    if len(box_patches) == 0:
+        box_patches = ax.artists
+    num_patches = len(box_patches)
+    lines_per_boxplot = len(ax.lines) // num_patches
+    for i, patch in enumerate(box_patches):
+        # Set the linecolor on the patch to the facecolor, and set the facecolor to None
+        patch.set_edgecolor('k')  # edge_colors[i])
+        patch.set_facecolor(box_colors[i])
+
+        # Each box has associated Line2D objects (to make the whiskers, fliers, etc.)
+        # Loop over them here, and use the same color as above
+        for line in ax.lines[i * lines_per_boxplot: (i + 1) * lines_per_boxplot]:
+            line.set_color('k')  # edge_colors[i])
+            line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
+            line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
+
+    sns.violinplot(data=df, ax=ax, y="pupil_size_z", x="region", size=0.5, scale='width', palette=box_colors, inner=None,
+                   saturation=0.5)
+
+    ax.set_xlabel('')
+    ax.set_ylabel('Pupil size z-score')
+    plt.savefig('./imgs/gaze/fixations/fixations_per_position/fixation_distance_per_region_box.png')
+    plt.savefig('../thesis/2river_vs_street/pupil_size_per_region_box.png')
+    plt.show()
+
 
 def ttest_blink_rate_street_river():
     blink_rates = pd.read_csv('../data/blink_rates.csv')

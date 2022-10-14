@@ -1044,7 +1044,7 @@ def plot_MFD_diff_river_street_over_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='Data')  # TODO sem or std for errorbar?
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='Data')
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
@@ -1057,7 +1057,14 @@ def plot_MFD_diff_river_street_over_score():
     plt.show()
 
 
+def print_n_fixations_per_region():
+    df = load_fixations()
+    print(df['region'].value_counts())
+    print('In total:', df.shape[0])
+
+
 if __name__ == '__main__':
+    print_n_fixations_per_region()
     plot_fixation_heatmap()
     plot_fixations_on_target_per_lane()
     # save_fixations()
