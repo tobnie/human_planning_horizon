@@ -3,6 +3,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import scipy
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 import seaborn as sns
 
@@ -82,17 +83,25 @@ def plot_blink_rates():
     plt.savefig('../thesis/2river_vs_street/3blink_rate/blink_rates_box.png')
     plt.show()
 
+
+def plot_blink_rates_fancy():
     # fancy blink rate plot (box plot and violin plot)
-    # TODO
-    df = df[(df['region'] == 'street') | (df['region'] == 'river')]
+    df = pd.read_csv('../data/blink_rates.csv')
+    df = df.drop(columns=['blink_rate'])
+
+    df = pd.melt(df, id_vars=['subject_id', 'game_difficulty', 'world_number'], value_vars=['blink_rate_street', 'blink_rate_river'])
+    df = df.replace({'blink_rate_river': 'river', 'blink_rate_street': 'street'})
+    df = df.rename(columns={'variable': 'region', 'value': 'blink_rate'})
+    df = df.dropna()
+    print(df['region'].value_counts())
 
     edge_colors = [paper_plot_utils.C0, paper_plot_utils.C1]
     box_colors = [paper_plot_utils.C0_soft, paper_plot_utils.C1_soft]
 
     # create boxplot
-    sns.set_style("whitegrid")
+    sns.set_style('whitegrid')
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-    sns.boxplot(data=df, ax=ax, y="pupil_size_z", x="region", width=0.2, linewidth=1.5,
+    sns.boxplot(data=df, ax=ax, y='blink_rate', x='region', width=0.2, linewidth=1.5,
                 showfliers=False,
                 # flierprops=dict(markersize=2),
                 showmeans=True, meanline=True,
@@ -116,13 +125,12 @@ def plot_blink_rates():
             line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
             line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
 
-    sns.violinplot(data=df, ax=ax, y="pupil_size_z", x="region", size=0.5, scale='width', palette=box_colors, inner=None,
+    sns.violinplot(data=df, ax=ax, y='blink_rate', x='region', size=0.5, palette=box_colors, inner=None,
                    saturation=0.5)
 
     ax.set_xlabel('')
-    ax.set_ylabel('Pupil size z-score')
-    plt.savefig('./imgs/gaze/fixations/fixations_per_position/fixation_distance_per_region_box.png')
-    plt.savefig('../thesis/2river_vs_street/pupil_size_per_region_box.png')
+    ax.set_ylabel('Blink rate [$s^{-1}$]')
+    plt.savefig('../thesis/2river_vs_street/3blink_rate/blink_rates_box.png')
     plt.show()
 
 
@@ -135,7 +143,7 @@ def ttest_blink_rate_street_river():
 
     # perform (Welch's) t-test
     # t test euclidean distances:
-    ttest_result = scipy.stats.ttest_ind(blink_rates_river, blink_rates_street,  alternative='greater')
+    ttest_result = scipy.stats.ttest_ind(blink_rates_river, blink_rates_street, alternative='greater')
     print(ttest_result)
     print('dof=', len(blink_rates_street) - 1 + len(blink_rates_river) - 1)
 
@@ -199,12 +207,12 @@ def plot_blink_rate_over_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')
-    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linReg')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='Data')
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
-    plt.xlabel('score')
-    plt.ylabel('blinking rate [$s^{-1}$]')
+    plt.xlabel('Score')
+    plt.ylabel('Blinking rate [$s^{-1}$]')
     plt.legend()
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_score_w_lin_reg.png')
@@ -225,7 +233,8 @@ def plot_blink_rate_over_level_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', hue='subject_id', ax=ax)   # TODO investigate exponential relation? --> single scatter plots for each subject?
+    sns.scatterplot(df, x='standardized_level_score', y='blink_rate', hue='subject_id',
+                    ax=ax)  # TODO investigate exponential relation? --> single scatter plots for each subject?
     plt.legend([], [], frameon=False)
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_level_score_w_lin_reg_per_subject.png')
@@ -278,6 +287,7 @@ def plot_blink_rate_over_level_score():
 
 
 if __name__ == '__main__':
+    plot_blink_rates_fancy()
     # save_blink_rates()
     plot_blink_rate_over_score()
     plot_blink_rate_over_level_score()

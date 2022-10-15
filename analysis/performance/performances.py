@@ -66,11 +66,11 @@ def plot_performance_per_difficulty():
     plt.savefig('./imgs/performance/game_endings.png')
     plt.show()
 
-    fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
-
+    fig, ax = plt.subplots(figsize=(6, 10))
     g = sns.displot(ax=ax, data=last_time_steps, y='game_difficulty', hue='game_status', stat='percent', multiple='stack', kind='hist',
                     palette=palette, hue_order=hue_order, edgecolor='k')  # TODO bar size
     g.set_axis_labels('Trial outcomes', 'Trial difficulty')
+    g.fig.set_size_inches(8, 2)
 
     # legend title
     g._legend.set_title('Trial outcome')
@@ -78,6 +78,14 @@ def plot_performance_per_difficulty():
     new_labels = ['Won', 'Timed out', 'Lost']
     for t, l in zip(g._legend.texts, new_labels):
         t.set_text(l)
+
+    # sns.histplot(ax=ax, data=last_time_steps, y='game_difficulty', hue='game_status', stat='percent', multiple='fill',
+    #                 palette=palette, hue_order=hue_order, edgecolor='k')  # TODO bar size
+    # g.set_axis_labels('Trial outcomes', 'Trial difficulty')
+    # ax.set_xlabel('Trial outcomes')
+    # ax.set_ylabel('Trial difficulty')
+    #
+    # sns.move_legend(ax, "center left", bbox_to_anchor=(1, 1), title='Trial outcomes', labels=['Won', 'Timed Out', 'Lost'])
 
     # plt.legend(title='Trial outcome', labels=['Won', 'Timed out', 'Lost'])
     plt.savefig('./imgs/performance/game_endings_stacked.png')
@@ -180,6 +188,9 @@ def histogram_over_avg_trial_times():
     print('Completion Time Mean: ', game_durations_won['time'].mean())
     print('Completion Time Var: ', game_durations_won['time'].var())
     print('Completion Time Median: ', game_durations_won['time'].median())
+
+    print('Avg Trial Times:\n')
+    print(game_durations_won[['game_difficulty', 'time']].groupby('game_difficulty').agg(['mean', 'median', 'var']))
 
     game_durations_won.replace('normal', 'medium', inplace=True)
     game_durations_won.rename(columns={'game_difficulty': 'Level Difficulty'}, inplace=True)
@@ -360,6 +371,8 @@ def classify_loss_cause(region, last_action):
 
 
 if __name__ == '__main__':
+    plot_performance_per_difficulty()
+    histogram_over_avg_trial_times()
     print_average_game_endings()
     plot_last_lanes_lost_games()
     # save_performance_stats()

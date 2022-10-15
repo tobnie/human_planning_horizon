@@ -91,6 +91,7 @@ def plot_pupil_size_for_each_game():
 def plot_pupil_size():
     df = read_data()
     df = df[['region', 'pupil_size_z']].dropna(subset='pupil_size_z')
+    df = df[df['pupil_size_z'] < 15]
 
     # pupil size everywhere
     pupil_size_total = df['pupil_size_z']
@@ -130,10 +131,10 @@ def plot_pupil_size():
     plt.savefig('../thesis/2river_vs_street/4pupil_size/pupil_sizes_violin.png')
     plt.show()
 
+
 def plot_pupil_size_per_region():
     df = read_data()
     df = df[['region', 'pupil_size_z']].dropna(subset='pupil_size_z')
-
     df = df[df['pupil_size_z'] < 15]
 
     # fancy pupil size plot (box plot and violin plot)
@@ -170,7 +171,7 @@ def plot_pupil_size_per_region():
             line.set_mfc('k')  # edge_colors[i])  # facecolor of fliers
             line.set_mec('k')  # edge_colors[i])  # edgecolor of fliers
 
-    sns.violinplot(data=df, ax=ax, y="pupil_size_z", x="region", size=0.5, scale='width', palette=box_colors, inner=None,
+    sns.violinplot(data=df, ax=ax, y="pupil_size_z", x="region", size=0.5, palette=box_colors, inner=None,
                    saturation=0.5)
 
     ax.set_xlabel('')
@@ -183,6 +184,7 @@ def plot_pupil_size_per_region():
 def ttest_pupil_size_street_river():
     df = read_data()
     df = df[['region', 'pupil_size_z']].dropna(subset='pupil_size_z')
+    df = df[df['pupil_size_z'] < 15]
 
     # pupil size on street
     street_mask = df['region'] == 'street'
@@ -202,6 +204,7 @@ def ttest_pupil_size_street_river():
 def kstest_pupil_size_street_river():
     df = read_data()
     df = df[['region', 'pupil_size_z']].dropna(subset='pupil_size_z')
+    df = df[df['pupil_size_z'] < 15]
 
     # pupil size on street
     street_mask = df['region'] == 'street'
@@ -223,27 +226,28 @@ def normalize_pupil_size_subject(subject_df):
 
 def plot_pupil_size_over_score():
     df = read_data()
-    df = df[['subject_id', 'score', 'pupil_size']].dropna(subset='pupil_size')
+    df = df[['subject_id', 'score', 'pupil_size', 'pupil_size_z']].dropna(subset=['pupil_size', 'pupil_size_z'])
+    df = df[df['pupil_size_z'] < 15]
 
     # normalize pupil size between 0 and 1
-    df['pupil_size_normalized'] = df.groupby(['subject_id', 'score']).apply(normalize_pupil_size_subject)
+    df['pupil_size_normalized'] = df.groupby(['subject_id', 'score'])['pupil_size'].apply(normalize_pupil_size_subject)
 
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
 
+    sns.set_style('whitegrid')
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     sns.pointplot(data=df, ax=ax, x='subject_id', y='pupil_size_normalized', join=False, order=order_df['subject_id'])
 
     xlabels = [subject2letter(subj_id.get_text()) for subj_id in ax.get_xticklabels()]
     ax.set_xticklabels(xlabels)
-    ax.set_xlabel('subject score')
-    ax.set_ylabel('normalized pupil size ')
+    ax.set_xlabel('Subject score')
+    ax.set_ylabel('Normalized pupil size ')
     plt.tight_layout()
     plt.savefig('./imgs/pupil_size/pupil_size_over_score.png')
     plt.savefig('../thesis/3experts_vs_novices/pupil_size_over_score.png')
     plt.show()
 
     # linear regression:
-
     df = df[['subject_id', 'score', 'pupil_size_normalized']].groupby(['subject_id', 'score'])[
         'pupil_size_normalized'].agg(['mean', 'sem', 'std'])
     df.columns = ['pupil_size', 'pupil_size_sem', 'pupil_size_std']
@@ -253,7 +257,7 @@ def plot_pupil_size_over_score():
     y = df['pupil_size']
     sem = df['pupil_size_sem']
     std = df['pupil_size_std']
-    res = scipy.stats.linregress(x, y, alternative='less')
+    res = scipy.stats.linregress(x, y, alternative='two-sided')
 
     print('Linear Regression for pupil size per score:')
     print(f'R-squared: {res.rvalue ** 2}')
@@ -282,8 +286,8 @@ def plot_pupil_size_over_score():
     print(f"slope (95%): {res.slope:.6f} +/- {ts * res.stderr:.6f}")
     print(f"intercept (95%): {res.intercept:.6f} +/- {ts * res.intercept_stderr:.6f}")
 
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')
-    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linear regression')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='Data')
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
     plt.xlabel('subject score')
@@ -296,8 +300,9 @@ def plot_pupil_size_over_score():
 
 
 if __name__ == '__main__':
-    plot_pupil_size_per_region()
-    plot_pupil_size()
     ttest_pupil_size_street_river()
     kstest_pupil_size_street_river()
+    plot_pupil_size()
+    plot_pupil_size_over_score()
+    plot_pupil_size_per_region()
     plot_pupil_size_for_each_game()

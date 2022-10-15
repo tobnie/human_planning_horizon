@@ -593,8 +593,8 @@ def plot_mfd_per_score():
 
     fig, ax = plt.subplots(figsize=paper_plot_utils.figsize)
     # plt.scatter(x, y, label='data')
-    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='data')  # TODO sem or std for errorbar?
-    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='linear regression')
+    plt.errorbar(x, y, yerr=sem, fmt='o', markersize=2, label='Data')
+    plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
     plt.xlabel('Subject score')
@@ -829,8 +829,11 @@ def plot_fixation_KDE_relative_to_player():
     df['weighted_x_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_x_distance).values
     df['weighted_y_distance'] = df.groupby(['subject_id', 'game_difficulty', 'world_number']).apply(calc_weighted_y_distance).values
 
+    print(df['region'].value_counts())
+
     lim = 0.2
-    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0)
+    palette = {'street': paper_plot_utils.red_kde, 'river': paper_plot_utils.blue_kde}
+    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0, palette=palette)
     g.refline(x=0, y=0)
     g.plot_joint(sns.kdeplot)
     g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
@@ -840,7 +843,7 @@ def plot_fixation_KDE_relative_to_player():
 
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde.png')
-    plt.savefig('../thesis/2river_vs_street/weighted_gaze_position_relative_to_player_kde.png')
+    plt.savefig('../thesis/2river_vs_street/2kde/weighted_gaze_position_relative_to_player_kde.png')
     plt.show()
     #
     # # do it for every target position
@@ -1064,6 +1067,7 @@ def print_n_fixations_per_region():
 
 
 if __name__ == '__main__':
+    plot_fixation_KDE_relative_to_player()
     print_n_fixations_per_region()
     plot_fixation_heatmap()
     plot_fixations_on_target_per_lane()
@@ -1086,8 +1090,6 @@ if __name__ == '__main__':
 
     # plot_gaze_y_position_relative_to_player()
     print_fixations_on_target_for_region()
-    plot_weighted_fixations_relative_to_player_per_fixated_object()  # TODO run
-    plot_fixation_KDE_relative_to_player()
     plot_gaze_x_position_relative_to_player()
 
     # # and for every subject:

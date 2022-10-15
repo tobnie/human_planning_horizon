@@ -31,12 +31,15 @@ def get_river_entrances():
 
 def plot_entrance_of_river_section():
     entrances = get_river_entrances()
+
+    sns.set_style('whitegrid')
     x = entrances[['player_x_field', 'target_position']]
-    ax = sns.histplot(data=x, x='player_x_field', hue='target_position', stat='proportion', multiple='stack', discrete=True)
+    ax = sns.histplot(data=x, x='player_x_field', hue='target_position', stat='count', multiple='stack', discrete=True)
 
     ax.set_xlabel('x')
     ax.set_ylabel('how often was river section entered at x')
-    plt.legend(title='Target position', loc='upper right', labels=['left', 'center', 'right'])
+    ax.set_xticks(range(0, 21))
+    plt.legend(title='Target position', loc='upper right', labels=['right', 'center', 'left'])
     plt.savefig('./imgs/player_position/entrances_river_x_by_target_position.png')
     plt.savefig('../thesis/1descriptive/2position/river_entrances_OPT.png')
     plt.tight_layout()
