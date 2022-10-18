@@ -19,7 +19,7 @@ def plot_performance_per_difficulty():
     palette = {'won': paper_plot_utils.blue, 'timed_out': paper_plot_utils.white, 'lost': paper_plot_utils.red}
     hue_order = ['won', 'timed_out', 'lost']
     # plot number of game outcomes
-    g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, height=4,
+    g = sns.catplot(x="game_difficulty", hue="game_status", col="subject_id", y='percentage', col_wrap=3, kind='bar', data=counts, height=4,
                     aspect=.7)
     g.set(ylim=(0.0, 1.0), ylabel="Percentage of trial outcomes", xlabel="Trial outcomes")
     g.set_xlabels('Trial outcomes')
@@ -39,7 +39,10 @@ def plot_performance_per_difficulty():
     plt.savefig('./imgs/performance/game_endings_per_subject_per_difficulty.png')
     plt.show()
 
-    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=4, kind='bar', data=counts, errorbar=None, palette=palette,
+    palette = {'Won': paper_plot_utils.blue, 'Timed out': paper_plot_utils.white, 'Lost': paper_plot_utils.red}
+    hue_order = ['Won', 'Timed out', 'Lost']
+    g = sns.catplot(x="game_status", col="subject_id", y='percentage', col_wrap=3, kind='bar',
+                    data=counts.replace({'won': 'Won', 'timed_out': 'Timed out', 'lost': 'Lost'}), errorbar=None, palette=palette,
                     hue_order=hue_order, edgecolor='k')
     g.set(ylim=(0.0, 0.8), ylabel="Percentage of trial outcomes", xlabel="Trial outcomes")
 
@@ -51,6 +54,8 @@ def plot_performance_per_difficulty():
     plt.savefig('../thesis/1descriptive/1performance/game_endings_per_subject.png')
     plt.show()
 
+    palette = {'won': paper_plot_utils.blue, 'timed_out': paper_plot_utils.white, 'lost': paper_plot_utils.red}
+    hue_order = ['won', 'timed_out', 'lost']
     # plot number of game outcomes per difficulty
     g = sns.catplot(x="game_difficulty", hue="game_status", y='percentage', kind='bar', data=counts, palette=palette, hue_order=hue_order,
                     edgecolor='k')
@@ -320,7 +325,8 @@ def plot_last_lanes_lost_games():
     last_time_steps = last_time_steps[last_time_steps['game_status'] != 'won']
 
     palette = {'timed_out': paper_plot_utils.blue, 'lost': paper_plot_utils.red}
-    ax = sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack', palette=palette)
+    ax = sns.histplot(last_time_steps, y='player_y_field', hue='game_status', discrete=True, stat='proportion', multiple='stack',
+                      palette=palette)
 
     y_lim_lower_offset = 0 - ax.get_ylim()[0]
     ax.set_ylim((ax.get_ylim()[0], ax.get_ylim()[1] + y_lim_lower_offset))

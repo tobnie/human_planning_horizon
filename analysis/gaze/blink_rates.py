@@ -212,7 +212,7 @@ def plot_blink_rate_over_score():
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
     plt.xlabel('Score')
-    plt.ylabel('Blinking rate [$s^{-1}$]')
+    plt.ylabel('Blink rate [$s^{-1}$]')
     plt.legend()
     plt.tight_layout()
     plt.savefig('./imgs/blinks/blink_rate_per_score_w_lin_reg.png')

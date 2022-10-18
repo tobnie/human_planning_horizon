@@ -833,13 +833,24 @@ def plot_fixation_KDE_relative_to_player():
 
     lim = 0.2
     palette = {'street': paper_plot_utils.red_kde, 'river': paper_plot_utils.blue_kde}
-    g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0, palette=palette)
-    g.refline(x=0, y=0)
-    g.plot_joint(sns.kdeplot)
-    g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
-    g.ax_marg_x.set_xlim(-lim, lim)
-    g.ax_marg_y.set_ylim(-lim, lim)
-    g.set_axis_labels('x', 'y')
+
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    sns.kdeplot(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0, palette=palette, ax=ax)
+    ax.axhline(0, ls='--', color='k', alpha=0.5)
+    ax.axvline(0, ls='--', color='k', alpha=0.5)
+    plt.xlim((-lim, lim))
+    plt.ylim((-lim, lim))
+    plt.xlabel('x')
+    plt.ylabel('y')
+
+    # g = sns.JointGrid(data=df, x="weighted_x_distance", y="weighted_y_distance", hue='region', space=0, palette=palette)
+    # g.refline(x=0, y=0)
+    # g.plot_joint(sns.kdeplot)
+    # g.plot_marginals(sns.histplot, binwidth=0.005, multiple='stack')
+    # g.ax_marg_x.set_xlim(-lim, lim)
+    # g.ax_marg_y.set_ylim(-lim, lim)
+    # g.set_axis_labels('x', 'y')
 
     plt.tight_layout()
     plt.savefig('./imgs/gaze/fixations/weighted_gaze_position_relative_to_player_kde.png')
