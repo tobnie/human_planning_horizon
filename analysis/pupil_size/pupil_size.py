@@ -290,8 +290,8 @@ def plot_pupil_size_over_score():
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
-    plt.xlabel('subject score')
-    plt.ylabel('normalized pupil size')
+    plt.xlabel('Subject score')
+    plt.ylabel('Normalized pupil size')
     plt.legend()
     plt.tight_layout()
     plt.savefig('./imgs/pupil_size/pupil_size_over_score_w_lin_reg.png')
@@ -300,9 +300,9 @@ def plot_pupil_size_over_score():
 
 
 if __name__ == '__main__':
+    plot_pupil_size_over_score()
     ttest_pupil_size_street_river()
     kstest_pupil_size_street_river()
     plot_pupil_size()
-    plot_pupil_size_over_score()
     plot_pupil_size_per_region()
     plot_pupil_size_for_each_game()

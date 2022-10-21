@@ -162,6 +162,7 @@ def kstest_blink_rate_distance_street_river():
 
 
 def plot_blink_rate_over_score():
+    sns.set_style('whitegrid')
     blink_rates = pd.read_csv('../data/blink_rates.csv')
     scores = pd.read_csv('../data/level_scores.csv')
     df = blink_rates.merge(scores, on=['subject_id', 'game_difficulty', 'world_number'], how='left')
@@ -211,7 +212,7 @@ def plot_blink_rate_over_score():
     plt.plot(xx, res.intercept + res.slope * xx, 'r', label='Linear regression')
     # plt.fill_between(xx, bounds_min, bounds_max, color='r', alpha=0.25, label='95% ci interval')
     plt.xlim(xlim)
-    plt.xlabel('Score')
+    plt.xlabel('Subject score')
     plt.ylabel('Blink rate [$s^{-1}$]')
     plt.legend()
     plt.tight_layout()
@@ -287,7 +288,7 @@ def plot_blink_rate_over_level_score():
 
 
 if __name__ == '__main__':
-    plot_blink_rates_fancy()
+    # plot_blink_rates_fancy()
     # save_blink_rates()
     plot_blink_rate_over_score()
     plot_blink_rate_over_level_score()

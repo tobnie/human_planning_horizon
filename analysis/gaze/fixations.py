@@ -277,6 +277,7 @@ def plot_fixation_heatmap():
     ax.set_ylabel('y')
 
     plt.tight_layout()
+    plt.show()
     plt.savefig('../thesis/1descriptive/3gaze/fixations_heatmap.png')
     plt.show()
 
@@ -532,6 +533,7 @@ def kstest_fixation_distance_street_river():
 
 
 def plot_mfd_per_score():
+    sns.set_style('whitegrid')
     df = load_fixations()
 
     order_df = df[['subject_id', 'score']].drop_duplicates().sort_values('score')
@@ -1078,12 +1080,13 @@ def print_n_fixations_per_region():
 
 
 if __name__ == '__main__':
+    plot_mfd_per_score()
+    plot_mfd_heatmap()
+
     plot_fixation_KDE_relative_to_player()
     print_n_fixations_per_region()
     plot_fixation_heatmap()
     plot_fixations_on_target_per_lane()
-    # save_fixations()
-    #
     # plot_avg_fixation_distance_per_subject()
     #
     # plot_fixations_kde()
