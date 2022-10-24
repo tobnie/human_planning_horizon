@@ -203,10 +203,11 @@ def histogram_over_avg_trial_times():
     ax.yaxis.grid(True)
     colors = [paper_plot_utils.C0, '#F7F7F7', paper_plot_utils.C1]
     sns.histplot(data=game_durations_won, ax=ax, multiple='stack', x='time', kde=False, binwidth=3, hue='Level Difficulty', element='bars',
-                 legend=True, palette=colors, zorder=10)
+                 legend=True, palette=colors, zorder=10, edgecolor='k')
 
     ax.set_xlabel('Time [s]')
     ax.set_ylabel('Count')
+    plt.tight_layout()
     plt.savefig('imgs/performance/trial_times_hist.png')
     plt.savefig('../thesis/1descriptive/1performance/trial_times_hist.png')
     plt.savefig('../paper/trial_times_hist.svg', format="svg")

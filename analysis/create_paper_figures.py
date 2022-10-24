@@ -6,9 +6,9 @@ from analysis.performance.performances import plot_mean_score_per_level, histogr
 
 if __name__ == '__main__':
     plot_mfd_per_score()
+    sns.set_style("whitegrid")
     histogram_over_avg_trial_times()
     #
-    sns.set_style("whitegrid")
     plot_mean_score_per_level()
     plot_fixation_distance_box_scoring_groups()
     #
