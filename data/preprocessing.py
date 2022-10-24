@@ -382,7 +382,7 @@ def run_preprocessing():
                     gaze_ys_i.append(gaze_y)
                     pupil_sizes_i.append(sample[3])
 
-                    # target 2position
+                    # target position
                     target_position_screen_coords = config.FIELD_WIDTH * target_position + config.FIELD_WIDTH / 2
                     target_positions_i.append(target_position_screen_coords)
 

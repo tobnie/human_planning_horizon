@@ -1080,9 +1080,10 @@ def print_n_fixations_per_region():
 
 
 if __name__ == '__main__':
-    plot_mfd_per_score()
-    plot_mfd_heatmap()
+    # plot_mfd_per_score()
+    # plot_mfd_heatmap()
 
+    sns.set_style('whitegrid')
     plot_fixation_KDE_relative_to_player()
     print_n_fixations_per_region()
     plot_fixation_heatmap()
