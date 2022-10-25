@@ -38,7 +38,10 @@ def plot_entrance_of_river_section():
 
     ax.set_xlabel('x')
     ax.set_ylabel('how often was river section entered at x')
-    ax.set_xticks(range(0, 21))
+    ax.set_xticks(range(0, 20), range(1, 21))
+    # xticklabels = [int(float(item.get_text())) + 1 for item in ax.get_xticklabels()]
+    # ax.set_xticklabels(xticklabels)
+
     plt.legend(title='Target position', loc='upper right', labels=['right', 'center', 'left'])
     plt.savefig('./imgs/player_position/entrances_river_x_by_target_position.png')
     plt.savefig('../thesis/1descriptive/2position/river_entrances_OPT.png')

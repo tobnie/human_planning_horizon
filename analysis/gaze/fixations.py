@@ -276,8 +276,13 @@ def plot_fixation_heatmap():
     ax.set_xlabel('x')
     ax.set_ylabel('y')
 
+    xticklabels = [int(float(item.get_text())) + 1 for item in ax.get_xticklabels()]
+    ax.set_xticklabels(xticklabels)
+
+    yticklabels = [int(float(item.get_text())) + 1 for item in ax.get_yticklabels()]
+    ax.set_yticklabels(yticklabels, rotation=0)
+
     plt.tight_layout()
-    plt.show()
     plt.savefig('../thesis/1descriptive/3gaze/fixations_heatmap.png')
     plt.show()
 
@@ -993,6 +998,8 @@ def plot_fixations_on_target_per_lane():
     plt.text(y=14, x=x_lim / 2, s='finish lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
              bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
 
+    ax.set_yticklabels(range(-1, 16, 2))
+
     plt.savefig('../thesis/1descriptive/3gaze/fixations_on_target.png')
     plt.show()
 
@@ -1083,10 +1090,10 @@ if __name__ == '__main__':
     # plot_mfd_per_score()
     # plot_mfd_heatmap()
 
-    sns.set_style('whitegrid')
-    plot_fixation_KDE_relative_to_player()
-    print_n_fixations_per_region()
-    plot_fixation_heatmap()
+    # sns.set_style('whitegrid')
+    # plot_fixation_KDE_relative_to_player()
+    # print_n_fixations_per_region()
+    # plot_fixation_heatmap()
     plot_fixations_on_target_per_lane()
     # plot_avg_fixation_distance_per_subject()
     #

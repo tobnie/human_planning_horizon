@@ -61,14 +61,14 @@ def plot_player_position_heatmap(df=None):
 
     heatmap_df = pd.crosstab(position_df_won['player_y_field'], position_df_won['player_x_field'], normalize=True)
     heatmap_df.iloc[0, 9] = 0  # set start position to zero
-    ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.1)
+    ax = sns.heatmap(heatmap_df, cbar_kws={'label': '% time on each field'}, linewidths=.05)
     ax.invert_yaxis()
     ax.set_xlabel('x')
 
-    xticklabels = [int(float(item.get_text())) for item in ax.get_xticklabels()]
+    xticklabels = [int(float(item.get_text())) + 1 for item in ax.get_xticklabels()]
     ax.set_xticklabels(xticklabels)
 
-    yticklabels = [int(float(item.get_text())) for item in ax.get_yticklabels()]
+    yticklabels = [int(float(item.get_text())) + 1 for item in ax.get_yticklabels()]
     ax.set_yticklabels(yticklabels)
 
     # add red borders for target positions
@@ -88,6 +88,7 @@ def plot_player_position_heatmap(df=None):
     plt.tight_layout()
     plt.savefig('./imgs/player_position/player_position_heatmap_start_position_set_to_zero_only_won_games.png')
     plt.savefig('../thesis/1descriptive/2position/player_position_heatmap.png')
+    plt.savefig('../thesis/1descriptive/2position/player_position_heatmap.svg', format='svg')
     plt.close(plt.gcf())
 
 
@@ -97,8 +98,9 @@ def plot_player_position_heatmap_per_target_position():
     position_df = df[['player_x_field', 'player_y_field', 'target_position']].copy()
     position_df['target_position'] = position_df['target_position'].replace({448: 'left', 1216: 'center', 2112: 'right'})
 
-    fig, axs = plt.subplots(1, 3, figsize=(14, 4), sharex=True, sharey=True)
-    cbar_ax = fig.add_axes([.91, .3, .03, .4])  # TODO right subplot is smaller than first two, maybe add cbar horizontally below plots
+    fig, axs = plt.subplots(1, 3, figsize=(16, 6), sharex=True, sharey=True)
+    # cbar_ax = fig.add_axes([.91, .3, .03, .4])  # TODO right subplot is smaller than first two, maybe add cbar horizontally below plots
+    im = None
     for i, target_pos in enumerate(position_df['target_position'].unique()):
         ax = axs[i]
         target_position_df = position_df[position_df['target_position'] == target_pos]
@@ -112,21 +114,23 @@ def plot_player_position_heatmap_per_target_position():
         heatmap_df = pd.crosstab(target_position_df['player_y_field'], target_position_df['player_x_field'], normalize=True)
 
         heatmap_df.iloc[0, 9] = 0  # set start position to zero
-        yticklabels = range(config.N_LANES)
-        xticklabels = range(config.N_FIELDS_PER_LANE)
-        if i == 2:
-            sns.heatmap(heatmap_df, vmax=0.025, cbar_kws={'label': '% time on each field'}, cbar=cbar_ax, linewidths=.1, ax=ax, yticklabels=yticklabels, xticklabels=xticklabels)
-        else:
-            sns.heatmap(heatmap_df, vmax=0.025, cbar=None, linewidths=.1, ax=ax, yticklabels=yticklabels)
+        yticklabels = range(1, config.N_LANES + 1)
+        xticklabels = range(1, config.N_FIELDS_PER_LANE + 1)
+        # if i == 2:
+        #     sns.heatmap(heatmap_df, vmax=0.025, cbar_kws={'label': '% time on each field'}, cbar=cbar_ax, linewidths=.1, ax=ax, yticklabels=yticklabels, xticklabels=xticklabels)
+        # else:
+        #     sns.heatmap(heatmap_df, vmax=0.025, cbar=None, linewidths=.1, ax=ax, yticklabels=yticklabels)
+        im = sns.heatmap(heatmap_df, vmax=0.025, cbar=False, linewidths=.05, ax=ax, yticklabels=yticklabels, xticklabels=xticklabels)
         ax.invert_yaxis()
-        # ax.set_xticks(range(config.N_FIELDS_PER_LANE))
+        ax.set_xticklabels(xticklabels, rotation=90)
         ax.set_xlabel('x')
         if i == 0:
             ax.set_ylabel('y')
-            yticklabels = [int(float(item.get_text())) for item in ax.get_yticklabels()]
-            ax.set_yticklabels(yticklabels)
+            ax.set_yticklabels(yticklabels, rotation=0)
+            # im.set_xticklabels(yticklabels, rotation=30)
         else:
             ax.set_ylabel('')
+            # ax.set_yticks([], [])
 
         # draw rect around target position
         if i == 0:
@@ -147,9 +151,13 @@ def plot_player_position_heatmap_per_target_position():
 
         ax.set_title(f'target={target_pos}')
 
-    fig.axes[-2].set_visible(False)
-    plt.tight_layout()
+    mappable = im.get_children()[0]
+    plt.colorbar(mappable, ax=axs, orientation='horizontal', label='% time on each field', shrink=0.3)
+
+    # fig.axes[-2].set_visible(False)
+    # plt.tight_layout()
     plt.savefig(f'../thesis/1descriptive/2position/player_position_heatmap_by_target_pos.png')
+    plt.savefig(f'../thesis/1descriptive/2position/player_position_heatmap_by_target_pos.svg', format='svg')
     plt.show()
 
 
@@ -177,6 +185,6 @@ def plot_position_heatmap_per_player(df=None):
 
 
 if __name__ == '__main__':
-    # plot_player_position_heatmap()
-    plot_player_position_heatmap_per_target_position()
+    plot_player_position_heatmap()
+    # plot_player_position_heatmap_per_target_position()
     # plot_position_heatmap_per_player()

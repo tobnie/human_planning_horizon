@@ -332,7 +332,7 @@ def plot_last_lanes_lost_games():
     y_lim_lower_offset = 0 - ax.get_ylim()[0]
     ax.set_ylim((ax.get_ylim()[0], ax.get_ylim()[1] + y_lim_lower_offset))
 
-    ax.set_xlabel('proportion of trial outcomes')
+    ax.set_xlabel('Proportion of trial outcomes')
     ax.set_ylabel('y')
     plt.legend(title='Trial outcome', loc='center right', labels=['Timed out', 'Lost'], framealpha=1.0)
 
@@ -349,6 +349,8 @@ def plot_last_lanes_lost_games():
     plt.axhline(y=14, color='black', linestyle="dashed", alpha=0.5)
     plt.text(y=14, x=x_lim / 2, s='finish lane', ha='center', va='center', backgroundcolor='white', alpha=0.5,
              bbox=dict(pad=1.5, facecolor='white', edgecolor='white'))
+
+    ax.set_yticklabels(range(-1, 16, 2))
 
     plt.savefig('imgs/performance/lost_games_last_lane.png')
     plt.savefig('../thesis/1descriptive/1performance/lost_games_last_lane.png')
@@ -378,10 +380,11 @@ def classify_loss_cause(region, last_action):
 
 
 if __name__ == '__main__':
+    plot_last_lanes_lost_games()
     plot_performance_per_difficulty()
     histogram_over_avg_trial_times()
     print_average_game_endings()
-    plot_last_lanes_lost_games()
+
     # save_performance_stats()
     # sns.set_style("whitegrid")
     # plot_performance_per_difficulty()
