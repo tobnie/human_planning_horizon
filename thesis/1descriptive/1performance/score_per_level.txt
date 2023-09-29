@@ -1,3 +1,0 @@
-Mean Score Per Level:  291.0048902777778
-Var Score Per Level:  120241.24965279047
-Median Score Per Level:  304.5815

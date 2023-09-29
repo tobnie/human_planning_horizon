@@ -1,3 +1,0 @@
-Completion Time Mean:  40.53941411764705
-Completion Time Var:  207.57626144130964
-Completion Time Median:  38.52

@@ -1,6 +1,9 @@
 snippets/
 **training/
 **states/
+**test_data/
+paper/
+thesis/
 
 situations.csv
 

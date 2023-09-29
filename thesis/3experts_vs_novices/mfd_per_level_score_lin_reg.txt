@@ -1,5 +1,0 @@
-Linear Regression for MFD per Score:
-R-squared: 0.2522019928240047
-p value: 0.048076893772496875
-slope (95%): 0.000060 +/- 0.000072
-intercept (95%): 1.672620 +/- 1.257454
