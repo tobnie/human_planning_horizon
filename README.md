@@ -1,10 +1,28 @@
 # Do humans adapt their Planning Horizon? - An Analysis of Sequential Decision-Making in the videogame Frogger 
 
+## Abstract
+
+Humans can employ sophisticated strategies to plan their next actions while only having limited cognitive
+capacity. Most of the studies investigating human behavior focus on minimal and rather abstract tasks. We
+provide an environment inspired by the video game Frogger, especially designed for studying how far humans
+plan ahead. This is described by the planning horizon, a not directly measurable quantity representing how
+far ahead people can consider the consequences of their actions. We treat the subjects’ eye movements as
+externalization of their internal planning horizon and can thereby infer its development over time.
+We found that people can dynamically adapt their planning horizon when switching between tasks. While
+subjects employed bigger planning horizons, we could not measure any physiological indicators of stronger
+cognitive engagement. Subjects using larger planning horizons were able to score higher in the game. We
+designed neural networks for predicting the subject’s planning horizon in different situations, providing
+further insight on the key features needed for accurate predictions of the planning horizon. In general, models
+trained only on subject-specific data achieved higher accuracy than models trained on data collected from all
+subjects.
+
+## Usage
+
 For saving the data in central files to load as a single dataframe from, run ``run_preprocessing.py`` in ``/data`` first (run from inside ``/data`` please). This will generate compressed files for each subject in ``data/compressed_data/``. This might take a while.
 
 The data can be loaded via ``read_subject_data(subject_id)`` or ``read_data()`` for all subjects in ``analysis/data_utils.py`` (also run within subdirectory please).
 
-## Content of Dataframes
+### Content of Dataframes
 
 | entry name    | description                                                                           |
 |-----------------|----------------------------------------------------------------------------------------------|
@@ -23,7 +41,7 @@ The data can be loaded via ``read_subject_data(subject_id)`` or ``read_data()`` 
 | game_status     | whether the game the current row belongs to was 'won', 'lost' or 'timed_out'                 |
 | state           | array representing the state. see below for explanation                                      |
 
-## Representation of State:
+### Representation of State:
 
 | state[:, 0] | state[:, 1] | state[:, 2]| state[:,3] |
 |-----------------|----------------------|----------------------------------|--------------------------------------|
@@ -37,7 +55,7 @@ where the object type is encoded as
 | 1   | vehicle |
 | 2   | lilypad |
 
-# Score Data
+### Score Data
 
 To load a dataframe containing all score information, call ``read_score_data()`` in ``analysis/score_utils.py``. The resulting dataframe is structured like this:
 
@@ -51,7 +69,7 @@ To load a dataframe containing all score information, call ``read_score_data()``
 Score data is located in  ``data/scores``. The score is saved after the first and after each five levels. Please keep in mind that the files also contain dummy data that is shown during the experiment, besides the actual data.
 There does not exist a score for every subject since there were errors in the calculcation of the score in the first few experiments.
 
-# Trial Order
+### Trial Order
 
 The trial order can be loaded as a dataframe with ``load_trial_orders()`` in ``analysis/trial_order_utils.py``. It returns a dataframe of the following structure:
 
@@ -72,7 +90,7 @@ The ``world_name`` is a string of form 'world_<world_nr>'.
 
 **Not every subject has a ``trial_order.csv`` since this was accidentally not saved for the first few experiments.
 
-# SoSci Survey Data
+## SoSci Survey Data
 
 The SoSci Survey Data is located in ``data/sosci_data.csv``. Column 'SD_05' corresponds to how often they play video games.
 
@@ -84,15 +102,15 @@ The SoSci Survey Data is located in ``data/sosci_data.csv``. Column 'SD_05' corr
 | 4   | often |
 | 5   | daily |
 
-# Processing of Eye Data
+## Processing of Eye Data
 
 Eye Data can be processed via ``analysis/plotting/gaze/events/event_detection.py`` for saccades, blinks and fixations.
 
-## Plots
+### Plots
 
 Plots are located in ``analysis/imgs/``. **Since I have made a lot of changes to the way data is saved or loaded, not every method for creating plots may work as expected and might need some fixes or tweaks**.
 
-# Remarks to Subject Data
+## Remarks to Subject Data
 
 The data of subject ``NI07LU`` is not complete, since the experiment crashed.
 
