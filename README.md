@@ -1,4 +1,4 @@
-# human_planning_horizon
+# Do humans adapt their Planning Horizon? - An Analysis of Sequential Decision-Making in the videogame Frogger 
 
 For saving the data in central files to load as a single dataframe from, run ``run_preprocessing.py`` in ``/data`` first (run from inside ``/data`` please). This will generate compressed files for each subject in ``data/compressed_data/``. This might take a while.
 
