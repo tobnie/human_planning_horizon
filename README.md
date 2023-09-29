@@ -8,6 +8,7 @@ provide an environment inspired by the video game Frogger, especially designed f
 plan ahead. This is described by the planning horizon, a not directly measurable quantity representing how
 far ahead people can consider the consequences of their actions. We treat the subjects’ eye movements as
 externalization of their internal planning horizon and can thereby infer its development over time.
+
 We found that people can dynamically adapt their planning horizon when switching between tasks. While
 subjects employed bigger planning horizons, we could not measure any physiological indicators of stronger
 cognitive engagement. Subjects using larger planning horizons were able to score higher in the game. We
