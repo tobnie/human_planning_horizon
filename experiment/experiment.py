@@ -36,7 +36,7 @@ class Experiment:
         else:
             self.eye_tracker = None
 
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((config.DISPLAY_WIDTH_PX, config.DISPLAY_HEIGHT_PX), pygame.SHOWN)  # pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen.fill(colors.WHITE)
         pygame.init()
 
@@ -131,7 +131,7 @@ class Experiment:
                     else:
                         text_rows[text_row_ptr] += event.unicode
 
-            y_offset_base = 300
+            y_offset_base = 300 
             for i, row_text in enumerate(text_rows):
                 self.show_message(row_text, x=80, y_offset=y_offset_base + i * 30, width=0.9 * config.DISPLAY_WIDTH_PX, alignment='left')
             self.show_screen()
@@ -222,13 +222,14 @@ class Experiment:
         # -------- TRAINING ----------
         easy_training_games = [(GameDifficulty.EASY, 'world_{}'.format(i)) for i in range(N_EASY_TRAINING_GAMES)]
         normal_training_games = [(GameDifficulty.NORMAL, 'world_{}'.format(i)) for i in range(N_NORMAL_TRAINING_GAMES)]
-        self.level_num = -5
+        self.level_num = -1  #-5
         for difficulty, world_name in easy_training_games + normal_training_games:
             self.run_trial(difficulty, world_name, training=True)
 
             self.show_screen_between_levels_training()
             self.loading_screen()
             self.level_num += 1
+            break
 
         self.loading_screen()
 
@@ -311,7 +312,7 @@ class Experiment:
 
         self.show_message("HIGHSCORES")
 
-        y_offset = 100
+        y_offset = 100 
         for name, score in scores:
             # draw colored row for the own score
             if name == self.subject_id:
@@ -353,7 +354,7 @@ class Experiment:
         self.subject_score += total_level_score
 
         self.show_message("SCORE")
-        y_offset = 50
+        y_offset = 50 
 
         # Win Bonus
         self._draw_score_row('Win Bonus', str(score['win_bonus']), y_offset)
@@ -372,8 +373,8 @@ class Experiment:
         y_offset += 25
 
         # draw line
-        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, (200 + y_offset) * config.DISPLAY_HEIGHT_PX / 1440),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440), 2)
         y_offset += 15
 
         self._draw_score_row('Level Score', str(level_score), y_offset)
@@ -383,8 +384,8 @@ class Experiment:
         y_offset += 50
 
         # draw line
-        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, 200 + y_offset),
-                         (4 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset), 2)
+        pygame.draw.line(self.screen, colors.BLACK, (config.DISPLAY_WIDTH_PX / 5, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440),
+                         (4 * config.DISPLAY_WIDTH_PX / 5, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440), 2)
 
         y_offset += 15
         self._draw_score_row('Total Level Score', str(total_level_score), y_offset)
@@ -396,10 +397,10 @@ class Experiment:
     def _draw_score_row(self, row_name, points, y_offset=0, font_size=30, color=colors.BLACK):
         """ Draws a row with the given name (aligned left) and points (aligned right). """
         drawText(self.screen, row_name, color,
-                 pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
+                 pygame.rect.Rect(config.DISPLAY_WIDTH_PX / 5, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font_size=font_size, alignment='left')
         drawText(self.screen, points.split('.')[0], color,
-                 pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, 200 + y_offset, config.DISPLAY_WIDTH_PX / 5, font_size),
+                 pygame.rect.Rect(3 * config.DISPLAY_WIDTH_PX / 5, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440, config.DISPLAY_WIDTH_PX / 5, font_size),
                  font_size=font_size, alignment='right')
 
     def show_message(self, msg, x=config.DISPLAY_WIDTH_PX / 4, width=config.DISPLAY_WIDTH_PX / 2, y_offset=0, font_size=30,
@@ -415,7 +416,7 @@ class Experiment:
         :param msg: Message to show
         """
         drawText(self.screen, msg, colors.BLACK,
-                 pygame.rect.Rect(x, 200 + y_offset, width, config.DISPLAY_HEIGHT_PX / 2),
+                 pygame.rect.Rect(x, (200 + y_offset)* config.DISPLAY_HEIGHT_PX / 1440, width, config.DISPLAY_HEIGHT_PX / 2),
                  font_size=font_size, alignment=alignment)
 
     def log_trial_order(self, game_list):

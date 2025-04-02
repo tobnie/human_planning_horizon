@@ -1,6 +1,6 @@
 ############################################### DISPLAY ################################################
-DISPLAY_WIDTH_PX = 2560  # pygame.display.Info().current_w
-DISPLAY_HEIGHT_PX = 1440  # pygame.display.Info().current_h
+DISPLAY_WIDTH_PX = 1920# 2560  # pygame.display.Info().current_w
+DISPLAY_HEIGHT_PX = 1080 #1440  # pygame.display.Info().current_h
 
 ############################################### UI ################################################
 font_size = 24
